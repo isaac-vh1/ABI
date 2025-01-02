@@ -1,0 +1,55 @@
+7/7/2008
+
+- Although non-standard, unencoding of plus signs "+" to spaces now works.
+
+- Trailing spaces in the "addr" service URL parameter are now properly discarded.
+
+6/26/2008
+
+- Minor update to single threaded server resource closing/cleanup.
+
+- Force no proxy detection in the demo ASPX page, dispose readers.
+
+6/16/2008
+
+- Test page now works with Firefox (but not Safari for some reason).
+
+- Invalid ZIP codes now return reponse code 4 instead of HTTP status code
+  500 (server error).
+
+6/14/2008
+
+- Added statistics output URL http://servername:port/stats.  Can be
+disabled in app.config with REMOTE_STATS_ENABLED key.
+
+- Added setting in app.config for test page host name.  If blank or
+missing, the machine name is used.
+
+- Added setting in app.config to specify the frequency to check DOR's
+site for updated files.  This also checks to see if the in memory files
+need to be updated when the period changes.
+
+- mono build and project freshened.
+
+6/13/2008
+
+- Changed app.config keys for automatic data file download.
+
+- Change default service user from network service to system.
+
+- Datafile are now downloaded and updated automatically.  See app.config for
+related settings.
+
+- Added optional performance counters under category "WA Tax Rate Service".
+The counters can be disabled in the app.config.
+
+- Added debug setting for the current period in app.config DEBUG_PERIOD.
+This allwows for testing of future rate files and testing of the rate
+update.
+
+6/9/2008
+
+- Modified the text output format to return "LocationCode=-1 Rate=-1
+ResultCode=3" instead of just "Not found" when the address, ZIP+4, and 
+ZIP are not found.
+

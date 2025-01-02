@@ -1,0 +1,64 @@
+<Project name="WaRateFiles" fileversion="2.0" language="C#" clr-version="Net_2_0" ctype="DotNetProject">
+  <Configurations active="">
+    <Configuration name="Debug" ctype="DotNetProjectConfiguration">
+      <Output directory="bin/Debug" assembly="WaRateFiles" />
+      <Build debugmode="True" target="Library" />
+      <Execution runwithwarnings="True" consolepause="False" runtime="MsNet" clr-version="Net_2_0" />
+      <CodeGeneration compiler="Mcs" warninglevel="4" optimize="False" unsafecodeallowed="False" generateoverflowchecks="False" definesymbols="DEBUG" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
+    </Configuration>
+    <Configuration name="Release" ctype="DotNetProjectConfiguration">
+      <Output directory="bin/Release" assembly="WaRateFiles" />
+      <Build debugmode="False" target="Library" />
+      <Execution runwithwarnings="True" consolepause="False" runtime="MsNet" clr-version="Net_2_0" />
+      <CodeGeneration compiler="Mcs" warninglevel="4" optimize="False" unsafecodeallowed="False" generateoverflowchecks="False" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
+    </Configuration>
+  </Configurations>
+  <Contents>
+    <File name="Docs/CHANGELOG.txt" subtype="Code" buildaction="Nothing" />
+    <File name="Docs/QuickStart.rtf" subtype="Code" buildaction="Nothing" />
+    <File name="Docs/TODO.txt" subtype="Code" buildaction="Nothing" />
+    <File name="Locators/AddressNormal/Metaphone.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/AddressNormal/RefinedSoundex.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/AddressNormal/SoundexUtils.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/AddressNormal/StreetComponent.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/AddressNormal/StreetName.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/AddressNormal/ZipStreet.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/AddressMemoryIndex.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/AddressNormalIndex.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/AddressScan.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/IAddressLocator.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/RateIndex.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/ZipPlus4Locator.cs" subtype="Code" buildaction="Compile" />
+    <File name="Locators/ZipPlus4MemoryIndex.cs" subtype="Code" buildaction="Compile" />
+    <File name="Properties/AssemblyInfo.cs" subtype="Code" buildaction="Compile" />
+    <File name="Standardizer/AddressLineTokenizer.cs" subtype="Code" buildaction="Compile" />
+    <File name="Standardizer/AddressToken.cs" subtype="Code" buildaction="Compile" />
+    <File name="Standardizer/Lex.cs" subtype="Code" buildaction="Compile" />
+    <File name="Standardizer/Lexicon.cs" subtype="Code" buildaction="Compile" />
+    <File name="Support/Date.cs" subtype="Code" buildaction="Compile" />
+    <File name="Support/DelimitedFile.cs" subtype="Code" buildaction="Compile" />
+    <File name="Support/DelimitedFileReader.cs" subtype="Code" buildaction="Compile" />
+    <File name="Support/LogFile.cs" subtype="Code" buildaction="Compile" />
+    <File name="Support/ObjectPool.cs" subtype="Code" buildaction="Compile" />
+    <File name="Support/StringHelper.cs" subtype="Code" buildaction="Compile" />
+    <File name="Support/StringTable.cs" subtype="Code" buildaction="Compile" />
+    <File name="Support/Vector.cs" subtype="Code" buildaction="Compile" />
+    <File name="Support/ZIP.cs" subtype="Code" buildaction="Compile" />
+    <File name="UnitTest/LexTest.cs" subtype="Code" buildaction="Compile" />
+    <File name="UnitTest/RateTest.cs" subtype="Code" buildaction="Compile" />
+    <File name="UnitTest/TokenizerTest.cs" subtype="Code" buildaction="Compile" />
+    <File name="UnitTest/ZipTest.cs" subtype="Code" buildaction="Compile" />
+    <File name="AddressLine.cs" subtype="Code" buildaction="Compile" />
+    <File name="FileMaintenance.cs" subtype="Code" buildaction="Compile" />
+    <File name="LICENSE-2.0.txt" subtype="Code" buildaction="Nothing" />
+    <File name="Period.cs" subtype="Code" buildaction="Compile" />
+    <File name="Rate.cs" subtype="Code" buildaction="Compile" />
+    <File name="RateLookup.cs" subtype="Code" buildaction="Compile" />
+  </Contents>
+  <References>
+    <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <ProjectReference type="Project" localcopy="True" refto="ICSharpCode.SharpZLib" />
+    <ProjectReference type="Gac" localcopy="True" refto="nunit.framework, Version=2.2.9.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77" />
+    <ProjectReference type="Gac" localcopy="True" refto="System.Configuration, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  </References>
+</Project>

@@ -1,0 +1,152 @@
+<html>
+<head>
+<title>Version 0.7</title>
+<script>
+
+var client;
+
+function getTaxRateHandler()
+{
+	try
+	{		
+		if(client.readyState == 4 && client.status == 200) 
+		{		
+			if(client.responseXML != null)
+			{
+				// success!
+				
+				var result = client.responseXML.documentElement;
+				document.getElementById('tdLocCode').innerHTML = result.attributes[0].nodeValue;
+				document.getElementById('tdRate').innerHTML = result.attributes[2].nodeValue;			
+				document.getElementById('tdLocalRate').innerHTML = result.attributes[1].nodeValue;			
+
+				var rcode = result.attributes[3].nodeValue;
+				
+				if ( rcode == '0' )
+				{
+					document.getElementById('tdCode').innerHTML = 'Address';
+				}
+				else if ( rcode == '1' )
+				{
+					document.getElementById('tdCode').innerHTML = 'ZIP+4';
+				}
+				else if ( rcode == '2' )
+				{
+					document.getElementById('tdCode').innerHTML = 'ZIP5';
+				}
+				else if ( rcode == '3' )
+				{
+					document.getElementById('tdCode').innerHTML = 'Not found';
+				}
+				else if ( rcode == '4' )
+				{
+					if ( result.attributes.length == 4 )
+					{
+						document.getElementById('tdCode').innerHTML = result.attributes[3].nodeValue;
+					}
+					else
+					{
+						document.getElementById('tdCode').innerHTML = 'Invalid arguemnts.';
+					}
+				}
+				else if ( rcode == '5' )
+				{
+					document.getElementById('tdCode').innerHTML = 'Internal error';
+				}
+			}
+			else
+			{
+				alert('No data ' + client.responseXML);
+			}
+		} 
+		else if (client.readyState == 4 && client.status != 200) 
+		{
+			// fetched the wrong page or network error...
+			alert('Request error ' + client.status);
+		}
+		else
+		{
+		}
+	}
+	catch (e)
+	{
+		alert(e);
+	}
+}
+
+function getTaxRate()
+{
+	var server = document.getElementById('txtServer').value;
+	var port = document.getElementById('txtPort').value;	
+	var street = document.getElementById('txtStreet').value;
+	var city = document.getElementById('txtCity').value;
+	var zip = document.getElementById('txtZIP').value;
+	var plus4 = document.getElementById('txtPlus4').value;
+	if ( plus4.length == 0 )
+	{
+		plus4 = '0';
+	}
+	if ( plus4 != '0' )
+	{
+		zip = zip + '-' + plus4;
+	}
+	
+	if ( typeof XMLHttpRequest != "undefined" )
+	{
+		client = new XMLHttpRequest();
+	}
+	else
+	{
+		try 
+		{
+			client = new ActiveXObject('Msxml2.XMLHTTP');
+		} 
+		catch (e) 
+		{
+			try 
+			{
+				client = new ActiveXObject('Microsoft.XMLHTTP');
+			} 
+			catch (E) 
+			{
+				alert('Cannot create XMLHTTP');
+				return;
+			}
+		 }
+	}
+	var url = 'http://' + server + ':' + port + '/AddressRates.aspx?output=xml&addr=' + encodeURI(street) + '&city=' + encodeURI(city) + '&zip=' + encodeURI(zip);
+	
+	client.onreadystatechange = getTaxRateHandler;	
+	client.open('GET', url, true);
+	//client.setRequestHeader('Content-Type', 'text/xml');
+	client.send("");
+}
+</script>
+</head>
+<body>
+<form>
+<br />
+<input type='hidden' id=txtServer value='dorwebgis2' />
+<input type='hidden' id=txtPort value='8080' />
+<table border='1'><tr><td>
+<table align='center' border="0">
+<tr><td colspan='2'>&nbsp;</td></tr>
+<tr><td align='right' width="50%">Street:</td><td width="50%"><input type='text' id='txtStreet' value='6300 linderson way' /></td></tr>
+<tr><td align='right'>City:</td><td><input type='text' id='txtCity' value='tumwater' /></td></tr>
+<tr><td align='right'>ZIP:</td><td><input type='text' id='txtZIP' value='98501' /></td></tr>
+<tr><td align='right'>Plus4:</td><td><input type='text' id='txtPlus4' /></td></tr>
+<tr><td colspan='2'>&nbsp;</td></tr>
+<tr><td colspan='2' align='center'><input type='button' onclick='getTaxRate()' value=' Lookup ' /></td></tr>
+<tr><td colspan='2'><hr></td></tr>
+<tr><td colspan='2'>&nbsp;</td></tr>
+<tr><td align='right'>Response Code:</td><td id='tdCode'>&nbsp;</td></tr>
+<tr><td align='right'>Location Code:</td><td id='tdLocCode'>&nbsp;</td></tr>
+<tr><td align='right'>Local Rate:</td><td id='tdLocalRate'>&nbsp;</td></tr>
+<tr><td align='right'>Rate:</td><td id='tdRate'>&nbsp;</td></tr>
+</table>
+</td></tr></table>
+<br />
+<a href="http://dor.wa.gov/Content/FindTaxesAndRates/RetailSalesTax/DestinationBased/SalesTaxLibrary.aspx">Download the source code for this service</a>
+</form>
+</body>
+</html>
