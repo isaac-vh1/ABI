@@ -1,0 +1,17 @@
+<Combine name="WaRateFilesMono" fileversion="2.0">
+  <Configurations />
+  <StartMode startupentry="WaRateFiles" single="True">
+    <Execute type="None" entry="WaRateFiles" />
+    <Execute type="None" entry="ICSharpCode.SharpZLib" />
+    <Execute type="None" entry="ServiceMono" />
+    <Execute type="None" entry="DesktopMono" />
+    <Execute type="None" entry="BatchJobMono" />
+  </StartMode>
+  <Entries>
+    <Entry filename="WaRateFiles/WaRateFiles.mdp" />
+    <Entry filename="SharpZipLib/src/ICSharpCode.SharpZLib.csproj" />
+    <Entry filename="Service/ServiceMono.mdp" />
+    <Entry filename="Desktop/DesktopMono.mdp" />
+    <Entry filename="BatchJob/BatchJobMono.mdp" />
+  </Entries>
+</Combine>

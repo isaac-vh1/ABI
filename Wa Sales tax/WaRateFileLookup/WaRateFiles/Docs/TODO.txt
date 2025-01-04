@@ -1,0 +1,4 @@
+
+- Add information about FileMaintenance.cs to QuickStart.rtf.
+
+- Modify the batch job example to automatically download the data files.
