@@ -1,27 +1,16 @@
 /* ========== Sidebar ========== */
 .calendar-drop-bar {
-    position: fixed; /* Fix the sidebar to the viewport */
+    position: fixed;
     left: 0;
     top: 0;
-    display: flex;
+    display: block;
     flex-direction: column;
-    width: 20%; /* Sidebar width for desktop */
-    background-color: #333; /* Changed to a slightly darker shade for better contrast */
+    width: 20%;
+    background-color: #333;
     color: #fff;
     padding-top: 30px;
     height: 100%;
-    transform: translateX(-100%); /* Hide sidebar by default */
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    opacity: 0; /* Initially hidden */
-    pointer-events: none; /* Disable interactions when hidden */
-    z-index: -1; /* Place below other elements */
-}
-
-.calendar-drop-bar.collapsed {
-    transform: translateX(0); /* Slide sidebar into view */
-    opacity: 1; /* Make it visible */
-    pointer-events: auto; /* Enable interactions */
-    z-index: 1000; /* Ensure it's above other elements */
+    z-index: 0;
 }
 
 .calendar-drop-bar h2 {
@@ -32,46 +21,56 @@
 
 /* ========== Toggle Button ========== */
 .calendar-toggle {
-    position: fixed; /* Keep the toggle button visible */
-    left: 10px; /* Adjust as needed */
-    top: 10px;
-    z-index: 1001; /* Above the sidebar */
+    position: absolute; /* Keep the toggle button visible */
+    left: 21px; /* Adjust as needed */
+    top: 55px;
     background-color: #4caf50;
     color: #fff;
     border: none;
-    padding: 8px 12px;
-    font-size: 18px;
+    padding: 2px 6px;
+    font-size: 24px;
     border-radius: 3px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    display: none;
 }
 
 .calendar-toggle:hover {
     background-color: #43a047;
 }
 
-/* ========== Calendar Container ========== */
-.my-custom-calendar-container {
-    margin-left: 0%; /* Space for sidebar on desktop */
-    width: 80%; /* Remaining width */
-    flex: 1;
-    padding: 10px;
-    box-sizing: border-box;
-    transition: margin-left 0.3s ease, width 0.4s ease;
+.top-bar-button {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 2px 6px;
+    font-size: 24px;
+    border-radius: 3px;
+    cursor: pointer;
 }
 
-.my-custom-calendar-container.collapsed {
-    margin-left: 20%; /* Maintain space when sidebar is visible */
+.top-bar {
+    background-color: #fafafa;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+
+}
+
+/* ========== Calendar Container ========== */
+.my-custom-calendar-container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    height: 96vh;
 }
 
 /* ========== Calendar Styles ========== */
 .my-custom-calendar {
     background-color: #fafafa;
-    border: 1px solid #ccc;
     border-radius: 5px;
-    padding: 10px; 
-    font-family: 'Arial', sans-serif;
+    padding: 10px;
     font-size: 14px;
+    height:89.5vh;
 }
 
 /* ========== Toolbar (Next/Prev Buttons, Title, etc.) ========== */
@@ -166,30 +165,81 @@
     overflow: scroll;
 }
 
-/* ========== Responsive Styles ========== */
-@media (max-width: 768px) {
+/* Modal Backdrop */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* semi-transparent overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* ensure it appears above all other elements */
+  }
+  
+  /* Modal Content Container */
+  .modal-content {
+    background-color: #fff;
+    padding: 20px 30px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+  }
+  
+  /* Sample form styling */
+  .modal-content label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .modal-content input[type="text"],
+  .modal-content textarea {
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  
+  .modal-buttons button {
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  /* ========== Responsive Styles ========== */
+@media (max-width: 767px) {
     /* Sidebar adjustments for mobile */
     .calendar-drop-bar {
-        width: 0%;
-        transform: translateX(-100%);
-        opacity: 0;
-        z-index: -1;
+        display: none;
     }
 
-    .calendar-drop-bar.collapsed {
-        transform: translateX(-500px); /* Slide into view */
-        opacity: 0;
+    .calendar-toggle.collapsed {
+        display: block;
     }
 
     /* Adjust main content to full width on mobile */
     .my-custom-calendar-container {
-        margin-left: 0%; /* No shift on mobile */
-        width: 100%; /* Full width */
-        transition: none;
+        margin-left: 0%;
     }
 
     .my-custom-calendar-container.collapsed {
-        margin-left: 0%; /* Maintain full width */
-        transition: none;
+        margin-left: 0%;
+        width: 100%;
+    }
+
+    .top-bar {
+        display: none;
+    }
+
+    .my-custom-calendar {
+        height: 96.5vh;
     }
 }

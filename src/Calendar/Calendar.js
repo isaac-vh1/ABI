@@ -45,11 +45,50 @@ export default function CalendarContainer({toggleSidebar, collapsed}) {
   ]);
 
   // ====== 4) DRAG / RESIZE EXISTING EVENTS ON CALENDAR ======
-  const onEventDrop = ({ event, start, end }) => {
+  const onEventChange = ({ event, start, end }) => {
     const updated = events.map((evt) =>
       evt.id === event.id ? { ...evt, start, end } : evt
     );
     setEvents(updated);
+  };
+
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  // 4. Input states for editing the event
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+
+  // 5. Handle event click
+  const handleSelectEvent = (event) => {
+    setSelectedEvent(event);
+    // Pre-fill form inputs with event data
+    setEditTitle(event.title || '');
+    setEditDescription(event.description || '');
+  };
+
+  // 6. Close the modal without saving
+  const handleCloseModal = () => {
+    setSelectedEvent(null);
+  };
+
+
+  const handleSaveChanges = () => {
+    if (selectedEvent) {
+      // Update the selected event in the 'events' array
+      const updatedEvents = events.map((evt) => {
+        if (evt.id === selectedEvent.id) {
+          return {
+            ...evt,
+            title: editTitle,
+            description: editDescription
+          };
+        }
+        return evt;
+      });
+      setEvents(updatedEvents);
+    }
+    // Close the modal
+    setSelectedEvent(null);
   };
 
   // ====== 5) MANUAL PARSE ON DROP FROM OUTSIDE (SIDEBAR) ======
@@ -84,11 +123,14 @@ export default function CalendarContainer({toggleSidebar, collapsed}) {
   };
 
   return (
+    <div>
+      <head>
+        <title>Calendar</title>
+      </head>
     <div style={{ display: 'flex' }}>
       {/* ===== SIDEBAR ===== */}
-      <button className="calendar-toggle" onClick={toggleSidebar}>☰</button>
+      <button className={`calendar-toggle ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}>☰</button>
       <div className={`calendar-drop-bar ${collapsed ? 'collapsed' : ''}`}>
-       <button className="calendar-toggle" onClick={toggleSidebar}>☰</button>
         <h2>Unscheduled</h2>
         {unscheduledEvents.map((item) => (
           <div
@@ -108,6 +150,12 @@ export default function CalendarContainer({toggleSidebar, collapsed}) {
 
       {/* ===== CALENDAR ===== */}
       <div className={`my-custom-calendar-container ${collapsed ? 'collapsed' : ''}`}>
+      <article>
+        <div className='top-bar'>
+        <button className={`top-bar-button`} onClick={toggleSidebar}>☰</button>
+        </div>
+      </article>
+      <article>
         <DnDCalendar
           className="my-custom-calendar" /* for our custom CSS */
           localizer={localizer}
@@ -116,22 +164,48 @@ export default function CalendarContainer({toggleSidebar, collapsed}) {
           view={currentView}
           onNavigate={(date) => setCurrentDate(date)}
           onView={(view) => setCurrentView(view)}
-          // RBC: Which views to show
           defaultView={Views.MONTH}
           views={[Views.MONTH, Views.WEEK, Views.DAY]}
-          // RBC: enable slot selection
           selectable
           onSelectSlot={handleSelectSlot}
-          // RBC: event dropping/resizing
-          onEventDrop={onEventDrop}
-          // RBC: external drag-and-drop => calls handleDropFromOutside
+          onEventDrop={onEventChange}
+          onEventResize={onEventChange}
+          onSelectEvent={handleSelectEvent}
           onDropFromOutside={handleDropFromOutside}
-          dragFromOutsideItem={null} // or () => null
+          dragFromOutsideItem={null}
           startAccessor="start"
           endAccessor="end"
-          style={{ minHeight: '80vh', maxHeight: '90vh', margin: '0 auto' }}
         />
-      </div>
-    </div>
+        </article>
+        </div>
+        </div>
+        {selectedEvent && (
+        <div className="modal-backdrop" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h2>Edit Event</h2>
+            <label>
+              Title:
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+              />
+            </label>
+            <label>
+              Description:
+              <textarea
+                rows="3"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+              />
+            </label>
+
+            <div className="modal-buttons">
+              <button onClick={handleSaveChanges}>Save</button>
+              <button onClick={handleCloseModal}>Cancel</button>
+            </div>
+          </div>
+        </div>)}
+        </div>
   );
 }

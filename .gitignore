@@ -83,11 +83,9 @@ dist/
 
 # Gatsby files
 .cache/
-public/
 
 # Vue.js build output
 dist/
-public/
 
 # Angular build output
 dist/

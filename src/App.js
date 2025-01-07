@@ -1,6 +1,7 @@
 import './App.css';
 import { Routes, Route, Link } from "react-router-dom";
 import React, { useState } from 'react';
+import { useLocation } from "react-router-dom";
 import Home from "./Home/Home.js";
 import Calendar from "./Calendar/Calendar.js";
 import Clients from "./Clients/Clients.js";
@@ -10,7 +11,8 @@ import { useMediaQuery } from 'react-responsive';
 
 function App() {
   const [collapsed, setCollapsed] = useState(false);
-
+  const location = useLocation();
+  const isCalendarRoute = location.pathname === "/calendar";
   // Function to toggle sidebar collapse
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -40,7 +42,7 @@ function App() {
       </nav>
       
       {/* Main content */}
-      <main className={`main-content ${collapsed ? 'collapsed' : ''}`}>
+      <main className={`main-content ${isCalendarRoute ? "no-collapse-on-calendar" : (collapsed ? 'collapsed' : '')}`}>
         <Routes>
           <Route path="/" element={<Home toggleSidebar={toggleSidebar} />} />
           <Route path="/calendar" element={<Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
