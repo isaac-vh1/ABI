@@ -15,7 +15,7 @@
 
 .calendar-drop-bar h2 {
     text-align: center;
-    font-size: 2.5vw;
+    font-size: clamp(10px, 2.5vw, 24px);
     margin: 0 0 20px 0; /* Add some bottom margin */
 }
 
@@ -153,6 +153,10 @@
     font-family: 'Arial', sans-serif;
     font-size: 14px;
 }
+/* Hide the ghost overlay */
+.rbc-addons-dnd-overlay {
+    display: none;
+  }
 
 /* ========== Sidebar Widget ========== */
 .sidebar-widget {
@@ -161,8 +165,7 @@
     padding: 10px 10px;
     border-radius: 10px;
     cursor: move;
-    font-size: clamp(10px, 2.5vw, 18px);
-    overflow: scroll;
+    font-size: clamp(10px, 2vw, 18px);
 }
 
 /* Modal Backdrop */

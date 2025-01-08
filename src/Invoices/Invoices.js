@@ -2,7 +2,7 @@ function Invoices({toggleSidebar}) {
     return (
         <div>
         <head>
-        <title>Home</title>
+        <title>Invoices</title>
          </head>
         <section class="welcome">
             <button id="menu-toggle" class="menu-toggle" onClick={toggleSidebar}>☰</button>
