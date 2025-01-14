@@ -8,12 +8,13 @@ import Clients from "./Clients/Clients.js";
 import Invoices from "./Invoices/Invoices.js";
 import Settings from "./Settings/Settings.js";
 import { useMediaQuery } from 'react-responsive';
+import HamburgerMenu from "./Components/Components.js"
 
 function App() {
   const [collapsed, setCollapsed] = useState(false);
+
   const location = useLocation();
   const isCalendarRoute = location.pathname === "/calendar";
-  // Function to toggle sidebar collapse
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
@@ -27,12 +28,10 @@ function App() {
   };
 
   return (
-    <div className="app-container">
-      {/* Sidebar with dynamic collapse class */}
+    <div className="app-container"> 
       <nav className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
         <div className='sidebar-header'>
-        <h2>Dashboard</h2>
-        <button className="sidebar-close" onClick={toggleSidebar}>X</button>
+          <h2>Dashboard</h2>
         </div>
         <Link to="/" className="nav-link" onClick={toggleSidebarSmall}>Home</Link>
         <Link to="/calendar" className="nav-link" onClick={toggleSidebar}>Calendar</Link>
@@ -40,18 +39,16 @@ function App() {
         <Link to="/invoices" className="nav-link" onClick={toggleSidebarSmall}>Invoices</Link>
         <Link to="/settings" className="nav-link" onClick={toggleSidebarSmall}>Settings</Link>
       </nav>
-      
-      {/* Main content */}
       <main className={`main-content ${isCalendarRoute ? "no-collapse-on-calendar" : (collapsed ? 'collapsed' : '')}`}>
         <Routes>
-          <Route path="/" element={<Home toggleSidebar={toggleSidebar} />} />
+          <Route path="/" element={<Home toggleSidebar={toggleSidebar} collapsed={collapsed} />} />
           <Route path="/calendar" element={<Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
           <Route path="/clients" element={<Clients toggleSidebar={toggleSidebar}/>} />
           <Route path="/invoices" element={<Invoices toggleSidebar={toggleSidebar}/>} />
           <Route path="/settings" element={<Settings toggleSidebar={toggleSidebar}/>} />
         </Routes>
       </main>
-    </div>
+      </div>
   );
 }
 

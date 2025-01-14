@@ -15,37 +15,47 @@
 
 .calendar-drop-bar h2 {
     text-align: center;
-    font-size: clamp(10px, 2.5vw, 24px);
-    margin: 0 0 20px 0; /* Add some bottom margin */
+    font-size: clamp(10px, 2.5vw, 30px);
+    margin: 0 0 20px 0;
+}
+
+.noJob {
+    display: flex;
+    justify-content: center;
+    font-size: clamp(10px, 1.5vw, 24px);
+    margin-top: 40vh;
 }
 
 /* ========== Toggle Button ========== */
 .calendar-toggle {
-    position: absolute; /* Keep the toggle button visible */
-    left: 21px; /* Adjust as needed */
-    top: 55px;
-    background-color: #4caf50;
-    color: #fff;
+    position: absolute;
+    left: 15px;
+    top: 15px;
     border: none;
-    padding: 2px 6px;
+    padding: 2px 7px;
+    padding-top: 6px;
     font-size: 24px;
     border-radius: 3px;
     cursor: pointer;
+    z-index: 11;
     display: none;
 }
 
 .calendar-toggle:hover {
-    background-color: #43a047;
+    color: #43a047;
 }
 
+/* ========== Top Bar ========== */
 .top-bar-button {
     background-color: #4caf50;
     color: #fff;
     border: none;
     padding: 2px 6px;
+    padding-top: 6px;
     font-size: 24px;
     border-radius: 3px;
     cursor: pointer;
+    margin-right:auto;
 }
 
 .top-bar {
@@ -53,7 +63,11 @@
     padding: 5px;
     border-radius: 5px;
     margin-bottom: 5px;
+    display: flex;
+}
 
+.cancel-button {
+    font-size: 14px;
 }
 
 /* ========== Calendar Container ========== */
@@ -72,6 +86,20 @@
     font-size: 14px;
     height:89.5vh;
 }
+
+.my-custom-calendar .rbc-allday-cell {
+    display:none;
+}
+
+.my-custom-calendar .rbc-addons-dnd-resize-ns-anchor .rbc-addons-dnd-resize-ns-icon {
+    padding-right: 10px;
+    padding-left:10px;
+}
+
+.rbc-addons-dnd .rbc-addons-dnd-resize-ns-anchor {
+    cursor: ns-resize;
+}
+
 
 /* ========== Toolbar (Next/Prev Buttons, Title, etc.) ========== */
 .my-custom-calendar .rbc-toolbar {
@@ -113,7 +141,6 @@
 
 .my-custom-calendar .rbc-day-bg.rbc-today {
     background-color: #fcf8e3;
-    border: 1px solid #f0e8c2;
 }
 
 .my-custom-calendar .rbc-off-range-bg {
@@ -123,7 +150,7 @@
 
 /* ========== Events ========== */
 .my-custom-calendar .rbc-event {
-    background-color: #4caf50; /* Event bubble color */
+    background-color: #4caf50;
     border: none;
     color: #fff;
     padding: 2px 4px;
@@ -133,8 +160,13 @@
     transition: background-color 0.3s ease;
 }
 
-.my-custom-calendar .rbc-event:hover {
-    background-color: #43a047;
+.my-custom-calendar .rbc-event-label {
+    display: none;
+}
+
+.my-custom-calendar .rbc-current-time-indicator {
+    background-color: red;
+    height: 2px;  
 }
 
 /* ========== Timeslot & Week View ========== */
@@ -153,11 +185,6 @@
     font-family: 'Arial', sans-serif;
     font-size: 14px;
 }
-/* Hide the ghost overlay */
-.rbc-addons-dnd-overlay {
-    display: none;
-  }
-
 /* ========== Sidebar Widget ========== */
 .sidebar-widget {
     background-color: #4caf50;
@@ -168,21 +195,20 @@
     font-size: clamp(10px, 2vw, 18px);
 }
 
-/* Modal Backdrop */
+/* ========== Modal Backdrop ========== */
 .modal-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* semi-transparent overlay */
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999; /* ensure it appears above all other elements */
+    z-index: 9999;
   }
   
-  /* Modal Content Container */
   .modal-content {
     background-color: #fff;
     padding: 20px 30px;
@@ -190,8 +216,7 @@
     max-width: 400px;
     width: 90%;
   }
-  
-  /* Sample form styling */
+
   .modal-content label {
     display: block;
     margin-bottom: 10px;
@@ -219,16 +244,14 @@
 
   /* ========== Responsive Styles ========== */
 @media (max-width: 767px) {
-    /* Sidebar adjustments for mobile */
     .calendar-drop-bar {
         display: none;
     }
 
-    .calendar-toggle.collapsed {
+    .calendar-toggle {
         display: block;
     }
 
-    /* Adjust main content to full width on mobile */
     .my-custom-calendar-container {
         margin-left: 0%;
     }
@@ -238,11 +261,7 @@
         width: 100%;
     }
 
-    .top-bar {
-        display: none;
-    }
-
     .my-custom-calendar {
-        height: 96.5vh;
+        height: 90vh;
     }
 }

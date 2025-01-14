@@ -1,5 +1,4 @@
 .Bar {
-    background-color: #fff;
     padding: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: flex;
@@ -11,11 +10,9 @@
     flex-grow: 1;
   }
   .menu-toggle {
-    background: none;
-    border: none;
-    font-size: 24px;
     cursor: pointer;
     margin-right: 20px;
+    z-index: 11;
   }
   .dashboard-grid {
     display: grid;
