@@ -60,11 +60,6 @@ function Home({toggleSidebar, collapsed}) {  // Receive toggleSidebar as a prop
             <h3>Widget 2</h3>
             <p>Content goes here...</p>
           </div>
-
-
-
-
-
           <div className="widget">
             <h3>Widget 2</h3>
             <p>Content goes here...</p>
@@ -85,8 +80,6 @@ function Home({toggleSidebar, collapsed}) {  // Receive toggleSidebar as a prop
             <h3>Widget 2</h3>
             <p>Content goes here...</p>
           </div>
-
-      
     </div>
   );
 }

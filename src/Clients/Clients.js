@@ -76,7 +76,6 @@ function Client({ toggleSidebar }) {
           </tr>
         </thead>
         <tbody>
-        <a href="queries.php?relation=User">User</a>
           {filteredClients.map((client) => (
             <tr key={client.id} onClick={() => handleRowClick(client)}>
               <td>{client.name}</td>
