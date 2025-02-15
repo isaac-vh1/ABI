@@ -6,16 +6,18 @@ function Client({ toggleSidebar }) {
   const [searchFilter, setSearchFilter] = useState('');
   const [selectedClient, setSelectedClient] = useState(null); // Selected client for popup
 
-  useEffect(() => {
-    // Fetch client data from the backend
-    fetch('/api/clients')
-      .then((response) => response.json())
-      .then((data) => {
-        setClients(data);
-        setFilteredClients(data);
-      })
-      .catch((error) => console.error('Error fetching client data:', error));
-  }, []);
+    useEffect(() => {
+      fetch('http://www.pi.acresbyisaac.com:5000/api/clients')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => setClients(data))
+        .catch(error => console.error('Error fetching users:', error));
+        console.log(clients)
+    }, []);
 
   // Handle filter changes
   const handleFilterChange = (e) => {
@@ -66,6 +68,13 @@ function Client({ toggleSidebar }) {
         onChange={handleFilterChange}
         className="filter-input"
       />
+      <ul>
+        {clients.map(client => (
+          <li key={client.id}>
+            {client.name} ({client.age})
+          </li>
+        ))}
+      </ul>
 
       <table className="client-table">
         <thead>
