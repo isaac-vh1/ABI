@@ -6,18 +6,20 @@ function Client({ toggleSidebar }) {
   const [searchFilter, setSearchFilter] = useState('');
   const [selectedClient, setSelectedClient] = useState(null); // Selected client for popup
 
-    useEffect(() => {
-      fetch('http://www.pi.acresbyisaac.com:5000/api/clients')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
-          }
-          return response.json();
-        })
-        .then(data => setClients(data))
-        .catch(error => console.error('Error fetching users:', error));
-        console.log(clients)
-    }, []);
+  useEffect(() => {
+    fetch('http://www.pi.acresbyisaac.com:5000/api/clients')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Fetched data:', data);
+        setClients(data);
+      })
+      .catch(error => console.error('Error fetching clients:', error));
+  }, []);
 
   // Handle filter changes
   const handleFilterChange = (e) => {
@@ -76,23 +78,23 @@ function Client({ toggleSidebar }) {
         ))}
       </ul>
       <table className="client-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredClients.map((client) => (
-            <tr key={client.id} onClick={() => handleRowClick(client)}>
-              <td>{client.name}</td>
-              <td>{client.email}</td>
-              <td>{client.phone}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+    </tr>
+  </thead>
+  <tbody>
+    {displayClients.map((client) => (
+      <tr key={client.id} onClick={() => handleRowClick(client)}>
+        <td>{client.name}</td>
+        <td>{client.email}</td>
+        <td>{client.phone}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
 
       {selectedClient && (
         <div className="client-popup">
