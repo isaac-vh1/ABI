@@ -70,12 +70,11 @@ function Client({ toggleSidebar }) {
       />
       <ul>
         {clients.map(client => (
-          <li key={client.id}>
-            {client.name} ({client.age})
+          <li key={client}>
+            {client}
           </li>
         ))}
       </ul>
-
       <table className="client-table">
         <thead>
           <tr>
