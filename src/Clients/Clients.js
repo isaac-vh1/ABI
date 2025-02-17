@@ -7,7 +7,7 @@ function Client({ toggleSidebar }) {
   const [selectedClient, setSelectedClient] = useState(null); // Selected client for popup
 
   useEffect(() => {
-    fetch('https://www.pi.acresbyisaac.com:5000/api/clients')
+    fetch('https://www.pi.acresbyisaac.com/api/clients')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok ' + response.statusText);
