@@ -86,7 +86,7 @@ function Client({ toggleSidebar }) {
     </tr>
   </thead>
   <tbody>
-    {displayClients.map((client) => (
+    {clients.map((client) => (
       <tr key={client.id} onClick={() => handleRowClick(client)}>
         <td>{client.name}</td>
         <td>{client.email}</td>
