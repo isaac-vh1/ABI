@@ -70,13 +70,6 @@ function Client({ toggleSidebar }) {
         onChange={handleFilterChange}
         className="filter-input"
       />
-      <ul>
-        {clients.map(client => (
-          <li key={client}>
-            {client}
-          </li>
-        ))}
-      </ul>
       <table className="client-table">
   <thead>
     <tr>
@@ -87,10 +80,19 @@ function Client({ toggleSidebar }) {
   </thead>
   <tbody>
     {clients.map((client) => (
-      <tr key={client.id} onClick={() => handleRowClick(client)}>
-        <td>{client.name}</td>
-        <td>{client.email}</td>
-        <td>{client.phone}</td>
+      <tr key={client[0]} onClick={() => handleRowClick(client)}>
+        <td>{client[0]}</td>
+        <td>{client[1]}</td>
+        <td>{client[2]}</td>
+        <td>{client[3]}</td>
+        <td>{client[4]}</td>
+        <td>{client[5]}</td>
+        <td>{client[6]}</td>
+        <td>{client[7]}</td>
+        <td>{client[8]}</td>
+        <td>{client[9]}</td>
+        <td>{client[10]}</td>
+        <td>{client[11]}</td>
       </tr>
     ))}
   </tbody>
