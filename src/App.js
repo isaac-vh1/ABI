@@ -8,7 +8,6 @@ import Clients from "./Clients/Clients.js";
 import Invoices from "./Invoices/Invoices.js";
 import Settings from "./Settings/Settings.js";
 import { useMediaQuery } from 'react-responsive';
-import HamburgerMenu from "./Components/Components.js"
 
 function App() {
   const [collapsed, setCollapsed] = useState(false);

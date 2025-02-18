@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import HamburgerMenu from '../Components/Components';
 
 function Client({ toggleSidebar }) {
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [searchFilter, setSearchFilter] = useState('');
-  const [selectedClient, setSelectedClient] = useState(null); // Selected client for popup
+  const [selectedClient, setSelectedClient] = useState(null);
 
   useEffect(() => {
     fetch('https://www.pi.acresbyisaac.com/api/clients')
@@ -15,7 +16,6 @@ function Client({ toggleSidebar }) {
         return response.json();
       })
       .then(data => {
-        console.log('Fetched data:', data);
         setClients(data);
       })
       .catch(error => console.error('Error fetching clients:', error));
@@ -60,7 +60,7 @@ function Client({ toggleSidebar }) {
             <title>Clients</title>
         </head>
       <section>
-        <button className="menu-toggle" onClick={toggleSidebar}>☰</button>
+        <div className={`calendar-toggle ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
         <h1>Clients</h1>
       </section>
       <input

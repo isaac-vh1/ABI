@@ -208,7 +208,6 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
     if (currentView !== Views.DAY) {
       setCurrentView(Views.WEEK);
     }
-    
   };
 
   const handleSelectEvent = () =>  {
