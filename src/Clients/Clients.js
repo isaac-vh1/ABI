@@ -3,7 +3,7 @@ import HamburgerMenu from '../Components/Components';
 
 function Client({ toggleSidebar, collapsed}) {
   const [clients, setClients] = useState([]);
-  const [filteredClients, setFilteredClients] = useState([]);
+  //const [filteredClients, setFilteredClients] = useState([]);
   const [searchFilter, setSearchFilter] = useState('');
   const [selectedClient, setSelectedClient] = useState(null);
 
