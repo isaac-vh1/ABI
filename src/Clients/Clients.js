@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import HamburgerMenu from '../Components/Components';
 
-function Client({ toggleSidebar }) {
+function Client({ toggleSidebar, collapsed}) {
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [searchFilter, setSearchFilter] = useState('');
