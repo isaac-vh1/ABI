@@ -42,7 +42,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home toggleSidebar={toggleSidebar} collapsed={collapsed} />} />
           <Route path="/calendar" element={<Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
-          <Route path="/clients" element={<Clients toggleSidebar={toggleSidebar}/>} />
+          <Route path="/clients" element={<Clients toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
           <Route path="/invoices" element={<Invoices toggleSidebar={toggleSidebar}/>} />
           <Route path="/settings" element={<Settings toggleSidebar={toggleSidebar}/>} />
         </Routes>
