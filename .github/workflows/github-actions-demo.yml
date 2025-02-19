@@ -31,7 +31,7 @@ jobs:
       # Step 5: Notify external API after successful build
       - name: Notify API
         env:
-          API_URL: ${"https://pi.acresbyisaac.com/api/git"}      # API endpoint URL stored in repo secrets
+          API_URL: "https://pi.acresbyisaac.com/api/git"     # API endpoint URL stored in repo secrets
           #API_KEY: ${{ secrets.API_KEY }}      # Optional: API key for authentication
         run: |
           curl -X POST "$API_URL" \
