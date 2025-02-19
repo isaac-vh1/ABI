@@ -32,7 +32,7 @@ function Client({ toggleSidebar, collapsed}) {
       client.phone.includes(value) ||
       client.address.toLowerCase().includes(value)
     );
-    setFilteredClients(filtered);
+    //setFilteredClients(filtered);
   };
 
   // Open client popup
