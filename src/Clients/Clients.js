@@ -74,6 +74,7 @@ function Client({ toggleSidebar, collapsed}) {
       <th>Name</th>
       <th>Email</th>
       <th>Phone</th>
+      <th>Address</th>
     </tr>
   </thead>
   <tbody>
