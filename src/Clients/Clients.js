@@ -4,7 +4,7 @@ import HamburgerMenu from '../Components/Components';
 function Client({ toggleSidebar, collapsed}) {
   const [clients, setClients] = useState([]);
   //const [filteredClients, setFilteredClients] = useState([]);
-  const [searchFilter, setSearchFilter] = useState('');
+  //const [searchFilter, setSearchFilter] = useState('');
   const [selectedClient, setSelectedClient] = useState(null);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ function Client({ toggleSidebar, collapsed}) {
   }, []);
 
   // Handle filter changes
-  const handleFilterChange = (e) => {
+  /*const handleFilterChange = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchFilter(value);
 
@@ -33,7 +33,7 @@ function Client({ toggleSidebar, collapsed}) {
       client.address.toLowerCase().includes(value)
     );
     //setFilteredClients(filtered);
-  };
+  };*/
 
   // Open client popup
   const handleRowClick = (client) => {
@@ -66,8 +66,6 @@ function Client({ toggleSidebar, collapsed}) {
       <input
         type="text"
         placeholder="Search by name, email, phone, or address..."
-        value={searchFilter}
-        onChange={handleFilterChange}
         className="filter-input"
       />
       <table className="client-table">
