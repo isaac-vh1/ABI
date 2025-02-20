@@ -1,4 +1,4 @@
-name: Notify API
+name: Notify API via GET
 
 on:
   push:
@@ -10,13 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      #Notify external API after successful build
-      - name: Notify API
+      - name: Notify API with GET request
         env:
           API_URL: "https://pi.acresbyisaac.com/api/git"
-          #API_KEY: ${{ secrets.API_KEY }}      # Optional: API key for authentication
         run: |
-          curl -X POST "$API_URL" \
-            -H "Content-Type: application/json" \
-            #-H "Authorization: Bearer $API_KEY" \
-            -d '{"status": "build_complete", "branch": "main"}'
+          curl "$API_URL?status=build_complete&branch=main"
