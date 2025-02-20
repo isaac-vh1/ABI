@@ -2,7 +2,8 @@
 
 // Scheduled Events
 export const scheduledEvents = [
-    {
+    
+  {
       id: 1,
       title: 'Existing Event',
       start: new Date(),
@@ -12,7 +13,6 @@ export const scheduledEvents = [
     },
     // Add more scheduled events as needed
   ];
-  
   // Unscheduled Events (e.g., Events available for scheduling)
   export const unscheduledEvents = [
     {

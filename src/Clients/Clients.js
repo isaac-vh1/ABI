@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import HamburgerMenu from '../Components/Components';
+import "./clients.css"
 
 function Client({ toggleSidebar, collapsed}) {
   const [clients, setClients] = useState([]);
@@ -69,33 +70,33 @@ function Client({ toggleSidebar, collapsed}) {
         className="filter-input"
       />
       <table className="client-table">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Email</th>
-      <th>Phone</th>
-      <th>Address</th>
-    </tr>
-  </thead>
-  <tbody>
-    {clients.map((client) => (
-      <tr key={client[0]} onClick={() => handleRowClick(client)}>
-        <td>{client[0]}</td>
-        <td>{client[1]}</td>
-        <td>{client[2]}</td>
-        <td>{client[3]}</td>
-        <td>{client[4]}</td>
-        <td>{client[5]}</td>
-        <td>{client[6]}</td>
-        <td>{client[7]}</td>
-        <td>{client[8]}</td>
-        <td>{client[9]}</td>
-        <td>{client[10]}</td>
-        <td>{client[11]}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+          </tr>
+        </thead>
+        <tbody>
+          {clients.map((client) => (
+            <tr key={client[0]} onClick={() => handleRowClick(client)}>
+              <td>{client[0]}</td>
+              <td>{client[1]}</td>
+              <td>{client[2]}</td>
+              <td>{client[3]}</td>
+              <td>{client[4]}</td>
+              <td>{client[5]}</td>
+              <td>{client[6]}</td>
+              <td>{client[7]}</td>
+              <td>{client[8]}</td>
+              <td>{client[9]}</td>
+              <td>{client[10]}</td>
+              <td>{client[11]}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
       {selectedClient && (
         <div className="client-popup">

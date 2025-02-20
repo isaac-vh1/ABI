@@ -2,7 +2,6 @@ import React from 'react';
 import "./Components.css"
 
 export default function HamburgerMenu ({collapsed}) {
-    
     return (
         <div>
         <svg className={`hamburger-menu ${collapsed ? '': 'o0iVae'}`} width="24"
