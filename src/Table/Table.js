@@ -100,7 +100,6 @@ function Table({ page, toggleSidebar, collapsed }) {
                 />
               </label>
               ))}
-              
               <label>
                 Email:
                 <input
