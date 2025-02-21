@@ -3,7 +3,6 @@ import "./Components.css";
 import HamburgerMenu from "./HamburgerMenu"; // Adjust the path to your HamburgerMenu component file
 
 export default function HeaderBar({ page, toggleSidebar, collapsed }) {
-  // Optionally update the document title
   useEffect(() => {
     document.title = page;
   }, [page]);

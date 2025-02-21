@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import "./Table.css"
 
 function Table({ page, toggleSidebar, collapsed }) {
+  const [update, setUpdate] = useState(false);
   const [data, setData] = useState([]);
-  const [dataHeader] = useState([]);
+  const [dataHeader, setDataHeader] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchFilter, setSearchFilter] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
@@ -19,22 +20,33 @@ function Table({ page, toggleSidebar, collapsed }) {
         return response.json();
       })
       .then(dataAPI => {
-        setData(dataAPI);
-        setFilteredData(dataAPI)
-        console.log()
+        dataHandler(dataAPI)
       })
       .catch(error => console.error('Error fetching Data:', error));
-  }, [page]);
+      setUpdate(false)
+  }, [page, update]);
+  const dataHandler = (dataAPI) => {
+    var head = dataAPI.shift()
+    setDataHeader(head)
+    setData(dataAPI)
+    setFilteredData(dataAPI)
+  }
   const handleFilterChange = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchFilter(value);
-
-    const filtered = data.filter((Item) =>
-      Item[1].toLowerCase().includes(value) ||
-      Item[2].toLowerCase().includes(value) ||
-      Item[3].includes(value) ||
-      Item[4].toLowerCase().includes(value)
-    );
+    const filtered = data.filter((item) => {
+      const field1 = item[1] ? item[1].toLowerCase() : '';
+      const field2 = item[2] ? item[2].toLowerCase() : '';
+      const field3 = item[3] ? item[3].toString().toLowerCase() : '';
+      const field4 = item[4] ? item[4].toLowerCase() : '';
+      const searchTerm = value.toLowerCase();
+      return (
+        field1.includes(searchTerm) ||
+        field2.includes(searchTerm) ||
+        field3.includes(searchTerm) ||
+        field4.includes(searchTerm)
+      );
+    });
     setFilteredData(filtered);
   };
   const handleRowClick = (item) => {
@@ -54,9 +66,21 @@ function Table({ page, toggleSidebar, collapsed }) {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
+  const newItem = () => {
+    
+  }
   return (
     <div className="table-container">
-      <HeaderBar page={capitalize(page)} toggleSidebar={toggleSidebar} collapsed={collapsed} />
+      <head>
+        <title>{page}</title>
+      </head>
+         <header className="Bar">
+           <div className="menu-toggle" onClick={toggleSidebar}>
+             <HamburgerMenu collapsed={collapsed} />
+           </div>
+           <h1>{capitalize(page)}</h1>
+           <button onClick={newItem}>New {page}</button>
+         </header>
       <input
         type="text"
         placeholder="Search by name, email, phone, or address..."
@@ -94,10 +118,10 @@ function Table({ page, toggleSidebar, collapsed }) {
             <form>
               {dataHeader.map((head) => (
                 <label>
-                head
+                {head}:
                 <input
                   type="text"
-                  name="name"
+                  index="name"
                   value={selectedItem.name}
                   onChange={handleInputChange}
                 />
