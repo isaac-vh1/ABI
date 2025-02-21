@@ -1,0 +1,32 @@
+/* ========== Client Section ========== */
+.filter-input {
+  margin-bottom: 20px;
+  padding: 10px 5%;
+  width: 90%;
+  font-size: 16px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #f4f4f4;
+}
+.table th, .table td {
+  border: 1px solid #000;
+  padding: 8px;
+}
+.table th {
+  text-align: left;
+}
+tbody {
+  overflow: auto;
+}
+.error {
+  display: none;
+}
+.error.show {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  height: 70vh;
+}

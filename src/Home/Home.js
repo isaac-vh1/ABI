@@ -1,18 +1,11 @@
 import React from 'react';
 import './home.css';
-import HamburgerMenu from '../Components/Components';
+import HeaderBar from '../Components/HeaderBar.js';
 
-function Home({toggleSidebar, collapsed}) {  // Receive toggleSidebar as a prop
+function Home({toggleSidebar, collapsed}) {
   return (
     <div>
-      <head>
-        <title>Home</title>
-      </head>
-      <section className="Bar">
-      <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
-        <h1>Welcome to Your Dashboard</h1>
-      </section>
-
+      <HeaderBar page="Home" toggleSidebar={toggleSidebar} collapsed={collapsed} />
       <section className="dashboard-grid">
         <article className="dashboard-column">
           <div className="widget">

@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { useLocation } from "react-router-dom";
 import Home from "./Home/Home.js";
 import Calendar from "./Calendar/Calendar.js";
-import Clients from "./Clients/Clients.js";
-import Invoices from "./Invoices/Invoices.js";
+import Table from "./Table/Table.js";
 import Settings from "./Settings/Settings.js";
 import { useMediaQuery } from 'react-responsive';
 
@@ -42,8 +41,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home toggleSidebar={toggleSidebar} collapsed={collapsed} />} />
           <Route path="/calendar" element={<Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
-          <Route path="/clients" element={<Clients toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
-          <Route path="/invoices" element={<Invoices toggleSidebar={toggleSidebar}/>} />
+          <Route path="/clients" element={<Table page="Clients"toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
+          <Route path="/invoices" element={<Table page="Invoices"toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
           <Route path="/settings" element={<Settings toggleSidebar={toggleSidebar}/>} />
         </Routes>
       </main>

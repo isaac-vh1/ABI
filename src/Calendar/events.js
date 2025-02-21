@@ -2,7 +2,6 @@
 
 // Scheduled Events
 export const scheduledEvents = [
-    
   {
       id: 1,
       title: 'Existing Event',

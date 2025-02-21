@@ -9,7 +9,7 @@ import './Calendar.css';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import CustomEvent from './CustomEvent';
 import DraggableEvent from './DraggableEvent';
-import HamburgerMenu from '../Components/Components';
+import HamburgerMenu from '../Components/HamburgerMenu';
 
 import { 
   scheduledEvents as initialScheduledEvents, 

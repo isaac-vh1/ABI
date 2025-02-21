@@ -1,126 +1,112 @@
 import React, { useState, useEffect } from 'react';
-import HamburgerMenu from '../Components/Components';
-import "./clients.css"
+import HeaderBar from '../Components/HeaderBar';
+import "./Table.css"
 
-function Client({ toggleSidebar, collapsed}) {
-  const [clients, setClients] = useState([]);
-  //const [filteredClients, setFilteredClients] = useState([]);
-  //const [searchFilter, setSearchFilter] = useState('');
-  const [selectedClient, setSelectedClient] = useState(null);
-
+function Table({ page, toggleSidebar, collapsed }) {
+  const [data, setData] = useState([]);
+  const [dataHeader] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [searchFilter, setSearchFilter] = useState('');
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [error, setError] = useState(false);
   useEffect(() => {
-    fetch('https://www.pi.acresbyisaac.com/api/clients')
+    fetch('https://www.pi.acresbyisaac.com/api/' + page)
       .then(response => {
         if (!response.ok) {
+          setError(true);
           throw new Error('Network response was not ok ' + response.statusText);
         }
         return response.json();
       })
-      .then(data => {
-        setClients(data);
+      .then(dataAPI => {
+        setData(dataAPI);
+        setFilteredData(dataAPI)
       })
-      .catch(error => console.error('Error fetching clients:', error));
-  }, []);
+      .catch(error => console.error('Error fetching Data:', error));
+  }, [page]);
 
   // Handle filter changes
-  /*const handleFilterChange = (e) => {
+  const handleFilterChange = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchFilter(value);
 
-    const filtered = clients.filter((client) =>
-      client.name.toLowerCase().includes(value) ||
-      client.email.toLowerCase().includes(value) ||
-      client.phone.includes(value) ||
-      client.address.toLowerCase().includes(value)
+    const filtered = data.filter((Item) =>
+      Item[1].toLowerCase().includes(value) ||
+      Item[2].toLowerCase().includes(value) ||
+      Item[3].includes(value) ||
+      Item[4].toLowerCase().includes(value)
     );
-    //setFilteredClients(filtered);
-  };*/
-
-  // Open client popup
-  const handleRowClick = (client) => {
-    setSelectedClient(client);
+    setFilteredData(filtered);
   };
 
-  // Close client popup
+  const handleRowClick = (item) => {
+    setSelectedItem(item);
+  };
   const closePopup = () => {
-    setSelectedClient(null);
+    setSelectedItem(null);
   };
-
-  // Handle input change in the popup
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setSelectedClient((prev) => ({
+    setSelectedItem((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
   return (
-    <div className="client-container">
-        <head>
-            <title>Clients</title>
-        </head>
-      <section>
-        <div className={`calendar-toggle ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
-        <h1>Clients</h1>
-      </section>
+    <div className="table-container">
+      <HeaderBar page={page} toggleSidebar={toggleSidebar} collapsed={collapsed} />
       <input
         type="text"
         placeholder="Search by name, email, phone, or address..."
         className="filter-input"
+        value={searchFilter}
+        onChange={handleFilterChange}
       />
-      <table className="client-table">
+      <table className="table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Address</th>
+            {dataHeader.map((head) => (
+              <td>head</td>
+            ))}
           </tr>
         </thead>
         <tbody>
-          {clients.map((client) => (
-            <tr key={client[0]} onClick={() => handleRowClick(client)}>
-              <td>{client[0]}</td>
-              <td>{client[1]}</td>
-              <td>{client[2]}</td>
-              <td>{client[3]}</td>
-              <td>{client[4]}</td>
-              <td>{client[5]}</td>
-              <td>{client[6]}</td>
-              <td>{client[7]}</td>
-              <td>{client[8]}</td>
-              <td>{client[9]}</td>
-              <td>{client[10]}</td>
-              <td>{client[11]}</td>
+          {filteredData.map((Item) => (
+            <tr key={Item[0]} onClick={() => handleRowClick(Item)}>
+              {Item}
             </tr>
           ))}
         </tbody>
       </table>
+      <h3 className={`error ${error ? '': 'show'}`}>Error Loading Data</h3>
 
-      {selectedClient && (
-        <div className="client-popup">
+      {selectedItem && (
+        <div className="table-popup">
           <div className="popup-content">
             <button className="close-popup" onClick={closePopup}>
               &times;
             </button>
-            <h2>Client Details</h2>
+            <h2>{page} Details</h2>
             <form>
-              <label>
-                Name:
+              {dataHeader.map((head) => (
+                <label>
+                head
                 <input
                   type="text"
                   name="name"
-                  value={selectedClient.name}
+                  value={selectedItem.name}
                   onChange={handleInputChange}
                 />
               </label>
+              ))}
+              
               <label>
                 Email:
                 <input
                   type="email"
                   name="email"
-                  value={selectedClient.email}
+                  value={selectedItem.email}
                   onChange={handleInputChange}
                 />
               </label>
@@ -129,7 +115,7 @@ function Client({ toggleSidebar, collapsed}) {
                 <input
                   type="text"
                   name="phone"
-                  value={selectedClient.phone}
+                  value={selectedItem.phone}
                   onChange={handleInputChange}
                 />
               </label>
@@ -138,7 +124,7 @@ function Client({ toggleSidebar, collapsed}) {
                 <input
                   type="text"
                   name="streetAddress"
-                  value={selectedClient.streetAddress || ''}
+                  value={selectedItem.streetAddress || ''}
                   onChange={handleInputChange}
                 />
               </label>
@@ -147,7 +133,7 @@ function Client({ toggleSidebar, collapsed}) {
                 <input
                   type="text"
                   name="city"
-                  value={selectedClient.city || ''}
+                  value={selectedItem.city || ''}
                   onChange={handleInputChange}
                 />
               </label>
@@ -156,7 +142,7 @@ function Client({ toggleSidebar, collapsed}) {
                 <input
                   type="text"
                   name="zipCode"
-                  value={selectedClient.zipCode || ''}
+                  value={selectedItem.zipCode || ''}
                   onChange={handleInputChange}
                 />
               </label>
@@ -165,7 +151,7 @@ function Client({ toggleSidebar, collapsed}) {
                 <input
                   type="text"
                   name="picturePreference"
-                  value={selectedClient.picturePreference || ''}
+                  value={selectedItem.picturePreference || ''}
                   onChange={handleInputChange}
                 />
               </label>
@@ -174,7 +160,7 @@ function Client({ toggleSidebar, collapsed}) {
                 <input
                   type="text"
                   name="emailPreference"
-                  value={selectedClient.emailPreference || ''}
+                  value={selectedItem.emailPreference || ''}
                   onChange={handleInputChange}
                 />
               </label>
@@ -183,7 +169,7 @@ function Client({ toggleSidebar, collapsed}) {
                 <input
                   type="number"
                   name="totalSpent"
-                  value={selectedClient.totalSpent || 0}
+                  value={selectedItem.totalSpent || 0}
                   onChange={handleInputChange}
                 />
               </label>
@@ -192,7 +178,7 @@ function Client({ toggleSidebar, collapsed}) {
                 <input
                   type="number"
                   name="balance"
-                  value={selectedClient.balance || 0}
+                  value={selectedItem.balance || 0}
                   onChange={handleInputChange}
                 />
               </label>
@@ -200,7 +186,7 @@ function Client({ toggleSidebar, collapsed}) {
                 Notifications:
                 <textarea
                   name="notifications"
-                  value={selectedClient.notifications || ''}
+                  value={selectedItem.notifications || ''}
                   onChange={handleInputChange}
                 />
               </label>
@@ -212,4 +198,4 @@ function Client({ toggleSidebar, collapsed}) {
   );
 }
 
-export default Client;
+export default Table;
