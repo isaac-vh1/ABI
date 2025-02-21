@@ -21,11 +21,10 @@ function Table({ page, toggleSidebar, collapsed }) {
       .then(dataAPI => {
         setData(dataAPI);
         setFilteredData(dataAPI)
+        console.log()
       })
       .catch(error => console.error('Error fetching Data:', error));
   }, [page]);
-
-  // Handle filter changes
   const handleFilterChange = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchFilter(value);
@@ -38,7 +37,6 @@ function Table({ page, toggleSidebar, collapsed }) {
     );
     setFilteredData(filtered);
   };
-
   const handleRowClick = (item) => {
     setSelectedItem(item);
   };
@@ -52,10 +50,13 @@ function Table({ page, toggleSidebar, collapsed }) {
       [name]: value,
     }));
   };
-
+  const capitalize = (str) => {
+    if (!str) return '';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
   return (
     <div className="table-container">
-      <HeaderBar page={page} toggleSidebar={toggleSidebar} collapsed={collapsed} />
+      <HeaderBar page={capitalize(page)} toggleSidebar={toggleSidebar} collapsed={collapsed} />
       <input
         type="text"
         placeholder="Search by name, email, phone, or address..."
@@ -87,7 +88,7 @@ function Table({ page, toggleSidebar, collapsed }) {
             <button className="close-popup" onClick={closePopup}>
               &times;
             </button>
-            <h2>{page} Details</h2>
+            <h2>{capitalize(page)} Details</h2>
             <form>
               {dataHeader.map((head) => (
                 <label>

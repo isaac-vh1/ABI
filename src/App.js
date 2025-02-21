@@ -9,7 +9,7 @@ import Settings from "./Settings/Settings.js";
 import { useMediaQuery } from 'react-responsive';
 
 function App() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   const location = useLocation();
   const isCalendarRoute = location.pathname === "/calendar";
@@ -41,8 +41,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home toggleSidebar={toggleSidebar} collapsed={collapsed} />} />
           <Route path="/calendar" element={<Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
-          <Route path="/clients" element={<Table page="Clients"toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
-          <Route path="/invoices" element={<Table page="Invoices"toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
+          <Route path="/clients" element={<Table page="clients"toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
+          <Route path="/invoices" element={<Table page="invoices"toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
           <Route path="/settings" element={<Settings toggleSidebar={toggleSidebar}/>} />
         </Routes>
       </main>
