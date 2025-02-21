@@ -67,20 +67,22 @@ function Table({ page, toggleSidebar, collapsed }) {
       <table className="table">
         <thead>
           <tr>
-            {dataHeader.map((head) => (
-              <td>head</td>
+            {dataHeader.map((head, index) => (
+              <th key={index}>{head}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((Item) => (
-            <tr key={Item[0]} onClick={() => handleRowClick(Item)}>
-              {Item}
+          {filteredData.map((row, rowIndex) => (
+            <tr key={row[0] || rowIndex} onClick={() => handleRowClick(row)}>
+              {row.map((cell, cellIndex) => (
+                <td key={cellIndex}>{cell}</td>
+              ))}
             </tr>
           ))}
         </tbody>
       </table>
-      <h3 className={`error ${error ? '': 'show'}`}>Error Loading Data</h3>
+      <h3 className={`error ${error ? 'show': ''}`}>Error Loading Data</h3>
 
       {selectedItem && (
         <div className="table-popup">
