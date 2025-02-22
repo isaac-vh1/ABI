@@ -102,7 +102,7 @@ function Table({ page, toggleSidebar, collapsed }) {
   return (
     <div className="table-container">
       <Helmet>
-        <title>{page}</title>
+        <title>{capitalize(page)}</title>
       </Helmet>
          <header className="Bar">
            <div className="menu-toggle" onClick={toggleSidebar}>
@@ -149,8 +149,8 @@ function Table({ page, toggleSidebar, collapsed }) {
                 <input
                   type="text"
                   name={head[0]} // use the header value as the key
-                  value={selectedItem[index] || ''} // get the value using the key
-                  onChange={handleInputChange} // no need to pass index anymore
+                  value={selectedItem[index]} // get the value using the key
+                  onChange={(e) => handleInputChange(e, index)} // no need to pass index anymore
                 />
               </label>
             ))}
