@@ -11,7 +11,7 @@ function Table({ page, toggleSidebar, collapsed }) {
   const [searchFilter, setSearchFilter] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const [error, setError] = useState(false);
-  const [test, settest] = useSatet("test")
+  const [test, settest] = useState("test")
   useEffect(() => {
     fetch('https://www.pi.acresbyisaac.com/api/' + page)
       .then(response => {
