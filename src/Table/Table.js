@@ -151,7 +151,10 @@ function Table({ page, toggleSidebar, collapsed }) {
                   type="text"
                   name={head[0]} // use the header value as the key
                   value={test} // get the value using the key
-                  onChange={(e) => handleInputChange(e, index)} // no need to pass index anymore
+                  onChange={(e) => setSelectedItem(prev => ({
+                    ...prev,
+                    [index]: e,
+                  }))}
                 />
               </label>
             ))}
