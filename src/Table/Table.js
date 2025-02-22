@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import HamburgerMenu from '../Components/HamburgerMenu';
 import "./Table.css"
+import {Helmet} from "react-helmet";
 
 function Table({ page, toggleSidebar, collapsed }) {
   const [update, setUpdate] = useState(false);
@@ -22,8 +23,8 @@ function Table({ page, toggleSidebar, collapsed }) {
       .then(dataAPI => {
         dataHandler(dataAPI)
       })
-      .catch(error => console.error('Error fetching Data:', error));
-      setUpdate(false)
+      .catch(error => console.error('Error fetching Data:', error))
+      .finally(() => {setUpdate(false)});
   }, [page, update]);
   const dataHandler = (dataAPI) => {
     var head = dataAPI.shift()
@@ -53,6 +54,7 @@ function Table({ page, toggleSidebar, collapsed }) {
     setSelectedItem(item);
   };
   const closePopup = () => {
+
     setSelectedItem(null);
   };
   const handleInputChange = (e) => {
@@ -67,13 +69,20 @@ function Table({ page, toggleSidebar, collapsed }) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
   const newItem = () => {
-    item = {}
+    const item = {};
+    dataHeader.forEach(head => {
+      item[head] = '';
+    });
+    setSelectedItem(item);
+  }
+  const saveChanges = (e) => {
+    setSelectedItem(e);
   }
   return (
     <div className="table-container">
-      <head>
+      <Helmet>
         <title>{page}</title>
-      </head>
+      </Helmet>
          <header className="Bar">
            <div className="menu-toggle" onClick={toggleSidebar}>
              <HamburgerMenu collapsed={collapsed} />
@@ -109,20 +118,17 @@ function Table({ page, toggleSidebar, collapsed }) {
       <h3 className={`error ${error ? 'show': ''}`}>Error Loading Data</h3>
 
       {selectedItem && (
-        <div className="table-popup">
-          <div className="popup-content">
-            <button className="close-popup" onClick={closePopup}>
-              &times;
-            </button>
+        <div className="table-popup" onClick={closePopup}>
+          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
             <h2>{capitalize(page)} Details</h2>
             <form>
-              {dataHeader.map((head) => (
+              {dataHeader.map((head, index) => (
                 <label>
-                {head}:
+                {head[0]}:
                 <input
                   type="text"
-                  index="name"
-                  value={selectedItem.name}
+                  index={index}
+                  value={selectedItem[index]}
                   onChange={handleInputChange}
                 />
               </label>
@@ -216,6 +222,10 @@ function Table({ page, toggleSidebar, collapsed }) {
                   onChange={handleInputChange}
                 />
               </label>
+              <div className="popup-buttons">
+                <button className="cancel-button" onClick={closePopup}>Cancel</button>
+                <button className="button" onClick={saveChanges}>Save</button>
+            </div>
             </form>
           </div>
         </div>

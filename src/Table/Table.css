@@ -49,3 +49,12 @@ tbody {
   max-width: 400px;
   width: 90%;
 }
+.popup-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.popup-buttons button {
+  padding: 8px 12px;
+  cursor: pointer;
+}

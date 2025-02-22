@@ -1,6 +1,6 @@
 import React from 'react';
 import './home.css';
-import HeaderBar from '../Components/HeaderBar.js';
+import HeaderBar from '../Components/HeaderBar';
 
 function Home({toggleSidebar, collapsed}) {
   return (

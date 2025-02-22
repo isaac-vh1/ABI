@@ -66,10 +66,6 @@
     display: flex;
 }
 
-.cancel-button {
-    font-size: 14px;
-}
-
 /* ========== Calendar Container ========== */
 .my-custom-calendar-container {
     flex: 1;
