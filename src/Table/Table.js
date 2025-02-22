@@ -78,7 +78,7 @@ function Table({ page, toggleSidebar, collapsed }) {
   }
   const saveChanges = () => {
     try {
-      const response = fetch('https://api.example.com/data', {
+      const response = fetch('https://www.pi.acresbyisaac.com/api/update' + page, {
         method: 'POST', // Specify the HTTP method
         headers: {
           'Content-Type': 'application/json', // Tell the server you're sending JSON
