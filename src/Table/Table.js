@@ -64,9 +64,14 @@ function Table({ page, toggleSidebar, collapsed }) {
       [name]: value,
     }));
   }
-  const capitalize = (str) => {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
+  function capitalize(str) {
+    return str
+      .split(' ')
+      .map(word => {
+        if (word.length === 0) return '';
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(' ');
   }
   const newItem = () => {
     const item = {};
@@ -117,7 +122,7 @@ function Table({ page, toggleSidebar, collapsed }) {
         <thead>
           <tr>
             {dataHeader.map((head, index) => (
-              <th key={index}>{capitalize(head[0])}</th>
+              <th key={index}>{capitalize(head[0].replace('_', ' '))}</th>
             ))}
           </tr>
         </thead>
@@ -140,11 +145,11 @@ function Table({ page, toggleSidebar, collapsed }) {
             <form>
             {dataHeader.map((head, index) => (
               <label key={index}>
-                {head[0].replace('_', ' ')}:
+                {capitalize(head[0].replace('_', ' '))}:
                 <input
                   type="text"
                   name={head[0]} // use the header value as the key
-                  value={selectedItem[head[0]] || ''} // get the value using the key
+                  value={selectedItem[index] || ''} // get the value using the key
                   onChange={handleInputChange} // no need to pass index anymore
                 />
               </label>
