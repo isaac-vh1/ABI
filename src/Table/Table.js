@@ -57,14 +57,13 @@ function Table({ page, toggleSidebar, collapsed }) {
 
     setSelectedItem(null);
   };
-  const handleInputChange = (e, index) => {
-    const { value } = e.target;
-    setSelectedItem(prevItem => {
-      const newItem = [...prevItem];
-      newItem[index] = value;
-      return newItem;
-    });
-  };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setSelectedItem(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
   const capitalize = (str) => {
     if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -139,18 +138,17 @@ function Table({ page, toggleSidebar, collapsed }) {
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
             <h2>{capitalize(page)} Details</h2>
             <form>
-              {dataHeader.map((head, index) => (
-                <label>
-                {head[0].replace}('_', ' '):
+            {dataHeader.map((head, index) => (
+              <label key={index}>
+                {head[0].replace('_', ' ')}:
                 <input
-                  name={head[0]}
                   type="text"
-                  index={index}
-                  value={selectedItem[index]}
-                  onChange={(e) => handleInputChange(e, index)}
+                  name={head[0]} // use the header value as the key
+                  value={selectedItem[head[0]] || ''} // get the value using the key
+                  onChange={handleInputChange} // no need to pass index anymore
                 />
               </label>
-              ))}
+            ))}
               <label>
                 Email:
                 <input
