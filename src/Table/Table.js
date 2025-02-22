@@ -11,6 +11,7 @@ function Table({ page, toggleSidebar, collapsed }) {
   const [searchFilter, setSearchFilter] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const [error, setError] = useState(false);
+  const [test, settest] = useSatet("test")
   useEffect(() => {
     fetch('https://www.pi.acresbyisaac.com/api/' + page)
       .then(response => {
@@ -149,7 +150,7 @@ function Table({ page, toggleSidebar, collapsed }) {
                 <input
                   type="text"
                   name={head[0]} // use the header value as the key
-                  value={selectedItem[index]} // get the value using the key
+                  value={test} // get the value using the key
                   onChange={(e) => handleInputChange(e, index)} // no need to pass index anymore
                 />
               </label>
