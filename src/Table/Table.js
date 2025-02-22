@@ -143,6 +143,7 @@ function Table({ page, toggleSidebar, collapsed }) {
                 <label>
                 {head[0].replace}('_', ' '):
                 <input
+                  name={head[0]}
                   type="text"
                   index={index}
                   value={selectedItem[index]}
