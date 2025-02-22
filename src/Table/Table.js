@@ -67,7 +67,7 @@ function Table({ page, toggleSidebar, collapsed }) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
   const newItem = () => {
-    
+    item = {}
   }
   return (
     <div className="table-container">
@@ -92,7 +92,7 @@ function Table({ page, toggleSidebar, collapsed }) {
         <thead>
           <tr>
             {dataHeader.map((head, index) => (
-              <th key={index}>{head}</th>
+              <th key={index}>{capitalize(head[0])}</th>
             ))}
           </tr>
         </thead>
