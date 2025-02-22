@@ -150,7 +150,7 @@ function Table({ page, toggleSidebar, collapsed }) {
                 <input
                   type="text"
                   name={head[0]}
-                  value={selectedItem[head] || ''}
+                  value={selectedItem[index]}
                   onChange={(e) =>
                     setSelectedItem(prev => ({
                       ...prev,
@@ -170,74 +170,11 @@ function Table({ page, toggleSidebar, collapsed }) {
                 />
               </label>
               <label>
-                Phone:
-                <input
-                  type="text"
-                  name="phone"
-                  value={selectedItem.phone}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Street Address:
-                <input
-                  type="text"
-                  name="streetAddress"
-                  value={selectedItem.streetAddress || ''}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                City:
-                <input
-                  type="text"
-                  name="city"
-                  value={selectedItem.city || ''}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Zip Code:
-                <input
-                  type="text"
-                  name="zipCode"
-                  value={selectedItem.zipCode || ''}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Picture Preference:
-                <input
-                  type="text"
-                  name="picturePreference"
-                  value={selectedItem.picturePreference || ''}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Email Preference:
-                <input
-                  type="text"
-                  name="emailPreference"
-                  value={selectedItem.emailPreference || ''}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
                 Total Dollars Spent:
                 <input
                   type="number"
                   name="totalSpent"
                   value={selectedItem.totalSpent || 0}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Balance on Past Invoices:
-                <input
-                  type="number"
-                  name="balance"
-                  value={selectedItem.balance || 0}
                   onChange={handleInputChange}
                 />
               </label>
