@@ -146,15 +146,15 @@ function Table({ page, toggleSidebar, collapsed }) {
             <form>
             {dataHeader.map((head, index) => (
               <label key={index}>
-                {capitalize(head.replace('_', ' '))}:
+                {capitalize(head[0].replace('_', ' '))}:
                 <input
                   type="text"
-                  name={head} // use the full header as the name
-                  value={selectedItem[head] || ''} // get the value using the header as key
+                  name={head[0]}
+                  value={selectedItem[head] || ''}
                   onChange={(e) =>
                     setSelectedItem(prev => ({
                       ...prev,
-                      [head]: e.target.value,
+                      [index]: e.target.value,
                     }))
                   }
                 />
