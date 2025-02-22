@@ -57,12 +57,13 @@ function Table({ page, toggleSidebar, collapsed }) {
 
     setSelectedItem(null);
   };
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setSelectedItem((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const handleInputChange = (e, index) => {
+    const { value } = e.target;
+    setSelectedItem(prevItem => {
+      const newItem = [...prevItem];
+      newItem[index] = value;
+      return newItem;
+    });
   };
   const capitalize = (str) => {
     if (!str) return '';
@@ -75,8 +76,24 @@ function Table({ page, toggleSidebar, collapsed }) {
     });
     setSelectedItem(item);
   }
-  const saveChanges = (e) => {
-    setSelectedItem(e);
+  const saveChanges = () => {
+    try {
+      const response = fetch('https://api.example.com/data', {
+        method: 'POST', // Specify the HTTP method
+        headers: {
+          'Content-Type': 'application/json', // Tell the server you're sending JSON
+        },
+        body: JSON.stringify(selectedItem), // Convert the payload to JSON
+      });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      const result = response.json();
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+    }
+    closePopup();
   }
   return (
     <div className="table-container">
@@ -124,12 +141,12 @@ function Table({ page, toggleSidebar, collapsed }) {
             <form>
               {dataHeader.map((head, index) => (
                 <label>
-                {head[0]}:
+                {head[0].replace}('_', ' '):
                 <input
                   type="text"
                   index={index}
                   value={selectedItem[index]}
-                  onChange={handleInputChange}
+                  onChange={(e) => handleInputChange(e, index)}
                 />
               </label>
               ))}
