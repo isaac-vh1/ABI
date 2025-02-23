@@ -37,8 +37,10 @@
     display: flex;
     align-items: center;
     border-radius: 20px;
+    background-color: green;
   }
   .Bar h1 {
     margin: 0;
     flex-grow: 1;
+    color: white;
   }

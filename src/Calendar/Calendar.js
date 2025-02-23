@@ -11,10 +11,10 @@ import CustomEvent from './CustomEvent';
 import DraggableEvent from './DraggableEvent';
 import HamburgerMenu from '../Components/HamburgerMenu';
 
-import { 
-  scheduledEvents as initialScheduledEvents, 
-  unscheduledEvents as initialUnscheduledEvents, 
-  workerSchedule as initialWorkerSchedule 
+import {
+  scheduledEvents as initialScheduledEvents,
+  unscheduledEvents as initialUnscheduledEvents,
+  workerSchedule as initialWorkerSchedule
 } from './events';
 
 const localizer = momentLocalizer(moment);
@@ -133,8 +133,6 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   // ====== 9) SAVE CHANGES ======
   const handleSaveChanges = () => {
     if (selectedEvent) {
-      //const { calendar } = selectedEvent;
-
       const updatedStart = editStart ? new Date(editStart) : selectedEvent.start;
       const updatedEnd = editEnd ? new Date(editEnd) : selectedEvent.end;
 

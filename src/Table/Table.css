@@ -1,12 +1,14 @@
 /* ========== Client Section ========== */
 .filter-input {
   margin-bottom: 20px;
+  margin-top: 10px;
   padding: 10px 5%;
   width: 90%;
   font-size: 16px;
 }
 .table {
   width: 100%;
+  overflow: scroll;
   border-collapse: collapse;
   background-color: #f4f4f4;
 }
@@ -24,11 +26,18 @@ tbody {
   display: none;
 }
 .error.show {
-  display: flex;
+  position:fixed;
+  display:flex;
+  height: 15%;
+  width: 25%;
+  background-color: white;
   justify-content: center;
   align-items: center;
   margin: auto;
-  height: 70vh;
+  border-radius: 10px;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
 }
 .table-popup {
   position: fixed;

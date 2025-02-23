@@ -31,7 +31,7 @@ function Table({ page, toggleSidebar, collapsed }) {
     var head = dataAPI.shift()
     setDataHeader(head)
     setData(dataAPI)
-    setFilteredData(dataAPI)
+    setFilteredData(dataAPI.slice(1))
   }
   const handleFilterChange = (e) => {
     const value = e.target.value.toLowerCase();
@@ -83,7 +83,7 @@ function Table({ page, toggleSidebar, collapsed }) {
   }
   const saveChanges = () => {
     try {
-      const response = fetch('https://www.pi.acresbyisaac.com/api/update' + page, {
+      const response = fetch('https://www.pi.acresbyisaac.com/api/update/' + page, {
         method: 'POST', // Specify the HTTP method
         headers: {
           'Content-Type': 'application/json', // Tell the server you're sending JSON
@@ -94,7 +94,7 @@ function Table({ page, toggleSidebar, collapsed }) {
         throw new Error(`Error: ${response.status}`);
       }
       const result = response.json();
-      setData(result);
+      setUpdate(true)
     } catch (err) {
       setError(err.message);
     }
@@ -122,7 +122,7 @@ function Table({ page, toggleSidebar, collapsed }) {
       <table className="table">
         <thead>
           <tr>
-            {dataHeader.map((head, index) => (
+            {dataHeader.slice(1).map((head, index) => (
               <th key={index}>{capitalize(head[0].replace('_', ' '))}</th>
             ))}
           </tr>
@@ -130,21 +130,20 @@ function Table({ page, toggleSidebar, collapsed }) {
         <tbody>
           {filteredData.map((row, rowIndex) => (
             <tr key={row[0] || rowIndex} onClick={() => handleRowClick(row)}>
-              {row.map((cell, cellIndex) => (
+              {row.slice(1).map((cell, cellIndex) => (
                 <td key={cellIndex}>{cell}</td>
               ))}
             </tr>
           ))}
         </tbody>
       </table>
-      <h3 className={`error ${error ? 'show': ''}`}>Error Loading Data</h3>
+      <h3 className={`error ${error ? ' ': 'show'}`}>Error Loading Data</h3>
 
       {selectedItem && (
         <div className="table-popup" onClick={closePopup}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
             <h2>{capitalize(page)} Details</h2>
-            <form>
-            {dataHeader.map((head, index) => (
+            {dataHeader.slice(1).map((head, index) => (
               <label key={index}>
                 {capitalize(head[0].replace('_', ' '))}:
                 <input
@@ -190,7 +189,6 @@ function Table({ page, toggleSidebar, collapsed }) {
                 <button className="cancel-button" onClick={closePopup}>Cancel</button>
                 <button className="button" onClick={saveChanges}>Save</button>
             </div>
-            </form>
           </div>
         </div>
       )}
