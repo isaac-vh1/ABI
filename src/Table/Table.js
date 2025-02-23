@@ -84,19 +84,20 @@ function Table({ page, toggleSidebar, collapsed }) {
   const saveChanges = () => {
     try {
       const response = fetch('https://www.pi.acresbyisaac.com/api/update/' + page, {
-        method: 'POST', // Specify the HTTP method
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // Tell the server you're sending JSON
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(selectedItem), // Convert the payload to JSON
       });
+      console.log(selectedItem)
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
       const result = response.json();
       setUpdate(true)
     } catch (err) {
-      setError(err.message);
+      setError(true);
     }
     closePopup();
   }
@@ -137,7 +138,7 @@ function Table({ page, toggleSidebar, collapsed }) {
           ))}
         </tbody>
       </table>
-      <h3 className={`error ${error ? ' ': 'show'}`}>Error Loading Data</h3>
+      <h3 className={`error ${error ? 'show': ' '}`}>Error Loading Data</h3>
 
       {selectedItem && (
         <div className="table-popup" onClick={closePopup}>
@@ -149,7 +150,7 @@ function Table({ page, toggleSidebar, collapsed }) {
                 <input
                   type="text"
                   name={head[0]}
-                  value={selectedItem[index]}
+                  value={selectedItem[index+1]}
                   onChange={(e) =>
                     setSelectedItem(prev => ({
                       ...prev,
