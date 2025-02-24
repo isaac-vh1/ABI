@@ -52,7 +52,7 @@ function Table({ page, toggleSidebar, collapsed }) {
     setFilteredData(filtered);
   };
   const handleRowClick = (item) => {
-    head
+    setSelectedItem(item)
   };
   const closePopup = () => {
 
