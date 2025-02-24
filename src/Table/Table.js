@@ -31,7 +31,7 @@ function Table({ page, toggleSidebar, collapsed }) {
     var head = dataAPI.shift()
     setDataHeader(head)
     setData(dataAPI)
-    setFilteredData(dataAPI.slice(1))
+    setFilteredData(dataAPI)
   }
   const handleFilterChange = (e) => {
     const value = e.target.value.toLowerCase();
@@ -52,7 +52,7 @@ function Table({ page, toggleSidebar, collapsed }) {
     setFilteredData(filtered);
   };
   const handleRowClick = (item) => {
-    setSelectedItem(item);
+    head
   };
   const closePopup = () => {
 
