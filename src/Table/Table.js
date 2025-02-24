@@ -150,7 +150,7 @@ function Table({ page, toggleSidebar, collapsed }) {
                 <input
                   type="text"
                   name={head[0]}
-                  value={selectedItem[index+1]}
+                  value={selectedItem[index]}
                   onChange={(e) =>
                     setSelectedItem(prev => ({
                       ...prev,
