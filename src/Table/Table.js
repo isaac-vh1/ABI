@@ -88,7 +88,7 @@ function Table({ page, toggleSidebar, collapsed }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(selectedItem), // Convert the payload to JSON
+        body: JSON.stringify({table:{page}, value: {selectedItem}}), // Convert the payload to JSON
       });
       console.log(selectedItem)
       if (!response.ok) {
@@ -150,11 +150,11 @@ function Table({ page, toggleSidebar, collapsed }) {
                 <input
                   type="text"
                   name={head[0]}
-                  value={selectedItem[index]}
+                  value={selectedItem[index + 1]}
                   onChange={(e) =>
                     setSelectedItem(prev => ({
                       ...prev,
-                      [index]: e.target.value,
+                      [index + 1]: e.target.value,
                     }))
                   }
                 />
