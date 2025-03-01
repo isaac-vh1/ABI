@@ -88,7 +88,7 @@ function Table({ page, toggleSidebar, collapsed }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({table:{page}, value: {selectedItem}}), // Convert the payload to JSON
+        body: JSON.stringify({selectedItem}),
       });
       console.log(selectedItem)
       if (!response.ok) {
