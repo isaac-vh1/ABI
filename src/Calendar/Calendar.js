@@ -261,7 +261,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
           </article>
           <article>
             <DnDCalendar
-              className="my-custom-calendar" 
+              className="my-custom-calendar"
               localizer={localizer}
               events={events}
               eventPropGetter={eventStyleGetter}

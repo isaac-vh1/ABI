@@ -90,7 +90,7 @@ function Table({ page, toggleSidebar, collapsed }) {
         },
         body: JSON.stringify({selectedItem}),
       });
-      console.log(selectedItem)
+      console.log(response)
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
       }
