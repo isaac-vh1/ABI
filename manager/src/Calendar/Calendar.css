@@ -1,0 +1,258 @@
+/* ========== Sidebar ========== */
+.calendar-drop-bar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    display: block;
+    flex-direction: column;
+    width: 20%;
+    background-color: #333;
+    color: #fff;
+    padding-top: 30px;
+    height: 100%;
+    z-index: 0;
+}
+
+.calendar-drop-bar h2 {
+    text-align: center;
+    font-size: clamp(10px, 2.5vw, 30px);
+    margin: 0 0 20px 0;
+}
+
+.noJob {
+    display: flex;
+    justify-content: center;
+    font-size: clamp(10px, 1.5vw, 24px);
+    margin-top: 40vh;
+}
+
+/* ========== Toggle Button ========== */
+.calendar-toggle {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    border: none;
+    padding: 2px 7px;
+    padding-top: 6px;
+    font-size: 24px;
+    border-radius: 3px;
+    cursor: pointer;
+    z-index: 11;
+    display: none;
+}
+
+.calendar-toggle:hover {
+    color: #43a047;
+}
+
+/* ========== Top Bar ========== */
+.top-bar-button {
+    background-color: #4caf50;
+    color: #fff;
+    border: none;
+    padding: 2px 6px;
+    padding-top: 6px;
+    font-size: 24px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-right:auto;
+}
+
+.top-bar {
+    background-color: #fafafa;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    display: flex;
+}
+
+/* ========== Calendar Container ========== */
+.my-custom-calendar-container {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    height: 96vh;
+}
+
+/* ========== Calendar Styles ========== */
+.my-custom-calendar {
+    background-color: #fafafa;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 14px;
+    height:89.5vh;
+}
+
+.my-custom-calendar .rbc-allday-cell {
+    display:none;
+}
+
+.my-custom-calendar .rbc-addons-dnd-resize-ns-anchor .rbc-addons-dnd-resize-ns-icon {
+    padding-right: 10px;
+    padding-left:10px;
+}
+
+.rbc-addons-dnd .rbc-addons-dnd-resize-ns-anchor {
+    cursor: ns-resize;
+}
+
+
+/* ========== Toolbar (Next/Prev Buttons, Title, etc.) ========== */
+.my-custom-calendar .rbc-toolbar {
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.my-custom-calendar .rbc-toolbar button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    margin: 0 5px;
+    padding: 8px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.my-custom-calendar .rbc-toolbar button:hover {
+    background-color: #43a047;
+}
+
+.my-custom-calendar .rbc-toolbar-label {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    flex-grow: 1;
+    text-align: center;
+}
+
+/* ========== Day/Date Cells ========== */
+.my-custom-calendar .rbc-day-bg {
+    background-color: #fff;
+}
+
+.my-custom-calendar .rbc-day-bg.rbc-today {
+    background-color: #fcf8e3;
+}
+
+.my-custom-calendar .rbc-off-range-bg {
+    background-color: #f5f5f5;
+    color: #999;
+}
+
+/* ========== Events ========== */
+.my-custom-calendar .rbc-event {
+    background-color: #4caf50;
+    border: none;
+    color: #fff;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.my-custom-calendar .rbc-event-label {
+    display: none;
+}
+
+.my-custom-calendar .rbc-current-time-indicator {
+    background-color: red;
+    height: 2px;  
+}
+
+/* ========== Timeslot & Week View ========== */
+.my-custom-calendar .rbc-timeslot-group {
+    min-height: 40px;
+}
+
+.my-custom-calendar .rbc-time-view .rbc-allday-cell {
+    background-color: #f9f9f9;
+}
+
+/* ========== Adjust fonts or size, if desired ========== */
+.my-custom-calendar .rbc-month-view, 
+.my-custom-calendar .rbc-time-view, 
+.my-custom-calendar .rbc-agenda-view {
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+}
+/* ========== Sidebar Widget ========== */
+.sidebar-widget {
+    background-color: #4caf50;
+    margin: 5px;
+    padding: 10px 10px;
+    border-radius: 10px;
+    cursor: move;
+    font-size: clamp(10px, 2vw, 18px);
+}
+
+/* ========== Modal Backdrop ========== */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  .modal-content {
+    background-color: #fff;
+    padding: 20px 30px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+  }
+  .modal-content label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  .modal-content input[type="text"],
+  .modal-content textarea {
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .modal-buttons button {
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+
+  /* ========== Responsive Styles ========== */
+@media (max-width: 767px) {
+    .calendar-drop-bar {
+        display: none;
+    }
+
+    .calendar-toggle {
+        display: block;
+    }
+
+    .my-custom-calendar-container {
+        margin-left: 0%;
+    }
+
+    .my-custom-calendar-container.collapsed {
+        margin-left: 0%;
+        width: 100%;
+    }
+
+    .my-custom-calendar {
+        height: 90vh;
+    }
+}
