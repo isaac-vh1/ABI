@@ -46,6 +46,10 @@
     text-align: right;
     padding: 8px;
   }
+  .leftAlign {
+    text-align: left;
+    padding: 8px;
+  }
   
   .totals {
     text-align: right;
