@@ -44,12 +44,13 @@ function App() {
       <AuthProvider>
         <main className={`main-content ${isCalendarRoute ? "no-collapse-on-calendar" : (collapsed ? 'collapsed' : '')}`}>
           <Routes>
-            <Route path="/login" element={<Login setSavedPage={ setSavedPage }/>} />
-            <Route path="/" element={<ProtectedRoute page={savedPage}><Home toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
-            <Route path="/calendar" element={<ProtectedRoute><Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
-            <Route path="/clients" element={<ProtectedRoute><Table page="clients"toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
-            <Route path="/invoices" element={<ProtectedRoute><Table page="invoices"toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings toggleSidebar={toggleSidebar}/></ProtectedRoute>} />
+            <Route path="/login" element={<Login page={ savedPage }/>} />
+            <Route path="/" element={<ProtectedRoute setSavedPage={setSavedPage}><Home toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
+            <Route path="/calendar" element={<ProtectedRoute setSavedPage={setSavedPage}><Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            <Route path="/clients" element={<ProtectedRoute setSavedPage={setSavedPage}><Table page="clients"toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            <Route path="/invoices" element={<ProtectedRoute setSavedPage={setSavedPage}><Table page="invoices"toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            <Route path="/quarter-finances" element={<ProtectedRoute setSavedPage={setSavedPage}><Table page="quarterly_information"toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute setSavedPage={setSavedPage}><Settings toggleSidebar={toggleSidebar}/></ProtectedRoute>} />
           </Routes>
         </main>
       </AuthProvider>

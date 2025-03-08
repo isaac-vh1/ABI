@@ -15,6 +15,8 @@ function Table({ page, toggleSidebar, collapsed }) {
   const user = auth.currentUser;
 
   useEffect(() => {
+    setData(null);
+    setFilteredData(null);
     user.getIdToken().then(token => {
       fetch('https://www.pi.acresbyisaac.com/api/' + page, {
         method: 'GET',
@@ -95,16 +97,17 @@ function Table({ page, toggleSidebar, collapsed }) {
   const saveChanges = () => {
     try {
       user.getIdToken().then(token => {
-        const response = fetch('https://www.pi.acresbyisaac.com/api/update/' + page, {
+        fetch('https://www.pi.acresbyisaac.com/api/update/' + page, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
           },
           body: JSON.stringify({selectedItem}),
+        }).then(response => {
+          const result = response.json();
+          console.log(result)
         })
-        const result = response.json();
-        console.log(result)
         setUpdate(true)
       });
     } catch (err) {

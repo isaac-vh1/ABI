@@ -12,7 +12,7 @@ function ProtectedRoute({ setSavedPage, children }) {
   }
   if (!user) {
     // Not logged in → redirect
-    setSavedPage(location);
+    setSavedPage(location.pathname);
     return <Navigate to="/login" />;
   }
   return children;

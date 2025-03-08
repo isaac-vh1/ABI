@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 import './CreateAccount.css';
 
 const CreateAccount = () => {
+  const { user, loading } = useAuth();
   const [formData, setFormData] = useState({
     displayName: '',
     email: '',
@@ -11,7 +14,6 @@ const CreateAccount = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [success, setSuccess] = useState('');
 
   // Function to validate the password
@@ -20,11 +22,15 @@ const CreateAccount = () => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
     return regex.test(password);
   };
+  const validateEmail = (email) => {
+    // This regex checks for a non-empty string before and after "@" and a dot somewhere after the "@"
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Update form data
+
     setFormData(prevData => ({
       ...prevData,
       [name]: value,
@@ -33,37 +39,35 @@ const CreateAccount = () => {
     // Validate password in real-time
     if (name === 'password') {
       if (!validatePassword(value)) {
-        setPasswordError('Password must contain at least one uppercase letter, one lowercase letter, and one number.');
+        setError('Password must contain at least one uppercase letter, one lowercase letter, and one number.');
       } else {
-        setPasswordError('');
+        setError('');
       }
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
-
-    // Ensure password meets criteria
     if (!validatePassword(formData.password)) {
       setError('Password does not meet the required criteria.');
+      return;
+    }
+    if (!validateEmail(formData.email)) {
+      setError('Please enter a valid email address.');
       return;
     }
 
     setError('');
     try {
-      // Create the user in Firebase
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email,
         formData.password
       );
-      // Update the user's display name
       await updateProfile(userCredential.user, {
         displayName: formData.displayName
       });
@@ -71,6 +75,7 @@ const CreateAccount = () => {
     } catch (err) {
       setError(err.message);
     }
+    <Navigate to={"/verify"} />
   };
 
   if (user) {
@@ -81,7 +86,6 @@ const CreateAccount = () => {
     <div className="create-account-container">
       <h2>Create Account</h2>
       {error && <p className="error">{error}</p>}
-      {passwordError && <p className="error">{passwordError}</p>}
       {success && <p className="success">{success}</p>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">

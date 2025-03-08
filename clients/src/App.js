@@ -6,6 +6,7 @@ import { AuthProvider } from "./AuthContext.js";
 import Login from './Login/Login.js';
 import ProtectedRoute from "./ProtectedRoute.js";
 import CreateAccount from './CreateAccount/CreateAccount.js';
+import VerifyEmail from './CreateAccount/VerifyEmail.js';
 
 function App() {
   const [savedPage, setSavedPage] = useState("")
@@ -19,6 +20,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login page={ savedPage }/>} />
             <Route path="/create-account" element={<CreateAccount />} />
+            <Route path="/verify" element={<ProtectedRoute setSavedPage={setSavedPage}><VerifyEmail /></ProtectedRoute>} />
             <Route path="/invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoicePage /></ProtectedRoute>} />
           </Routes>
         </main>
