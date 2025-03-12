@@ -1,23 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import './CreateAccount.css';
 import { useAuth } from '../AuthContext';
-import { Navigate } from 'react-router-dom';
+import { useNavigate, useSearchParams} from 'react-router-dom';
 
 const VerifyEmail = () => {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const navigate = useNavigate();
   const { user, loading } = useAuth();
-    useEffect(() => {
-        user.getIdToken().then(token => {
-            fetch('https://www.client.acresbyisaac.com/api/verify-email', {
-                method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
-            }).catch(error => console.error('Error sending email:', error))
-        })
-    }, [])
+  const [searchParams] = useSearchParams();
+  setCode(searchParams.get('code'));
+
+  if(code !== ''){
+    handleSubmit();
+  }
+
+  useEffect(() => {
+    const sendVerificationEmail = async () => {
+      if (user) {
+        try {
+          const token = await user.getIdToken();
+          const response = await fetch('https://www.client.acresbyisaac.com/api/verify-email', {
+            method: 'GET',
+            headers: {
+              'Authorization': 'Bearer ' + token,
+              'Content-Type': 'application/json'
+            }
+          });
+          // Optionally parse the response if needed
+          // const data = await response.json();
+          setSuccess("Verification Email Sent! (Please do not reload this page)");
+        } catch (err) {
+          console.error('Error sending email:', err);
+          setError("Error sending email, please try again");
+        }
+      }
+    };
+
+    sendVerificationEmail();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,29 +47,33 @@ const VerifyEmail = () => {
     setSuccess('');
 
     try {
-        user.getIdToken().then(token => {
-            const response = fetch('https://www.client.acresbyisaac.com/api/verify', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ code })
-            });
-            if (!response.ok) {
-                const data = response.json();
-                throw new Error(data.error || 'Verification failed. Please try again.');
-            }
-            if(response == "true") {
-                setSuccess('Email verified successfully! Going to Home!');
-            } else {
-                setError("Wrong Verification Code! Try again!")
-            }
-        })
+      const token = await user.getIdToken();
+      const response = await fetch('https://www.client.acresbyisaac.com/api/verify', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code })
+      });
+      const data = await response.json();
+      console.log(data);
+      // Explicitly check if data equals the string "true" (or a boolean true, if that’s what your API returns)
+      if (data === "true" || data === true) {
+        setSuccess('Email verified successfully! Going to Home!');
+        navigate('/invoice#1'); // This should perform client-side navigation if the route exists
+      } else {
+        setError("Wrong Verification Code! Try again!");
+      }
     } catch (err) {
+      console.error(err);
       setError(err.message);
     }
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="create-account-container">

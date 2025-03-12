@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { auth } from '../firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { Navigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import './CreateAccount.css';
 
 const CreateAccount = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     displayName: '',
     email: '',
@@ -18,12 +19,10 @@ const CreateAccount = () => {
 
   // Function to validate the password
   const validatePassword = (password) => {
-    // This regex checks for at least one lowercase letter, one uppercase letter, and one digit.
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/;
     return regex.test(password);
   };
   const validateEmail = (email) => {
-    // This regex checks for a non-empty string before and after "@" and a dot somewhere after the "@"
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return regex.test(email);
   };
@@ -48,6 +47,7 @@ const CreateAccount = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match.');
       return;
@@ -68,14 +68,21 @@ const CreateAccount = () => {
         formData.email,
         formData.password
       );
-      await updateProfile(userCredential.user, {
-        displayName: formData.displayName
-      });
+      userCredential.user.getIdToken().then(token => {
+        fetch('https://www.client.acresbyisaac.com/api/create-account', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({name: formData.displayName})
+        }).catch(error => console.error('Error sending email:', error))
+      })
       setSuccess('Account created successfully!');
+      navigate("/verify");
     } catch (err) {
       setError(err.message);
     }
-    <Navigate to={"/verify"} />
   };
 
   if (user) {
@@ -89,7 +96,7 @@ const CreateAccount = () => {
       {success && <p className="success">{success}</p>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="displayName">Name:</label>
+          <label htmlFor="displayName">Name<span className='required'>*</span></label>
           <input
             type="text"
             id="displayName"
@@ -100,7 +107,7 @@ const CreateAccount = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="email">Email:</label>
+          <label htmlFor="email">Email<span className='required'>*</span></label>
           <input 
             type="email" 
             id="email" 
@@ -111,7 +118,7 @@ const CreateAccount = () => {
           />
         </div>
         <div className="form-group">
-          <label htmlFor="password">Password:</label>
+          <label htmlFor="password">Password<span className='required'>*</span></label>
           <input 
             type="password" 
             id="password" 
@@ -125,7 +132,7 @@ const CreateAccount = () => {
           </small>
         </div>
         <div className="form-group">
-          <label htmlFor="confirmPassword">Confirm Password:</label>
+          <label htmlFor="confirmPassword">Confirm Password<span className='required'>*</span></label>
           <input 
             type="password" 
             id="confirmPassword" 

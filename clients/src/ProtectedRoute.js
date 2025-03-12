@@ -5,9 +5,11 @@ import { useAuth } from './AuthContext';
 function ProtectedRoute({ setSavedPage, children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
-  const [verified, setVerified] = useState(null); // null: not checked, true: verified, false: not verified
+  const [verified, setVerified] = useState(null);
+  const [client, setClient] = useState(null);
 
   useEffect(() => {
+    setVerified(null)
     if (user) {
       user.getIdToken().then(token => {
         fetch('https://www.client.acresbyisaac.com/api/get-verified', {
@@ -22,8 +24,16 @@ function ProtectedRoute({ setSavedPage, children }) {
         .then(data => {
           if (data === "true") {
             setVerified(true);
+            setClient(true);
+          } else if (data === "Not Verified") { 
+            setVerified(false);
+            setClient(false);
+          } else if (data === "No Client") {
+            setVerified(true);
+            setClient(false);
           } else {
             setVerified(false);
+            setClient(false);
           }
         })
         .catch(error => {
@@ -32,27 +42,27 @@ function ProtectedRoute({ setSavedPage, children }) {
         });
       });
     }
-  }, [user]);
+  }, [user, location]);
 
   if (loading) {
     return <div>Loading...</div>;
   }
-
   if (!user) {
     setSavedPage(location.pathname);
     return <Navigate to="/login" />;
   }
-  if (verified === null) {
-    return <div>Checking verification...</div>;
+  if (verified === null || client === null) {
+    return <div>Loading</div>;
   }
-
-  if (!verified && location.pathname != "/verify") {
+  if (!verified && location.pathname !== "/verify") {
     return <Navigate to="/verify" />;
   }
-  if(verified && location.pathname == "/verify") {
+  if(verified && location.pathname === "/verify") {
     return <Navigate to="/" />;
   }
-
+  if (!client && location.pathname !== "/client-info") {
+    return <Navigate to="client-info" />;
+  }
   return children;
 }
 

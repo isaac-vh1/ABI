@@ -3,11 +3,12 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Navigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import '../CreateAccount/CreateAccount.css'; 
+import { useAuth } from "../AuthContext"
 
-function Login({ page }) {
+function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userLogged, setUserLogged] = useState(false);
+  const { user, loading } = useAuth();
   const [error, setError] = useState('');
 
   const handleLogin = async (e) => {
@@ -15,15 +16,14 @@ function Login({ page }) {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log('Logged in:', userCredential.user);
-      setUserLogged(true);
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message);
     }
   };
 
-  if (userLogged) {
-    return <Navigate to={`/${page}`} />;
+  if (user) {
+    return <Navigate to={'/'} />;
   }
 
   return (

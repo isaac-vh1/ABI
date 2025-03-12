@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './InvoicePage.css';
 import { useLocation } from 'react-router-dom';
 import { auth } from '../firebase';
+const user = auth.currentUser;
 
 const InvoicePage = () => {
   const [invoiceData, setInvoiceData] = useState(null);
@@ -33,11 +34,12 @@ const InvoicePage = () => {
       })
       .catch(error => console.error('Error fetching Data:', error))
     });
-  }, [invoiceNum]);
+  }, [invoiceNum, user]);
 
-  if(!invoiceData) {
+  if(!invoiceData || invoiceData === "Invoice not found" || invoiceData === "All Data not found") {
     return (<h1>Error Retrieving Invoice, Please try again</h1>)
   }
+
   return (
     <div className="container">
       <h1 className="title">Invoice #{invoiceNum}</h1>
@@ -73,7 +75,6 @@ const InvoicePage = () => {
           </thead>
           <tbody>
           {invoiceData.slice(14).map((item, index, slicedArray) => {
-            // Process only even indices (description) and pair them with the next element (price)
             if (index % 2 === 0) {
               const description = slicedArray[index];
               const price = slicedArray[index + 1];
@@ -84,7 +85,6 @@ const InvoicePage = () => {
                 </tr>
               );
             }
-            // Return null for odd indices since they are handled as price values for the previous row.
             return null;
           })}
           </tbody>
@@ -95,7 +95,9 @@ const InvoicePage = () => {
         <div className="totals">
           <p><strong>Subtotal:</strong> ${invoiceData[2]}</p>
           <p><strong>Sales Tax (10.5%):</strong> ${invoiceData[3]}</p>
-          <p><strong>Total:</strong> ${invoiceData[4]}</p>
+          <p><strong>Total:</strong> ${invoiceData[2]+invoiceData[3]}</p>
+          <p><strong>Balance Due:</strong> ${invoiceData[4]}</p>
+          <p><strong>Tips:</strong> ${invoiceData[5]}</p>
         </div>
       </section>
       
