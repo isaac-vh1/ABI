@@ -48,7 +48,7 @@ const ClientDashboard = () => {
 
   return (
     <div>
-    <div className='anouncement'> Thank you for signing up! If you are a new client or have not had services below</div>
+    <div className='announcement'> Thank you for signing up! Currently only invoicing is available, however new features are being added daily! If an error is encountered please email support@acresbyisaac.com so it can be addressed promptly</div>
     <div className="client-dashboard">
       <h1>My Invoices</h1>
         <table className="invoice-table">

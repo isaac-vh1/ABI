@@ -10,13 +10,12 @@ const VerifyEmail = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [searchParams] = useSearchParams();
-  setCode(searchParams.get('code'));
-
-  if(code !== ''){
-    handleSubmit();
-  }
-
+  const codeParam = searchParams.get('code');
   useEffect(() => {
+    if(codeParam && codeParam !== ''){
+      setCode(codeParam);
+      handleSubmit();
+    }
     const sendVerificationEmail = async () => {
       if (user) {
         try {
@@ -27,10 +26,23 @@ const VerifyEmail = () => {
               'Authorization': 'Bearer ' + token,
               'Content-Type': 'application/json'
             }
-          });
-          // Optionally parse the response if needed
-          // const data = await response.json();
-          setSuccess("Verification Email Sent! (Please do not reload this page)");
+          }).then(response => {
+            if (!response.ok) {
+              return response.json().then(err => {
+                console.error('Error response:', err);
+                throw new Error(err.error);
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data === "Email verification initiated") {
+              console.log("Received data: [" + data + "]");
+              setSuccess("Verification Email Sent! Code will expire in 15 minutes");
+            } else if(data === "Not sent, too close to time") {
+              setSuccess("Verification Email Sent Previously!");
+            }
+          })
         } catch (err) {
           console.error('Error sending email:', err);
           setError("Error sending email, please try again");
@@ -42,7 +54,9 @@ const VerifyEmail = () => {
   }, []);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
     setError('');
     setSuccess('');
 
@@ -54,20 +68,45 @@ const VerifyEmail = () => {
           'Authorization': 'Bearer ' + token,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ code })
+        body: JSON.stringify({ code: code ? code : codeParam })
       });
       const data = await response.json();
-      console.log(data);
-      // Explicitly check if data equals the string "true" (or a boolean true, if that’s what your API returns)
       if (data === "true" || data === true) {
-        setSuccess('Email verified successfully! Going to Home!');
-        navigate('/invoice#1'); // This should perform client-side navigation if the route exists
+        setSuccess('Email verified successfully!');
+        navigate('/');
+      } else if (data === "Verification Email Resent"){
+        setError("Code Expired")
+        setSuccess("Verification Email resent!")
       } else {
         setError("Wrong Verification Code! Try again!");
       }
     } catch (err) {
       console.error(err);
       setError(err.message);
+    }
+  };
+
+  const handleResend = async () => {
+    try {
+      setSuccess('')
+      setError('')
+      const token = await user.getIdToken();
+      const response = await fetch('https://www.client.acresbyisaac.com/api/verify-email-force', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+          'Content-Type': 'application/json'
+        }
+      });
+      const data = await response.json();
+      if (data === "Email verification initiated") {
+        setSuccess("Verification Email Sent! Code will expire in 15 minutes");
+      } else {
+        setError("Unexpected response: " + data);
+      }
+    } catch (err) {
+      console.error('Error sending email:', err);
+      setError("Error sending email, please try again");
     }
   };
 
@@ -92,8 +131,9 @@ const VerifyEmail = () => {
             required 
           />
         </div>
-        <button type="submit">Verify Email</button>
+        <button type="submit" className='submit'>Verify Email</button>
       </form>
+      <button onClick={handleResend} className='submit'>Resend Email</button>
     </div>
   );
 };

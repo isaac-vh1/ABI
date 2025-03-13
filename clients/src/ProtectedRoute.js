@@ -60,7 +60,7 @@ function ProtectedRoute({ setSavedPage, children }) {
   if(verified && location.pathname === "/verify") {
     return <Navigate to="/" />;
   }
-  if (!client && location.pathname !== "/client-info") {
+  if (!client && location.pathname !== "/client-info" && location.pathname !== "/verify") {
     return <Navigate to="client-info" />;
   }
   return children;

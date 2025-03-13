@@ -18,7 +18,7 @@ function Table({ page, toggleSidebar, collapsed }) {
     setData(null);
     setFilteredData(null);
     user.getIdToken().then(token => {
-      fetch('https://www.pi.acresbyisaac.com/api/' + page, {
+      fetch('https://www.pi.acresbyisaac.com/api/manager/' + page, {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer ' + token
@@ -97,7 +97,7 @@ function Table({ page, toggleSidebar, collapsed }) {
   const saveChanges = () => {
     try {
       user.getIdToken().then(token => {
-        fetch('https://www.pi.acresbyisaac.com/api/update/' + page, {
+        fetch('https://www.pi.acresbyisaac.com/api/manager/update/' + page, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

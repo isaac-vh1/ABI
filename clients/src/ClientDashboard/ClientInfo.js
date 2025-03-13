@@ -24,6 +24,9 @@ const ClientInfo = () => {
           setEditing(true);
         } else {
           setClientInfo(data);
+          if (data.slice(0, 7).filter(item => item === '').length >= 3) {
+            setEditing(true);
+          }
         }
         setLoading(false);
       })

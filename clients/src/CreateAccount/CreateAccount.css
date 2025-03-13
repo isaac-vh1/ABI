@@ -76,7 +76,7 @@ body {
   }
   
   /* Submit button styling */
-  button[type="submit"] {
+  .submit {
     width: 100%;
     padding: 0.8rem;
     font-size: 1rem;
@@ -86,9 +86,10 @@ body {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin:5px;
   }
   
-  button[type="submit"]:hover {
+  .submit:hover {
     background-color: #1565c0;
   }
   .required {
