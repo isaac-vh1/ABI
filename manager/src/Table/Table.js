@@ -3,6 +3,8 @@ import HamburgerMenu from '../Components/HamburgerMenu';
 import "./Table.css"
 import { Helmet } from "react-helmet";
 import { auth } from '../firebase';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 function Table({ page, toggleSidebar, collapsed }) {
   const [update, setUpdate] = useState(false);
@@ -15,8 +17,15 @@ function Table({ page, toggleSidebar, collapsed }) {
   const user = auth.currentUser;
 
   useEffect(() => {
-    setData(null);
-    setFilteredData(null);
+    setDataHeader([]);
+    setData([]);
+    setFilteredData([]);
+    setError(true)
+    if(update === true) {
+      setUpdate(false);
+    } else {
+      return;
+    }
     user.getIdToken().then(token => {
       fetch('https://www.pi.acresbyisaac.com/api/manager/' + page, {
         method: 'GET',
@@ -68,16 +77,8 @@ function Table({ page, toggleSidebar, collapsed }) {
     setSelectedItem(item)
   };
   const closePopup = () => {
-
     setSelectedItem(null);
   };
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setSelectedItem(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
   function capitalize(str) {
     return str
       .split(' ')
@@ -89,8 +90,8 @@ function Table({ page, toggleSidebar, collapsed }) {
   }
   const newItem = () => {
     const item = {};
-    dataHeader.forEach(head => {
-      item[head] = '';
+    dataHeader.forEach((head, index) => {
+      item[index] = '';
     });
     setSelectedItem(item);
   }
@@ -115,6 +116,10 @@ function Table({ page, toggleSidebar, collapsed }) {
     }
     closePopup();
   }
+  const adjustForTimezone = (date) => {
+    const offset = date.getTimezoneOffset();
+    return new Date(date.getTime() + offset * 60000);
+  };
   return (
     <div className="table-container">
       <Helmet>
@@ -125,7 +130,7 @@ function Table({ page, toggleSidebar, collapsed }) {
              <HamburgerMenu collapsed={collapsed} />
            </div>
            <h1>{capitalize(page)}</h1>
-           <button onClick={newItem}>New {page}</button>
+           <button onClick={newItem}>New {page.slice(0, -1)}</button>
          </header>
       <input
         type="text"
@@ -143,8 +148,8 @@ function Table({ page, toggleSidebar, collapsed }) {
           </tr>
         </thead>
         <tbody>
-          {filteredData.map((row, rowIndex) => (
-            <tr key={row[0] || rowIndex} onClick={() => handleRowClick(row)}>
+          {filteredData.map((row) => (
+            <tr key={row[0]} onClick={() => handleRowClick(row)}>
               {row.slice(1).map((cell, cellIndex) => (
                 <td key={cellIndex}>{cell}</td>
               ))}
@@ -161,45 +166,37 @@ function Table({ page, toggleSidebar, collapsed }) {
             {dataHeader.slice(1).map((head, index) => (
               <label key={index}>
                 {capitalize(head[0].replace('_', ' '))}:
-                <input
-                  type="text"
-                  name={head[0]}
-                  value={selectedItem[index + 1]}
-                  onChange={(e) =>
-                    setSelectedItem(prev => ({
-                      ...prev,
-                      [index + 1]: e.target.value,
-                    }))
-                  }
-                />
+                {head[1] === 'date' ? (
+                  
+                  <DatePicker
+                    selected={
+                      selectedItem[index + 1]
+                        ? adjustForTimezone(new Date(selectedItem[index + 1]))
+                        : null
+                    }
+                    onChange={(date) =>
+                      setSelectedItem((prev) => ({
+                        ...prev,
+                        [index + 1]: date.toUTCString(),
+                      }))
+                    }
+                    dateFormat="yyyy-MM-dd"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    name={head[0]}
+                    value={selectedItem[index + 1]}
+                    onChange={(e) =>
+                      setSelectedItem((prev) => ({
+                        ...prev,
+                        [index + 1]: e.target.value,
+                      }))
+                    }
+                  />
+                )}
               </label>
             ))}
-              <label>
-                Email:
-                <input
-                  type="email"
-                  name="email"
-                  value={selectedItem.email}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Total Dollars Spent:
-                <input
-                  type="number"
-                  name="totalSpent"
-                  value={selectedItem.totalSpent || 0}
-                  onChange={handleInputChange}
-                />
-              </label>
-              <label>
-                Notifications:
-                <textarea
-                  name="notifications"
-                  value={selectedItem.notifications || ''}
-                  onChange={handleInputChange}
-                />
-              </label>
               <div className="popup-buttons">
                 <button className="cancel-button" onClick={closePopup}>Cancel</button>
                 <button className="button" onClick={saveChanges}>Save</button>
