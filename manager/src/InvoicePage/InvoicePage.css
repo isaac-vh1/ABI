@@ -1,12 +1,16 @@
-/* InvoicePage.css */
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 10px;
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    color:white;
-    background-color: #7fc37e;
+.invoiceContainer {
+  margin: 0px;
+  padding: 10px;
+  line-height: 1.6;
+  background-color: white;
+  aspect-ratio: 8.5 / 11;
+  font-size: 1.5vw;
+}
+.invoiceBorder {
+  position: relative;
+  border: 1px solid black;
+  margin: 0 auto;
+  width:70%;
 }
 .title {
   text-align: center;
@@ -15,10 +19,9 @@
 .section {
   margin-bottom: 10px;
 }
-
 .companyName {
   margin: 0;
-  font-size: 1.8em;
+  font-size: 2.5vw;
 }
 
 .subHeading {
@@ -27,19 +30,21 @@
 }
 
 .heading {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid;
   padding-bottom: 5px;
 }
-
 .invoiceTable {
   width: 100%;
   border-collapse: collapse;
-  background-color: #7fc37e;
-  border-color: #ccc;
+}
+.invoiceTable,
+.invoiceTable th,
+.invoiceTable td {
+  border: 1px solid;
 }
 
 .tableHeader {
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid;
   text-align: left;
   padding: 8px;
 }
@@ -52,15 +57,24 @@
   text-align: left;
   padding: 8px;
 }
-
 .totals {
   text-align: right;
 }
-
 .note {
   font-style: italic;
 }
 
-p {
-  margin: 0px;
+.invoiceContainer p {
+  margin: 0;
+}
+.total {
+  font-size: 2.5vw;
+  color: #7fc37e;
+  font-weight: bold;
+}
+.invoiceLogo {
+  position: absolute;
+  top: 3%;
+  right: 3%;
+  width: 10%;
 }

@@ -11,19 +11,18 @@ import { useMediaQuery } from 'react-responsive';
 import ProtectedRoute from "./ProtectedRoute.js";
 import { AuthProvider } from "./AuthContext.js";
 import Login from './Login/Login.js';
+import InvoiceNew from './InvoicePage/InvoiceNew.js';
 
 function App() {
   const [collapsed, setCollapsed] = useState(true);
   const [savedPage, setSavedPage] = useState("")
-
   const location = useLocation();
   const isCalendarRoute = location.pathname === "/calendar";
+  const [tables, setTables] = useState(["clients", "invoices", "invoice_items", "locations", "quarterly_information", "users", "expenses", "notifications"]);
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
-
   const isSmallScreen = useMediaQuery({ query: '(max-width: 768px)' });
-
   const toggleSidebarSmall = () => {
     if (isSmallScreen) {
       setCollapsed(!collapsed);
@@ -38,10 +37,10 @@ function App() {
         </div>
         <Link to="/" className="nav-link" onClick={toggleSidebarSmall}>Home</Link>
         <Link to="/calendar" className="nav-link" onClick={toggleSidebar}>Calendar</Link>
-        <Link to="/clients" className="nav-link" onClick={toggleSidebarSmall}>Clients</Link>
-        <Link to="/locations" className="nav-link" onClick={toggleSidebarSmall}>Locations</Link>
-        <Link to="/invoices" className="nav-link" onClick={toggleSidebarSmall}>Invoices</Link>
-        <Link to="/invoice_items" className="nav-link" onClick={toggleSidebarSmall}>Invoice Items</Link>
+        {tables.map((table) => (
+          <Link key={table} to={`/table/${table}`} className="nav-link" onClick={toggleSidebarSmall}>{table.charAt(0).toUpperCase() + table.slice(1)}</Link>
+        ))}
+        <Link to="/invoice-new" className="nav-link" onClick={toggleSidebarSmall}>New Invoice</Link>
         <Link to="/settings" className="nav-link" onClick={toggleSidebarSmall}>Settings</Link>
       </nav>
       <AuthProvider>
@@ -50,13 +49,12 @@ function App() {
             <Route path="/login" element={<Login page={ savedPage }/>} />
             <Route path="/" element={<ProtectedRoute setSavedPage={setSavedPage}><Home toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute setSavedPage={setSavedPage}><Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
-            <Route path="/clients" element={<ProtectedRoute setSavedPage={setSavedPage}><Table page="clients" toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
-            <Route path="/invoices" element={<ProtectedRoute setSavedPage={setSavedPage}><Table page="invoices" toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
-            <Route path="/invoice_items" element={<ProtectedRoute setSavedPage={setSavedPage}><Table page="invoice_items" toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
-            <Route path="/locations" element={<ProtectedRoute setSavedPage={setSavedPage}><Table page="locations"toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
-            <Route path="/quarterly-information" element={<ProtectedRoute setSavedPage={setSavedPage}><Table page="quarterly_information" toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            {tables.map((table) => (
+              <Route key={table} path={`/table/${table}`} element={<ProtectedRoute setSavedPage={setSavedPage}><Table page={table} toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            ))}
             <Route path="/settings" element={<ProtectedRoute setSavedPage={setSavedPage}><Settings toggleSidebar={toggleSidebar}/></ProtectedRoute>} />
             <Route path="/invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoicePage /></ProtectedRoute>} />
+            <Route path="/invoice-new" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoiceNew toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

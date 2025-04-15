@@ -7,7 +7,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function Table({ page, toggleSidebar, collapsed }) {
-  const [update, setUpdate] = useState(false);
+  const [update, setUpdate] = useState(true);
   const [data, setData] = useState([]);
   const [dataHeader, setDataHeader] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -17,10 +17,12 @@ function Table({ page, toggleSidebar, collapsed }) {
   const user = auth.currentUser;
 
   useEffect(() => {
+    setUpdate(true);
+  }, [page])
+  useEffect(() => {
     setDataHeader([]);
     setData([]);
     setFilteredData([]);
-    setError(true)
     if(update === true) {
       setUpdate(false);
     } else {
@@ -37,6 +39,7 @@ function Table({ page, toggleSidebar, collapsed }) {
         if (!response.ok) {
           return response.json().then(err => {
             console.error('Error response:', err);
+            setError(true);
             throw new Error(err.error);
           });
         }
@@ -45,10 +48,10 @@ function Table({ page, toggleSidebar, collapsed }) {
       .then(dataAPI => {
         dataHandler(dataAPI)
       })
-      .catch(error => console.error('Error fetching Data:', error))
+      .catch(error => {console.error('Error fetching Data:', error); setError(true)})
       .finally(() => {setUpdate(false)});
     });
-  }, [page, update]);
+  }, [update]);
   const dataHandler = (dataAPI) => {
     var head = dataAPI.shift()
     setDataHeader(head)
@@ -158,7 +161,6 @@ function Table({ page, toggleSidebar, collapsed }) {
         </tbody>
       </table>
       <h3 className={`error ${error ? 'show': ' '}`}>Error Loading Data</h3>
-
       {selectedItem && (
         <div className="table-popup" onClick={closePopup}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
