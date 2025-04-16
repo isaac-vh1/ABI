@@ -19,3 +19,27 @@
   padding: 10px;
   font-size: 14px;
 }
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #f8f9fa;
+  color: #555;
+  text-align: center;
+  padding: 20px 0;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  border-top: 1px solid #e7e7e7;
+}
+footer a {
+  color: #007bff;
+  text-decoration: none;
+  margin: 0 10px;
+  transition: color 0.3s ease;
+}
+footer a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}

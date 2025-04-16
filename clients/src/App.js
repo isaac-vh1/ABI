@@ -28,6 +28,7 @@ function App() {
             <Route path="/client-info" element={<ProtectedRoute setSavedPage={setSavedPage}><ClientInfo /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <footer><a href="https://www.acresbyisaac.com/privacy-policy">Privacy Policy</a> | <a href='https://www.acresbyisaac.com/terms-and-conditions'>Terms and Conditions</a></footer>
         </main>
       </AuthProvider>
     </div>

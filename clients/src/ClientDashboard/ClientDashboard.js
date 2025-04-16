@@ -65,7 +65,7 @@ const ClientDashboard = () => {
               <tr key={invoice.invoice_id} onClick={() => {navigate("/invoice#" + invoice[0])}}>
                 <td>{invoice[1]}</td>
                 <td>{invoice[2]}</td>
-                <td>{invoice[2]}</td>
+                <td>{invoice[3]}</td>
                 <td>{invoice[4]}</td>
               </tr>
             ))}
