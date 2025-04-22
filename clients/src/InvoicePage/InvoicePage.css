@@ -1,3 +1,9 @@
+.invoicePage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 .invoiceContainer {
   margin: 0px;
   padding: 10px;
