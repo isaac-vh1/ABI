@@ -1,8 +1,9 @@
 /* ========== Global Styles (Body / "Home") ========== */
+@import "bootstrap/dist/css/bootstrap.css";
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background-color: #7fc37e;
+  background-color: #7fc37e !important;
   overflow-x: hidden;
   width: 100%;
   height: 100%;

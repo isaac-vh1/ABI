@@ -11,7 +11,7 @@ import { useMediaQuery } from 'react-responsive';
 import ProtectedRoute from "./ProtectedRoute.js";
 import { AuthProvider } from "./AuthContext.js";
 import Login from './Login/Login.js';
-import InvoiceNew from './InvoicePage/InvoiceNew.js';
+import InvoiceNew from './new-invoice/InvoiceNew.js';
 
 function App() {
   const [collapsed, setCollapsed] = useState(true);
@@ -40,7 +40,7 @@ function App() {
         {tables.map((table) => (
           <Link key={table} to={`/table/${table}`} className="nav-link" onClick={toggleSidebarSmall}>{table.charAt(0).toUpperCase() + table.slice(1)}</Link>
         ))}
-        <Link to="/invoice-new" className="nav-link" onClick={toggleSidebarSmall}>New Invoice</Link>
+        <Link to="/new-invoice" className="nav-link" onClick={toggleSidebarSmall}>New Invoice</Link>
         <Link to="/settings" className="nav-link" onClick={toggleSidebarSmall}>Settings</Link>
       </nav>
       <AuthProvider>
@@ -54,7 +54,7 @@ function App() {
             ))}
             <Route path="/settings" element={<ProtectedRoute setSavedPage={setSavedPage}><Settings toggleSidebar={toggleSidebar}/></ProtectedRoute>} />
             <Route path="/invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoicePage /></ProtectedRoute>} />
-            <Route path="/invoice-new" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoiceNew toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            <Route path="/new-invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoiceNew toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import './InvoicePage.css';
+import './InvoiceNew.css';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import DatePicker from 'react-datepicker';
+import { Helmet } from 'react-helmet';
 
 const InvoiceNew = () => {
   const [invoiceData, setInvoiceData] = useState([
@@ -15,7 +16,7 @@ const InvoiceNew = () => {
     '0.00',                       // Tips (default as 0)
     'pending',
   ]);
-  const[invoiceItems, setInvoiceItems] = useState([['',"", '0.00']]);
+  const[invoiceItems, setInvoiceItems] = useState([['',"0.00"]]);
   const[clientData, setClientData] = useState([]);
   const[locationData, setLocationData] = useState([]);
   const[tempData, setTempData] = useState(['10.0', 0, 0]); //Sales tax, client index, location index
@@ -82,9 +83,11 @@ const InvoiceNew = () => {
           body: JSON.stringify([invoiceData, invoiceItems]),
         }).then(response => {
           const result = response.json();
-        })
-        navigate('/invoices')
-        });
+        }).then(result => {
+          if(result == "true") {
+            navigate('/invoices');
+          }
+        })});
     } catch (err) {
         console.error("Error: " + err)
     }
@@ -95,7 +98,8 @@ const InvoiceNew = () => {
   };
 
   return (
-    <div>
+    <div className='invoice-scope'>
+      <Helmet><title>New Invoice</title></Helmet>
       <input className="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..."
         onChange={(e) => {
           const inputValue = e.target.value;
@@ -146,7 +150,7 @@ const InvoiceNew = () => {
               })
             }
           />
-          <img src="/ABI_NO_bg.png" className='invoiceLogo' alt={"Acres by Isaac logo"} />
+          <img src="/favicon.ico" className='invoiceLogo' alt={"Acres by Isaac logo"} />
           <section className="section">
             <h2 className="companyName">Acres By Isaac</h2>
             <p>156 NE 193rd St.</p>
@@ -245,7 +249,7 @@ const InvoiceNew = () => {
                           name={"price"}
                           value={invoiceItems[index][1]}
                           onChange={(e) => {
-                            const numericValue = e.target.value || 0;
+                            const numericValue = e.target.value;
                             setInvoiceItems((prev) => {
                               const newItems = [...prev];
                               newItems[index] = [...newItems[index]];

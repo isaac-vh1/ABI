@@ -1,8 +1,8 @@
 // src/components/CalendarContainer.js
 
-import React, { useCallback, useState, useMemo, useRef} from 'react';
+import React, { useCallback, useState, useMemo, useRef, useEffect} from 'react';
 import { Calendar, Views, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
+import moment, { duration } from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import './Calendar.css';
@@ -10,24 +10,65 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import CustomEvent from './CustomEvent';
 import DraggableEvent from './DraggableEvent';
 import HamburgerMenu from '../Components/HamburgerMenu';
-
-import {
-  scheduledEvents as initialScheduledEvents,
-  unscheduledEvents as initialUnscheduledEvents,
-  workerSchedule as initialWorkerSchedule
-} from './events';
+import auth from '../firebase';
+import { Helmet } from 'react-helmet';
 
 const localizer = momentLocalizer(moment);
 const DnDCalendar = withDragAndDrop(Calendar);
 
 export default function CalendarContainer({ toggleSidebar, collapsed }) {
   // ====== 1) INITIALIZE EVENTS ======
-  const [scheduledEvents, setScheduledEvents] = useState(initialScheduledEvents || []);
-  const [unscheduledEvents, setUnscheduledEvents] = useState(initialUnscheduledEvents || []);
-  const [workerSchedule, setWorkerSchedule] = useState(initialWorkerSchedule || []);
+  const [scheduledEvents, setScheduledEvents] = useState([]);
+  const [unscheduledEvents, setUnscheduledEvents] = useState( []);
+  const [workerSchedule, setWorkerSchedule] = useState([]);
+  const [updateEvent, setUpdateEvent] = useState([]);
+  const [clients, setClients] = useState([]);
+  const user = auth.currentUser;
 
+  useEffect(() => {
+    if (!user) return;
+    const fetchEvents = async () => {
+      try {
+        const token = await user.getIdToken();
+        const res   = await fetch('/api/manager/events', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error(res.statusText);
+        const data = await res.json();
+        setScheduledEvents(data[0] ?? []);
+        setUnscheduledEvents(data[1] ?? []);
+        setWorkerSchedule(data[2] ?? []);
+        setClients(data[3] ?? []);
+        eventIdRef.current = data[4] ?? 1000;
+      } catch (err) {
+        console.error('Error fetching events:', err);
+      }
+    };
+
+    fetchEvents();
+  }, [user, page]);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchEvents = async () => {
+      try {
+        const token = await user.getIdToken();
+        const res   = await fetch('/api/manager/events', {
+          method: 'POST',
+          headers: {Authorization: `Bearer ${token}` },
+          body: JSON.stringify([]),
+        }).then(response => {
+          const result = response.json();
+        });
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        alert('Error fetching events:', err);
+      }
+    };
+    fetchEvents();
+  }, [updateEvent]);
   // ====== 2) UNIQUE ID COUNTER ======
-  const eventIdRef = useRef(1000); // Starting from 1000 to avoid conflicts
+  const eventIdRef = useRef(1000);
 
   // ====== 3) COMBINE EVENTS ======
   const events = useMemo(() => [
@@ -94,27 +135,23 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
       },
     };
   };
-
-  // ====== 5) RBC STATE: DATE & VIEW ======
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState(Views.MONTH);
-
-  // ====== 6) SELECTED EVENT STATE ======
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editCalendar, setEditCalendar] = useState('');
   const [editStart, setEditStart] = useState('');
   const [editEnd, setEditEnd] = useState('');
 
-  // ====== 7) HANDLE EVENT SELECTION ======
   const handleDoubleClickEvent = (event) => {
     setSelectedEvent(event);
     setEditTitle(event.title || '');
     setEditDescription(event.description || '');
+    setEditCalendar(event.calendar);
     setEditStart(event.start ? formatDateTimeLocal(event.start) : '');
     setEditEnd(event.end ? formatDateTimeLocal(event.end) : '');
   };
-
   const formatDateTimeLocal = (date) => {
     const pad = (n) => (n < 10 ? '0' + n : n);
     const year = date.getFullYear();
@@ -125,12 +162,11 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
-  // ====== 8) CLOSE THE MODAL ======
   const handleCloseModal = () => {
+    setUpdateEvent(selectedEvent)
     setSelectedEvent(null);
   };
 
-  // ====== 9) SAVE CHANGES ======
   const handleSaveChanges = () => {
     if (selectedEvent) {
       const updatedStart = editStart ? new Date(editStart) : selectedEvent.start;
@@ -142,6 +178,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
         description: editDescription,
         start: updatedStart,
         end: updatedEnd,
+        calendar: editCalendar,
       };
 
       var calendar = getCalendar(selectedEvent);
@@ -153,10 +190,8 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
     setSelectedEvent(null);
   };
 
-  // ====== 10) DRAGGED EVENT STATE ======
   const [draggedEvent, setDraggedEvent] = useState(null);
 
-  // ====== 11) HANDLE DROP FROM OUTSIDE ======
   const handleDropFromOutside = useCallback(
     ({ start, end, allDay: isAllDay }) => {
       if (!draggedEvent) return;
@@ -165,17 +200,15 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
       const duration = draggedEvent.duration || 1;
       const endDate = new Date(startDate);
       endDate.setHours(endDate.getHours() + duration);
-
-      // Generate a unique ID
       const newEventId = eventIdRef.current++;
 
       const newEvent = {
-        id: newEventId, // Ensure unique ID
+        id: newEventId,
         title: draggedEvent.title,
         start: startDate,
         end: endDate,
         calendar: 'scheduledEvents',
-        allDay: isAllDay, // Include allDay property
+        allDay: isAllDay,
       };
 
       const isDuplicate = scheduledEvents.some(
@@ -214,36 +247,43 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   };
 
   const onEventChange = ({ event, start, end, isAllDay }) => {
-    //if(!isAllDay && start.getDate() == end.getDate()) {
       var calendar = getCalendar(event);
       const updated = calendar.map((evt) =>
         evt.id === event.id ? { ...evt, start, end } : evt
       );
       updateCalendar(event, updated);
-    //}
   }
 
   const handleOnDragStart = useCallback((item) => {
     const updatedEvent = {
       ...item,
       start: new Date(),
-      end: new Date() + item.duration
+      end: new Date(Date.now() + item.duration * 3600_000)
     };
     console.log(updatedEvent);
     setDraggedEvent(item);
     console.log('Dragging event:', item);
   }, []);
 
+  const handleNewUnscheduledEvent = () => {
+    const newEventId = eventIdRef.current++;
+    const newEvent = {
+      id: newEventId,
+      title: 'New Unscheduled Event',
+      duration: 1,
+      calendar: 'unscheduledEvents',
+    };
+    setSelectedEvent(newEvent);
+  }
+
   return (
     <div>
-      <head>
-        <title>Calendar</title>
-      </head>
+      <Helmet><title>Calendar</title></Helmet>
       <div>
         {/* ===== SIDEBAR ===== */}
         <div className={`calendar-toggle ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
         <div className={`calendar-drop-bar ${collapsed ? 'collapsed' : ''}`}>
-          <h2>Unscheduled</h2>
+          <h2>Unscheduled<button onClick={ handleNewUnscheduledEvent }>+</button></h2>
           {(!unscheduledEvents || unscheduledEvents.length === 0 )? <p className='noJob'>No Jobs to Schedule</p> :
           unscheduledEvents.map((item) => (
             <DraggableEvent key={item.id} event={item} onDragStart={handleOnDragStart}/>
@@ -255,8 +295,8 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
           <article>
             <div className='top-bar'>
               <div className={`top-bar-button ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
-              <button className="button">View</button>
-              <button className="button" onClick={handleDoubleClickEvent}>New Job</button>
+              <button className="calendar-button">View</button>
+              <button className="calendar-button" onClick={handleDoubleClickEvent}>New Job</button>
             </div>
           </article>
           <article>
@@ -333,7 +373,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
 
             <div className="modal-buttons">
               <button className="cancel-button" onClick={handleCloseModal}>Cancel</button>
-              <button className="button" onClick={handleSaveChanges}>Save</button>
+              <button className="calendar-button" onClick={handleSaveChanges}>Save</button>
             </div>
           </div>
         </div>

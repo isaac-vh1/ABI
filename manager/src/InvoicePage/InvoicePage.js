@@ -6,6 +6,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import { Helmet } from 'react-helmet';
 
 const InvoicePage = () => {
   const [invoiceData, setInvoiceData] = useState(null);
@@ -103,11 +104,12 @@ const InvoicePage = () => {
   }
 
   return (
-    <div>
+    <div className="invoicePage">
+      <Helmet><title>New Invoice</title></Helmet>
       <div className='invoiceBorder'>
         <div className="invoiceContainer" ref={invoiceRef}>
           <h1 className="title">Invoice #{invoiceData[0]}</h1>
-          <img src="/ABI_NO_bg.png" className='invoiceLogo' alt={"Acres by Isaac logo"} />
+          <img src="/favicon.ico" className='invoiceLogo' alt={"Acres by Isaac logo"} />
           <section className="section">
             <h2 className="companyName">Acres By Isaac</h2>
             <p>156 NE 193rd St.</p>
