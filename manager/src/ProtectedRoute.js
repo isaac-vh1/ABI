@@ -2,16 +2,14 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { useLocation } from 'react-router-dom';
+import Spinner from 'react-bootstrap/Spinner';
 
 function ProtectedRoute({ setSavedPage, children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <Spinner className="m-5" />;
   if (!user) {
-    // Not logged in → redirect
     setSavedPage(location.pathname);
     return <Navigate to="/login" />;
   }

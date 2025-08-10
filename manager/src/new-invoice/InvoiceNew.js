@@ -4,12 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import DatePicker from 'react-datepicker';
 import { Helmet } from 'react-helmet';
+import { DateTime } from 'luxon';
+import HamburgerMenu from '../Components/HamburgerMenu';
 
-const InvoiceNew = () => {
+const InvoiceNew = ({collapsed, toggleSidebar}) => {
+  const today   = DateTime.local();          // 2025-05-18T22:05:…
+  const dueDate = today.plus({ days: 30 });
   const [invoiceData, setInvoiceData] = useState([
     '','80','','',                         // client ID, invoiceNumber, location code
-    new Date().toUTCString(),      // Completion Date (today's date)
-    new Date(new Date().setDate(new Date().getDate() + 30)).toUTCString(), // Due Date (30 days from today)
+    today.toUTC().toHTTP(),      // Completion Date (today's date)
+    dueDate.toUTC().toHTTP(), // Due Date (30 days from today)
     '','0.00',                       // Subtotal (default as 0)
     '0.00',                       // Sales Tax Amount (default as 0)
     '0.00',                       // Total (default as 0)
@@ -26,7 +30,7 @@ const InvoiceNew = () => {
   useEffect(() => {
     if (!user) return;
     user.getIdToken().then(token => {
-      fetch('https://www.pi.acresbyisaac.com/api/manager/new-invoice', {
+      fetch('/api/manager/new-invoice', {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer ' + token
@@ -74,20 +78,20 @@ const InvoiceNew = () => {
   const saveInvoice = () => {
     try {
         user.getIdToken().then(token => {
-        fetch('https://www.pi.acresbyisaac.com/api/manager/update/new-invoice', {
+        fetch('/api/manager/update/new-invoice', {
           method: 'POST',
           headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
           },
           body: JSON.stringify([invoiceData, invoiceItems]),
-        }).then(response => {
-          const result = response.json();
-        }).then(result => {
+        }).then(response => response.json()
+        ).then(result => {
+          console.log("Response from server:", result);
           if(result == "true") {
-            navigate('/invoices');
+            navigate('/invoice-dashboard');
           }
-        })});
+        }).catch(err => console.error('Fetch chain failed:', err))});
     } catch (err) {
         console.error("Error: " + err)
     }
@@ -100,6 +104,9 @@ const InvoiceNew = () => {
   return (
     <div className='invoice-scope'>
       <Helmet><title>New Invoice</title></Helmet>
+      <div className='top-bar'>
+        <div className={`top-bar-button ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
+      </div>
       <input className="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..."
         onChange={(e) => {
           const inputValue = e.target.value;
@@ -228,7 +235,7 @@ const InvoiceNew = () => {
               </thead>
               <tbody>
                 {invoiceItems.map((item, index, slicedArray) => {
-                  if (index % 2 === 0) {
+                  if (index === 0) {
                     return (
                       <tr key={index}>
                         <td className="leftAlign"><input

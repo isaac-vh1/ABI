@@ -7,8 +7,9 @@ import jsPDF from 'jspdf';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { Helmet } from 'react-helmet';
+import HamburgerMenu from '../Components/HamburgerMenu';
 
-const InvoicePage = () => {
+const InvoicePage = ({collapsed, toggleSidebar}) => {
   const [invoiceData, setInvoiceData] = useState(null);
   const location = useLocation();
   const invoiceNum = location.hash.slice(1);
@@ -20,7 +21,7 @@ const InvoicePage = () => {
     setInvoiceData(null);
     if (!user) return;
     user.getIdToken().then(token => {
-      fetch('https://www.pi.acresbyisaac.com/api/invoice/' + invoiceNum, {
+      fetch('/api/invoice/' + invoiceNum, {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer ' + token
@@ -106,6 +107,9 @@ const InvoicePage = () => {
   return (
     <div className="invoicePage">
       <Helmet><title>New Invoice</title></Helmet>
+      <div className='top-bar'>
+        <div className={`top-bar-button ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
+      </div>
       <div className='invoiceBorder'>
         <div className="invoiceContainer" ref={invoiceRef}>
           <h1 className="title">Invoice #{invoiceData[0]}</h1>

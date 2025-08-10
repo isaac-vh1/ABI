@@ -7,7 +7,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 function Table({ page, toggleSidebar, collapsed }) {
-  const [update, setUpdate] = useState(true);
+  const [update, setUpdate] = useState(false);
   const [data, setData] = useState([]);
   const [dataHeader, setDataHeader] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -17,19 +17,14 @@ function Table({ page, toggleSidebar, collapsed }) {
   const user = auth.currentUser;
 
   useEffect(() => {
-    setUpdate(true);
-  }, [page])
-  useEffect(() => {
     setDataHeader([]);
     setData([]);
     setFilteredData([]);
     if(update === true) {
       setUpdate(false);
-    } else {
-      return;
     }
     user.getIdToken().then(token => {
-      fetch('https://www.pi.acresbyisaac.com/api/manager/' + page, {
+      fetch('/api/manager/' + page, {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer ' + token
@@ -51,7 +46,7 @@ function Table({ page, toggleSidebar, collapsed }) {
       .catch(error => {console.error('Error fetching Data:', error); setError(true)})
       .finally(() => {setUpdate(false)});
     });
-  }, [update]);
+  }, [update, page]);
   const dataHandler = (dataAPI) => {
     var head = dataAPI.shift()
     setDataHeader(head)
@@ -101,11 +96,11 @@ function Table({ page, toggleSidebar, collapsed }) {
   const saveChanges = () => {
     try {
       user.getIdToken().then(token => {
-        fetch('https://www.pi.acresbyisaac.com/api/manager/update/' + page, {
+        fetch('/api/manager/update/' + page, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({selectedItem}),
         }).then(response => {

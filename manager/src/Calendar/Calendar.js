@@ -1,5 +1,3 @@
-// src/components/CalendarContainer.js
-
 import React, { useCallback, useState, useMemo, useRef, useEffect} from 'react';
 import { Calendar, Views, momentLocalizer } from 'react-big-calendar';
 import moment, { duration } from 'moment';
@@ -10,66 +8,104 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import CustomEvent from './CustomEvent';
 import DraggableEvent from './DraggableEvent';
 import HamburgerMenu from '../Components/HamburgerMenu';
-import auth from '../firebase';
+import { auth } from '../firebase';
 import { Helmet } from 'react-helmet';
+import { Button, Dropdown } from 'react-bootstrap';
 
 const localizer = momentLocalizer(moment);
 const DnDCalendar = withDragAndDrop(Calendar);
 
 export default function CalendarContainer({ toggleSidebar, collapsed }) {
-  // ====== 1) INITIALIZE EVENTS ======
   const [scheduledEvents, setScheduledEvents] = useState([]);
   const [unscheduledEvents, setUnscheduledEvents] = useState( []);
   const [workerSchedule, setWorkerSchedule] = useState([]);
-  const [updateEvent, setUpdateEvent] = useState([]);
   const [clients, setClients] = useState([]);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
   const user = auth.currentUser;
+  const eventIdRef = useRef(1000); // Use a ref to keep track of event IDs
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentView, setCurrentView] = useState(Views.MONTH);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
-    if (!user) return;
-    const fetchEvents = async () => {
-      try {
-        const token = await user.getIdToken();
-        const res   = await fetch('/api/manager/events', {
+      if (!user) return;
+      user.getIdToken().then((token) => {
+        fetch('/api/manager/events', {
           headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error(res.statusText);
-        const data = await res.json();
-        setScheduledEvents(data[0] ?? []);
-        setUnscheduledEvents(data[1] ?? []);
-        setWorkerSchedule(data[2] ?? []);
-        setClients(data[3] ?? []);
-        eventIdRef.current = data[4] ?? 1000;
-      } catch (err) {
-        console.error('Error fetching events:', err);
-      }
-    };
+        }).then((r) => r.json())
+          .then((data) => {
+            setScheduledEvents(data[0] ?? []);
+            setUnscheduledEvents(formatEvents(data[1]) ?? []);
+            setWorkerSchedule(formatEvents(data[2]) ?? []);
+            setClients(formatEvents(data[3]) ?? []);
+            eventIdRef.current = data[4] ?? 1000;
+          })
+          .catch((e) => {
+            console.error(e);
+            setError(true);
+          })
+          .finally(() => setLoading(false));
+      });
+    }, [user]);
 
-    fetchEvents();
-  }, [user, page]);
+function formatEvents(rows = []) {
+  return rows.map(
+    ({
+      id,
+      client_id: client_id,      // snake → camel
+      title,
+      description,
+      calendar,
+      start,
+      end,
+      duration_h,               // only used if end is NULL
+    }) => {
+      const startDate = new Date(start);          // DATETIME → JS Date
+      const endDate =
+        end != null
+          ? new Date(end)
+          : new Date(startDate.getTime() + (duration_h ?? 1) * 60 * 60 * 1000); // fallback
 
-  useEffect(() => {
+      return {
+        id,
+        client_id,
+        title,
+        start: startDate,
+        end: endDate,
+        calendar,
+        description: description ?? '',
+      };
+    }
+  );
+  }
+
+  const saveChanges = (selectedItem) => {
     if (!user) return;
-    const fetchEvents = async () => {
+    user.getIdToken().then(async (token) => {
       try {
-        const token = await user.getIdToken();
-        const res   = await fetch('/api/manager/events', {
+        const res = await fetch('/api/manager/update/calendar', {
           method: 'POST',
-          headers: {Authorization: `Bearer ${token}` },
-          body: JSON.stringify([]),
-        }).then(response => {
-          const result = response.json();
-        });
-      } catch (err) {
-        console.error('Error fetching events:', err);
-        alert('Error fetching events:', err);
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({selectedItem}),
+        }).then((r) => r.json())
+          .then((data) => {
+            if (data != "true"){
+              setError(true);
+              throw new Error('Update failed');
+            }
+          });
+        if (!res.ok) throw new Error('Update failed');
+        return true;
+      } catch (e) {
+        console.error(e);
+        setError(true);
       }
-    };
-    fetchEvents();
-  }, [updateEvent]);
-  // ====== 2) UNIQUE ID COUNTER ======
-  const eventIdRef = useRef(1000);
-
+    });
+  };
   // ====== 3) COMBINE EVENTS ======
   const events = useMemo(() => [
     ...(scheduledEvents || []).map((event) => ({
@@ -135,59 +171,33 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
       },
     };
   };
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [currentView, setCurrentView] = useState(Views.MONTH);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [editDescription, setEditDescription] = useState('');
-  const [editCalendar, setEditCalendar] = useState('');
-  const [editStart, setEditStart] = useState('');
-  const [editEnd, setEditEnd] = useState('');
 
   const handleDoubleClickEvent = (event) => {
     setSelectedEvent(event);
-    setEditTitle(event.title || '');
-    setEditDescription(event.description || '');
-    setEditCalendar(event.calendar);
-    setEditStart(event.start ? formatDateTimeLocal(event.start) : '');
-    setEditEnd(event.end ? formatDateTimeLocal(event.end) : '');
+
   };
   const formatDateTimeLocal = (date) => {
     const pad = (n) => (n < 10 ? '0' + n : n);
     const year = date.getFullYear();
     const month = pad(date.getMonth() + 1);
-    const day = pad(date.getDate());
+    const day = pad(date);
     const hours = pad(date.getHours());
     const minutes = pad(date.getMinutes());
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
   const handleCloseModal = () => {
-    setUpdateEvent(selectedEvent)
     setSelectedEvent(null);
   };
 
   const handleSaveChanges = () => {
-    if (selectedEvent) {
-      const updatedStart = editStart ? new Date(editStart) : selectedEvent.start;
-      const updatedEnd = editEnd ? new Date(editEnd) : selectedEvent.end;
-
-      const updatedEvent = {
-        ...selectedEvent,
-        title: editTitle,
-        description: editDescription,
-        start: updatedStart,
-        end: updatedEnd,
-        calendar: editCalendar,
-      };
-
+    if (selectedEvent && saveChanges(selectedEvent)) {
       var calendar = getCalendar(selectedEvent);
       const updated = calendar.map((evt) =>
-        evt.id === selectedEvent.id ? updatedEvent : evt
+        evt.id === selectedEvent.id ? selectedEvent : evt
       );
       updateCalendar(selectedEvent, updated);
     }
-    setSelectedEvent(null);
   };
 
   const [draggedEvent, setDraggedEvent] = useState(null);
@@ -195,26 +205,27 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   const handleDropFromOutside = useCallback(
     ({ start, end, allDay: isAllDay }) => {
       if (!draggedEvent) return;
-
       const startDate = new Date(start);
       const duration = draggedEvent.duration || 1;
       const endDate = new Date(startDate);
       endDate.setHours(endDate.getHours() + duration);
-      const newEventId = eventIdRef.current++;
 
       const newEvent = {
-        id: newEventId,
+        id: draggedEvent.id,
         title: draggedEvent.title,
-        start: startDate,
-        end: endDate,
+        description: draggedEvent.description,
+        client_id: draggedEvent.client_id,
+        duration: duration,
+        start: startDate.toUTCString(),
+        end: endDate.toUTCString(),
         calendar: 'scheduledEvents',
-        allDay: isAllDay,
       };
 
+      saveChanges(newEvent);
       const isDuplicate = scheduledEvents.some(
         (evt) =>
           evt.title === newEvent.title &&
-          evt.start.getTime() === newEvent.start.getTime()
+          evt.start === newEvent.start
       );
 
       if (!isDuplicate) {
@@ -233,7 +244,6 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
     [scheduledEvents, draggedEvent, setUnscheduledEvents]
   );
 
-  // ====== 13) HANDLE SLOT SELECTION ======
   const handleSelectSlot = (slotInfo) => {
     setCurrentDate(slotInfo.start);
     if (currentView !== Views.DAY) {
@@ -249,9 +259,10 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   const onEventChange = ({ event, start, end, isAllDay }) => {
       var calendar = getCalendar(event);
       const updated = calendar.map((evt) =>
-        evt.id === event.id ? { ...evt, start, end } : evt
+        evt.id === event.id ? { ...evt, start: start.toUTCString(), end: end.toUTCString() } : evt
       );
       updateCalendar(event, updated);
+      saveChanges({ ...event, start: start.toUTCString(), end: end.toUTCString() });
   }
 
   const handleOnDragStart = useCallback((item) => {
@@ -269,11 +280,23 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
     const newEventId = eventIdRef.current++;
     const newEvent = {
       id: newEventId,
-      title: 'New Unscheduled Event',
+      title: '',
+      description: '',
+      client_id: null,
+      start: null,
+      end: null,
       duration: 1,
       calendar: 'unscheduledEvents',
     };
     setSelectedEvent(newEvent);
+  }
+  const getClientName = (clientNum) => {
+    const clientRow = clients.find(
+      (c) => String(c[0]) === String(clientNum)
+    );
+    const clientName = clientRow
+      ? `${clientRow[1] || ''} ${clientRow[2] || ''}`.trim()
+      : '(no match)';
   }
 
   return (
@@ -283,10 +306,10 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
         {/* ===== SIDEBAR ===== */}
         <div className={`calendar-toggle ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
         <div className={`calendar-drop-bar ${collapsed ? 'collapsed' : ''}`}>
-          <h2>Unscheduled<button onClick={ handleNewUnscheduledEvent }>+</button></h2>
+          <h2>Unscheduled<Button onClick={ handleNewUnscheduledEvent }>+</Button></h2>
           {(!unscheduledEvents || unscheduledEvents.length === 0 )? <p className='noJob'>No Jobs to Schedule</p> :
           unscheduledEvents.map((item) => (
-            <DraggableEvent key={item.id} event={item} onDragStart={handleOnDragStart}/>
+            <DraggableEvent key={item.id} event={item} onDragStart={handleOnDragStart} onClick={handleDoubleClickEvent}/>
           ))}
         </div>
 
@@ -295,8 +318,8 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
           <article>
             <div className='top-bar'>
               <div className={`top-bar-button ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
-              <button className="calendar-button">View</button>
-              <button className="calendar-button" onClick={handleDoubleClickEvent}>New Job</button>
+              <Button className="calendar-button">View</Button>
+              <Button className="calendar-button" onClick={handleDoubleClickEvent}>New Job</Button>
             </div>
           </article>
           <article>
@@ -342,38 +365,87 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
               Title:
               <input
                 type="text"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
+                value={selectedEvent.title}
+                onChange={(e) => setSelectedEvent({
+                  ...selectedEvent,
+                  title: e.target.value,
+                })}
               />
             </label>
             <label>
               Description:
               <textarea
                 rows="3"
-                value={editDescription}
-                onChange={(e) => setEditDescription(e.target.value)}
+                value={selectedEvent.description}
+                onChange={(e) => setSelectedEvent({
+                  ...selectedEvent,
+                  description: e.target.value,
+                })}
               />
+            </label>
+            <label>
+              Client:
+              <input className="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..."
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  const foundIndex = clients.findIndex((client) => {
+                    const fullName = `${client[1] || ""} ${client[2] || ""}`.trim();
+                    return fullName === inputValue;
+                  });
+                  if (foundIndex !== -1) {
+                    setSelectedEvent({
+                      ...selectedEvent,
+                      client_id: clients[foundIndex][0],
+                    });
+                  }
+                }}
+              />
+              <datalist id="datalistOptions">
+                {clients.map((client, index) => {
+                  const value = client ? `${client[1] || ""} ${client[2] || ""}`.trim() : "";
+                  return <option key={index} value={value} />
+                })}
+              </datalist>
             </label>
             <label>
               Start:
               <input
                 type="datetime-local"
-                value={editStart}
-                onChange={(e) => setEditStart(e.target.value)}
+                value={selectedEvent.start ? formatDateTimeLocal(selectedEvent.start) : ''}
+                onChange={(e) => setSelectedEvent({
+                  ...selectedEvent,
+                  start: e.target.value ? new Date(e.target.value).toUTCString() : null,
+                })}
+              />
+            </label>
+            <label>
+              Duration:
+              <input
+                type="number"
+                value={selectedEvent.duration}
+                onChange={(e) => setSelectedEvent({
+                  ...selectedEvent,
+                  duration: e.target.value,
+                  end: e.target.value ? new Date(new Date(selectedEvent.start).getTime() + e.target.value * 60 * 60 * 1000).toUTCString() : null,
+                })}
               />
             </label>
             <label>
               End:
               <input
                 type="datetime-local"
-                value={editEnd}
-                onChange={(e) => setEditEnd(e.target.value)}
+                value={selectedEvent.end ? formatDateTimeLocal(selectedEvent.end) : ''}
+                onChange={(e) => setSelectedEvent({
+                  ...selectedEvent,
+                  end: e.target.value ? new Date(e.target.value).toUTCString() : null,
+                  duration: e.target.value ? (new Date(e.target.value) - new Date(selectedEvent.start)) / (60 * 60 * 1000) : 1,
+                })}
               />
             </label>
 
             <div className="modal-buttons">
-              <button className="cancel-button" onClick={handleCloseModal}>Cancel</button>
-              <button className="calendar-button" onClick={handleSaveChanges}>Save</button>
+              <Button className="cancel-button" onClick={handleCloseModal}>Cancel</Button>
+              <Button className="calendar-button" onClick={handleSaveChanges}>Save</Button>
             </div>
           </div>
         </div>
