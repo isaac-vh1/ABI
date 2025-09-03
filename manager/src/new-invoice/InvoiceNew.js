@@ -6,6 +6,7 @@ import DatePicker from 'react-datepicker';
 import { Helmet } from 'react-helmet';
 import { DateTime } from 'luxon';
 import HamburgerMenu from '../Components/HamburgerMenu';
+import { Spinner }from 'react-bootstrap';
 
 const InvoiceNew = ({collapsed, toggleSidebar}) => {
   const today   = DateTime.local();          // 2025-05-18T22:05:…
@@ -24,6 +25,7 @@ const InvoiceNew = ({collapsed, toggleSidebar}) => {
   const[clientData, setClientData] = useState([]);
   const[locationData, setLocationData] = useState([]);
   const[tempData, setTempData] = useState(['10.0', 0, 0]); //Sales tax, client index, location index
+  const [loading, setLoading] = useState(true);
   const user = auth.currentUser;
   const navigate = useNavigate();
 
@@ -54,7 +56,8 @@ const InvoiceNew = ({collapsed, toggleSidebar}) => {
         setClientData(dataAPI[1])
         setLocationData(dataAPI[2])
       })
-      .catch(error => console.error('Error fetching Data:', error));
+      .catch(error => console.error('Error fetching Data:', error))
+      .finally(() => setLoading(false));
     });
   },[user]);
   useEffect(() => {
@@ -100,6 +103,8 @@ const InvoiceNew = ({collapsed, toggleSidebar}) => {
     const newItem = ['', '0.00'];
     setInvoiceItems((prev) => [...prev, newItem]);
   };
+
+  if (loading) return <Spinner className="m-5" />;
 
   return (
     <div className='invoice-scope'>

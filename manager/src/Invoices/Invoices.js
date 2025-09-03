@@ -163,6 +163,11 @@ const InvoicesPage = ({ toggleSidebar, collapsed }) => {
 
   const closePopup = () => setSelectedItem(null);
 
+  const formatDate = (dateStr) => {
+    const newDate = new Date(dateStr);
+    return newDate.getMonth() + '/' + newDate.getDate() + '/' + newDate.getFullYear();
+  };
+
   if (loading) return <Spinner className="m-5" />;
 
   return (
@@ -214,8 +219,8 @@ const InvoicesPage = ({ toggleSidebar, collapsed }) => {
             <tr key={raw[IDX.INVOICE_ID]}>
               <td>{raw[IDX.INVOICE_NUM]}</td>
               <td>{clientName}</td>
-              <td>{new Date(raw[IDX.ISSUE_DATE]).toLocaleDateString()}</td>
-              <td>{new Date(raw[IDX.DUE_DATE]).toLocaleDateString()}</td>
+              <td>{formatDate(raw[IDX.ISSUE_DATE])}</td>
+              <td>{formatDate(raw[IDX.DUE_DATE])}</td>
               <td>${parseFloat(raw[IDX.BALANCE_DUE] || 0).toFixed(2)}</td>
               <td>
                 <Badge bg={raw[IDX.STATUS] === 'paid' ? 'success' : isOverdue(raw) ? 'danger' : 'primary'}>

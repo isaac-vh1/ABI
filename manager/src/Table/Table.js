@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet";
 import { auth } from '../firebase';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { Spinner } from 'react-bootstrap';
 
 function Table({ page, toggleSidebar, collapsed }) {
   const [update, setUpdate] = useState(false);
@@ -14,6 +15,7 @@ function Table({ page, toggleSidebar, collapsed }) {
   const [searchFilter, setSearchFilter] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
   const user = auth.currentUser;
 
   useEffect(() => {
@@ -44,7 +46,7 @@ function Table({ page, toggleSidebar, collapsed }) {
         dataHandler(dataAPI)
       })
       .catch(error => {console.error('Error fetching Data:', error); setError(true)})
-      .finally(() => {setUpdate(false)});
+      .finally(() => {setUpdate(false); setLoading(false)});
     });
   }, [update, page]);
   const dataHandler = (dataAPI) => {
@@ -118,6 +120,41 @@ function Table({ page, toggleSidebar, collapsed }) {
     const offset = date.getTimezoneOffset();
     return new Date(date.getTime() + offset * 60000);
   };
+
+  const deleteItem = (id) => {
+    setLoading(true);
+    const pageLower = page.toLowerCase();
+    user.getIdToken().then(token => {
+      fetch('/api/manager/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ pageLower, id })
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => {
+            console.error('Error response:', err);
+            setError(true);
+            throw new Error(err.error);
+          });
+        }
+        return response.json();
+      })
+      .catch(error => {console.error('Error fetching Data:', error); setError(true)})
+      .finally(() => {setLoading(false)});
+    });
+    data.map((row, index) => {
+      if(row[0] === id) {
+        data.splice(index, 1);
+      }
+    });
+  }
+
+  if (loading) return <Spinner className="m-5" />;
+
   return (
     <div className="table-container">
       <Helmet>
@@ -160,21 +197,21 @@ function Table({ page, toggleSidebar, collapsed }) {
         <div className="table-popup" onClick={closePopup}>
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
             <h2>{capitalize(page)} Details</h2>
-            {dataHeader.slice(1).map((head, index) => (
+            {dataHeader.map((head, index) => (
               <label key={index}>
                 {capitalize(head[0].replace('_', ' '))}:
                 {head[1] === 'date' ? (
                   
                   <DatePicker
                     selected={
-                      selectedItem[index + 1]
-                        ? adjustForTimezone(new Date(selectedItem[index + 1]))
+                      selectedItem[index]
+                        ? adjustForTimezone(new Date(selectedItem[index]))
                         : null
                     }
                     onChange={(date) =>
                       setSelectedItem((prev) => ({
                         ...prev,
-                        [index + 1]: date.toUTCString(),
+                        [index]: date.toUTCString(),
                       }))
                     }
                     dateFormat="yyyy-MM-dd"
@@ -183,11 +220,11 @@ function Table({ page, toggleSidebar, collapsed }) {
                   <input
                     type="text"
                     name={head[0]}
-                    value={selectedItem[index + 1]}
+                    value={selectedItem[index]}
                     onChange={(e) =>
                       setSelectedItem((prev) => ({
                         ...prev,
-                        [index + 1]: e.target.value,
+                        [index]: e.target.value,
                       }))
                     }
                   />
@@ -197,6 +234,7 @@ function Table({ page, toggleSidebar, collapsed }) {
               <div className="popup-buttons">
                 <button className="cancel-button" onClick={closePopup}>Cancel</button>
                 <button className="button" onClick={saveChanges}>Save</button>
+                <button className="delete-button" onClick={() => {deleteItem(selectedItem[0]); closePopup();}}>Delete</button>
             </div>
           </div>
         </div>
