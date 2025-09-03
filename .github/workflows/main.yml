@@ -1,0 +1,56 @@
+name: Build React Apps
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Set up Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 3. Build clients app
+      - name: Install dependencies (clients)
+        working-directory: clients
+        run: npm ci
+
+      - name: Build clients app
+        working-directory: clients
+        env:
+          apiKey: "AIzaSyB9bZ91dIsqqIcb3W5QKqSwgTooRRAd6XY",
+          authDomain: "abi-management.firebaseapp.com",
+          projectId: "abi-management",
+          storageBucket: "abi-management.firebasestorage.app",
+          messagingSenderId: "549679174966",
+          appId: "1:549679174966:web:a09e9a14a57e3e770b4f97",
+          measurementId: "G-LWL1XKB42X"
+        run: npm run build
+
+      # 4. Build manager app
+      - name: Install dependencies (manager)
+        working-directory: manager
+        run: npm ci
+
+      - name: Build manager app
+        working-directory: manager
+        env:
+          apiKey: "AIzaSyB9bZ91dIsqqIcb3W5QKqSwgTooRRAd6XY",
+          authDomain: "abi-management.firebaseapp.com",
+          projectId: "abi-management",
+          storageBucket: "abi-management.firebasestorage.app",
+          messagingSenderId: "549679174966",
+          appId: "1:549679174966:web:a09e9a14a57e3e770b4f97",
+          measurementId: "G-LWL1XKB42X"
+        run: npm run build
