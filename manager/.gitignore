@@ -118,6 +118,5 @@ jest/
 # Large files or directories to ignore
 Wa Sales tax/
 Wa Sales tax/Zip4RatesQ12025-Long.txt
-/src/Login
 ../Build\ folder
 .env
