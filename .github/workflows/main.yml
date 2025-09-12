@@ -56,12 +56,9 @@ jobs:
           REACT_APP_FIREBASE_APP_ID: ${{ secrets.REACT_APP_FIREBASE_APP_ID }}
           REACT_APP_FIREBASE_MEASUREMENT_ID: ${{ secrets.REACT_APP_FIREBASE_MEASUREMENT_ID }}
         run: npm run build
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
+      
       - name: Deploy to Raspberry Pi
         run: |
           rsync -avz --delete ./build/ \
             ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }}:/home/deployer/build/DEV_build
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
