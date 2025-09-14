@@ -66,7 +66,14 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.PI_HOST }} >> ~/.ssh/known_hosts
       
-      - name: Deploy to Raspberry Pi
+      - name: Deploy clients app to Raspberry Pi
         run: |
-          rsync -avz --delete ./build/ \
-            ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }}:/home/deployer/build/DEV_build
+          ssh ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} "mkdir -p /home/deployer/build/DEV_build/clients"
+          rsync -avz --delete ./clients/build/ \
+            ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }}:/home/deployer/build/DEV_build/clients
+      
+      - name: Deploy manager app to Raspberry Pi
+        run: |
+          ssh ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} "mkdir -p /home/deployer/build/DEV_build/manager"
+          rsync -avz --delete ./manager/build/ \
+            ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }}:/home/deployer/build/DEV_build/manager
