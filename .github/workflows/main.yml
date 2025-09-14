@@ -63,8 +63,8 @@ jobs:
       
       - name: Add Raspberry Pi to known_hosts
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.PI_HOST }} >> ~/.ssh/known_hosts
+          mkdir -p /home/runner/.ssh
+          ssh-keyscan -H ${{ secrets.PI_HOST }} >> /home/runner/.ssh/known_hosts
       
       - name: Deploy clients app to Raspberry Pi
         run: |
