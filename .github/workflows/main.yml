@@ -68,12 +68,12 @@ jobs:
       
       - name: Deploy clients app to Raspberry Pi
         run: |
-          ssh ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} "mkdir -p /home/deployer/build/DEV_build/clients"
+          ssh ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} "mkdir -p /home/deployer/ABI_builds/dev_env/clients"
           rsync -avz --delete ./clients/build/ \
-            ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }}:/home/deployer/build/DEV_build/clients
+            ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }}:/home/deployer/ABI_builds/dev_env/clients
       
       - name: Deploy manager app to Raspberry Pi
         run: |
-          ssh ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} "mkdir -p /home/deployer/build/DEV_build/manager"
+          ssh ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} "mkdir -p /home/deployer/ABI_builds/dev_env/manager"
           rsync -avz --delete ./manager/build/ \
-            ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }}:/home/deployer/build/DEV_build/manager
+            ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }}:/home/deployer/ABI_builds/dev_env/manager
