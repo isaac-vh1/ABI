@@ -60,6 +60,10 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Add Pi host key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PI_KNOWN_HOST }}" >> ~/.ssh/known_hosts
       - name: Deploy clients app to Raspberry Pi
         run: |
           ssh ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} "mkdir -p /home/deployer/ABI_builds/dev_env/clients"
