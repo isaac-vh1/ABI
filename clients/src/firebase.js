@@ -12,7 +12,7 @@ const firebaseConfig = {
   storageBucket: process.env.storageBucket,
   messagingSenderId: process.env.messagingSenderId,
   appId: process.env.appId
-  };  
+  };
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
