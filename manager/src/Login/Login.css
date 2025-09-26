@@ -74,7 +74,6 @@ body {
     border-radius: 4px;
     text-align: center;
   }
-  
   /* Submit button styling */
   .submit {
     width: 100%;
@@ -88,7 +87,6 @@ body {
     transition: background-color 0.3s ease;
     margin:5px;
   }
-  
   .submit:hover {
     background-color: #1565c0;
   }
