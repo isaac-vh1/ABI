@@ -13,8 +13,8 @@ const firebaseConfig = {
   messagingSenderId: process.env.messagingSenderId,
   appId: process.env.appId
   };
-const app = initializeApp(firebaseConfig);
 
+const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 // export const db = getFirestore(app);
 // export const analytics = getAnalytics(app);
