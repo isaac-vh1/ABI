@@ -277,7 +277,7 @@ const InvoiceNew = ({collapsed, toggleSidebar}) => {
                 })}
               </tbody>
             </table>
-            <button className={"button"} onClick={addItem} style={{ marginTop: '20px' }}>
+            <button type="button" class="btn btn-primary" onClick={addItem} style={{ marginTop: '20px' }}>
                 Add Item
             </button>
           </section>
