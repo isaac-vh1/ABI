@@ -19,12 +19,13 @@ const InvoiceNew = ({collapsed, toggleSidebar}) => {
     '0.00',                       // Sales Tax Amount (default as 0)
     '0.00',                       // Total (default as 0)
     '0.00',                       // Tips (default as 0)
-    'pending',
+    'pending', //status
+    '0'  //Location Code - DOR reference
   ]);
   const[invoiceItems, setInvoiceItems] = useState([['',"0.00"]]);
   const[clientData, setClientData] = useState([]);
   const[locationData, setLocationData] = useState([]);
-  const[tempData, setTempData] = useState(['10.0', 0, 0]); //Sales tax, client index, location index
+  const[tempData, setTempData] = useState(['10.0', 0, 0, 0]); //Sales tax, client index, location index, locationCode-DOR number tracking
   const [loading, setLoading] = useState(true);
   const user = auth.currentUser;
   const navigate = useNavigate();
@@ -72,6 +73,37 @@ const InvoiceNew = ({collapsed, toggleSidebar}) => {
       return newData;
     });
   }, [invoiceItems, tempData[0]]);
+  useEffect(()=>{
+    if (!user) return;
+    user.getIdToken().then(token => {
+      fetch('/api/manager/sales-tax-lookup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
+          body: JSON.stringify([locationData[tempData[2]][1], locationData[tempData[2]][2],locationData[tempData[2]][3]])
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => {
+            console.error('Error response:', err);
+            throw new Error(err.error);
+          });
+        }
+        return response.json();
+      })
+      .then(dataAPI => {
+        setTempData([dataAPI[0], tempData[1], tempData[2]]);
+        const newData = [...invoiceData];
+        newData[12] = dataAPI[1];
+        setInvoiceData(newData);
+
+      })
+      .catch(error => console.error('Error fetching Data:', error))
+      .finally(() => setLoading(false))
+    });
+  }, [invoiceData[0]]);
 
   const adjustForTimezone = (date) => {
     const offset = date.getTimezoneOffset();
@@ -289,17 +321,7 @@ const InvoiceNew = ({collapsed, toggleSidebar}) => {
               </p>
               <p>
                 <strong>
-                  Sales Tax (
-                  <input type="text"
-                    name={"Sales tax"}
-                    value={tempData[0]}
-                    onChange={(e) => {
-                      setTempData((prev) => {
-                        const newData = [...prev];
-                        newData[0] = e.target.value;
-                        return newData;
-                      });
-                    }}/>%):
+                  Sales Tax ({tempData[0]}%):
                 </strong>{' '}
                 ${invoiceData[8]}
               </p>
@@ -327,9 +349,7 @@ const InvoiceNew = ({collapsed, toggleSidebar}) => {
           </section>
         </div>
       </div>
-      <button className={"button"} onClick={saveInvoice} style={{ marginTop: '20px' }}>
-        Save
-      </button>
+      <button className={"button"} onClick={saveInvoice} style={{ marginTop: '20px' }}>Save</button>
     </div>
   );
 };
