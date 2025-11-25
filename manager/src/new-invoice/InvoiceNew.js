@@ -103,7 +103,7 @@ const InvoiceNew = ({collapsed, toggleSidebar}) => {
       .catch(error => console.error('Error fetching Data:', error))
       .finally(() => setLoading(false))
     });
-  }, [invoiceData[0]]);
+  }, [invoiceData]);
 
   const adjustForTimezone = (date) => {
     const offset = date.getTimezoneOffset();
