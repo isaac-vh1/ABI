@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Form,
   Button,
@@ -8,29 +8,74 @@ import {
   InputGroup,
   Badge,
   Stack,
-  Alert
+  Alert,
+  Card,
 } from 'react-bootstrap';
 
-/**
- * SeasonalServiceFeedbackForm
- * - Uses React Bootstrap components
- * - Client-friendly wording
- * - Clear grouping and accessible inputs
- */
-export default function SeasonalServiceFeedbackForm({ onSubmit }) {
-  // Example service options (customize to your business)
-  const serviceOptions = [
-    'Lawn Care',
-    'Snow Removal',
-    'Gutter Cleaning',
-    'Tree Trimming',
-    'Power Washing',
-    'Landscape Design',
-    'Other',
-  ];
+/** Rating scale (1–5) with concise labels */
+function RatingScale({ id, label, value, onChange }) {
+  const labels = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+  return (
+    <Form.Group controlId={id} className="mb-3">
+      <Form.Label className="fw-semibold">{label}</Form.Label>
+      <div role="group" aria-labelledby={id}>
+        <Stack direction="horizontal" gap={2} className="flex-wrap">
+          {labels.map((lbl, idx) => {
+            const score = idx + 1;
+            return (
+              <Form.Check
+                key={`${id}-${score}`}
+                inline
+                type="radio"
+                name={id}
+                id={`${id}-${score}`}
+                label={lbl}
+                checked={value === score}
+                onChange={() => onChange(score)}
+              />
+            );
+          })}
+        </Stack>
+      </div>
+    </Form.Group>
+  );
+}
 
-  // Controlled state
-  const [form, setForm] = useState({
+/** Checkbox grid */
+function CheckboxGrid({ idPrefix, options, selected, onToggle }) {
+  return (
+    <Row xs={1} sm={2} md={3} className="g-2">
+      {options.map((opt) => (
+        <Col key={opt}>
+          <Form.Check
+            type="checkbox"
+            id={`${idPrefix}-${opt}`}
+            label={opt}
+            checked={selected.includes(opt)}
+            onChange={() => onToggle(opt)}
+          />
+        </Col>
+      ))}
+    </Row>
+  );
+}
+
+export default function SeasonalServiceFeedbackForm({ onSubmit }) {
+  // 🔧 Edit this list to match your business
+  const serviceOptions = useMemo(
+    () => [
+      'Lawn Care',
+      'Snow Removal',
+      'Gutter Cleaning',
+      'Tree Trimming',
+      'Power Washing',
+      'Landscape Design',
+      'Other',
+    ],
+    []
+  );
+
+  const initial = {
     clientName: '',
     servicesUsed: [],
     ratings: {
@@ -38,44 +83,42 @@ export default function SeasonalServiceFeedbackForm({ onSubmit }) {
       professionalism: 0,
       schedulingEase: 0,
       paymentEase: 0,
-      timelinessHours: '',
       costSatisfaction: 0,
-      serviceVolume: '',
+      timelinessHours: '',
+      serviceCount: '',
     },
     likesMost: '',
     improveNextYear: '',
     otherComments: '',
-    continueServices: 'yes', // 'yes' | 'no' | 'unsure'
+    continueServices: 'yes', // 'yes' | 'unsure' | 'no'
     discontinueReason: '',
     canEarnBack: '',
     newServicesWishList: '',
-  });
+  };
 
+  const [form, setForm] = useState(initial);
   const [validated, setValidated] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const scaleLabels = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
-
-  const handleChange = (path, value) => {
-    // Helper for nested state updates
-    setForm(prev => {
+  // Minimal helpers
+  const update = (path, value) => {
+    setForm((prev) => {
       const keys = path.split('.');
-      const copy = { ...prev };
-      let cursor = copy;
+      const draft = { ...prev };
+      let cursor = draft;
       for (let i = 0; i < keys.length - 1; i++) {
         cursor[keys[i]] = { ...cursor[keys[i]] };
         cursor = cursor[keys[i]];
       }
       cursor[keys.at(-1)] = value;
-      return copy;
+      return draft;
     });
   };
 
   const toggleService = (svc) => {
-    setForm(prev => {
+    setForm((prev) => {
       const set = new Set(prev.servicesUsed);
-      if (set.has(svc)) set.delete(svc);
-      else set.add(svc);
+      set.has(svc) ? set.delete(svc) : set.add(svc);
       return { ...prev, servicesUsed: Array.from(set) };
     });
   };
@@ -84,156 +127,107 @@ export default function SeasonalServiceFeedbackForm({ onSubmit }) {
     e.preventDefault();
     setValidated(true);
 
-    // Minimal validation: at least one service selected
-    const valid = form.servicesUsed.length > 0;
-
-    if (!valid) return;
+    if (form.servicesUsed.length === 0) return; // require at least one service
 
     setSubmitted(true);
-    // Bubble up to parent or log
     onSubmit?.(form);
-    // Optionally clear:
-    // setForm({ ...initial });
+  };
+
+  const resetForm = () => {
+    setForm(initial);
+    setValidated(false);
+    setSubmitted(false);
   };
 
   return (
     <Form noValidate validated={validated} onSubmit={handleSubmit} className="p-3">
-      <h4 className="mb-3">Seasonal Services Feedback</h4>
-      <p className="text-muted">
-        Your feedback helps us improve for next season. This takes ~2–3 minutes.
-      </p>
+      <Card className="mb-4 shadow-sm border-0">
+        <Card.Body>
+          <Card.Title as="h4" className="mb-2">Seasonal Services Feedback</Card.Title>
+          <Card.Subtitle className="text-muted">
+            Quick survey (~2–3 minutes) to help us improve next season.
+          </Card.Subtitle>
+        </Card.Body>
+      </Card>
 
       {/* Client Info */}
-      <fieldset className="mb-4">
-        <legend className="h6">Client Info</legend>
+      <section className="mb-4">
+        <h6 className="text-uppercase text-muted mb-2">Client Info</h6>
         <Form.Group controlId="clientName">
           <Form.Label>Client Name <span className="text-muted">(optional)</span></Form.Label>
           <Form.Control
             type="text"
             placeholder="e.g., Jane Doe"
             value={form.clientName}
-            onChange={(e) => handleChange('clientName', e.target.value)}
+            onChange={(e) => update('clientName', e.target.value)}
           />
         </Form.Group>
-      </fieldset>
+      </section>
 
       {/* Services Used */}
-      <fieldset className="mb-4">
-        <legend className="h6">Which services did you use? <Badge bg="secondary">Required</Badge></legend>
-        <Row xs={1} sm={2} md={3}>
-          {serviceOptions.map((svc) => (
-            <Col key={svc} className="mb-2">
-              <Form.Check
-                type="checkbox"
-                id={`svc-${svc}`}
-                label={svc}
-                checked={form.servicesUsed.includes(svc)}
-                onChange={() => toggleService(svc)}
-                required={form.servicesUsed.length === 0} // only triggers when none selected
-              />
-            </Col>
-          ))}
-        </Row>
-      </fieldset>
+      <section className="mb-4">
+        <div className="d-flex align-items-center gap-2 mb-2">
+          <h6 className="text-uppercase text-muted mb-0">Services Used</h6>
+          <Badge bg="secondary">Required</Badge>
+        </div>
+        <CheckboxGrid
+          idPrefix="svc"
+          options={serviceOptions}
+          selected={form.servicesUsed}
+          onToggle={toggleService}
+        />
+        {validated && form.servicesUsed.length === 0 && (
+          <div className="invalid-feedback d-block">Please select at least one service.</div>
+        )}
+      </section>
 
-      {/* Experience Ratings */}
-      <fieldset className="mb-4">
-        <legend className="h6">Your Experience</legend>
-
-        {/* Helper component-like patterns for scales */}
-        <Row className="gy-3">
+      {/* Experience */}
+      <section className="mb-4">
+        <h6 className="text-uppercase text-muted mb-2">Your Experience</h6>
+        <Row>
           <Col md={6}>
-            <Form.Label>Quality</Form.Label>
-            <Stack direction="horizontal" gap={2}>
-              {scaleLabels.map((lbl, idx) => (
-                <Form.Check
-                  key={lbl}
-                  inline
-                  type="radio"
-                  name="quality"
-                  id={`quality-${idx + 1}`}
-                  label={lbl}
-                  checked={form.ratings.quality === idx + 1}
-                  onChange={() => handleChange('ratings.quality', idx + 1)}
-                />
-              ))}
-            </Stack>
+            <RatingScale
+              id="quality"
+              label="Quality"
+              value={form.ratings.quality}
+              onChange={(v) => update('ratings.quality', v)}
+            />
+          </Col>
+          <Col md={6}>
+            <RatingScale
+              id="professionalism"
+              label="Professionalism"
+              value={form.ratings.professionalism}
+              onChange={(v) => update('ratings.professionalism', v)}
+            />
+          </Col>
+          <Col md={6}>
+            <RatingScale
+              id="schedulingEase"
+              label="Ease of Scheduling"
+              value={form.ratings.schedulingEase}
+              onChange={(v) => update('ratings.schedulingEase', v)}
+            />
+          </Col>
+          <Col md={6}>
+            <RatingScale
+              id="paymentEase"
+              label="Ease of Payment"
+              value={form.ratings.paymentEase}
+              onChange={(v) => update('ratings.paymentEase', v)}
+            />
+          </Col>
+          <Col md={6}>
+            <RatingScale
+              id="costSatisfaction"
+              label="Cost Satisfaction"
+              value={form.ratings.costSatisfaction}
+              onChange={(v) => update('ratings.costSatisfaction', v)}
+            />
           </Col>
 
-          <Col md={6}>
-            <Form.Label>Professionalism</Form.Label>
-            <Stack direction="horizontal" gap={2}>
-              {scaleLabels.map((lbl, idx) => (
-                <Form.Check
-                  key={lbl}
-                  inline
-                  type="radio"
-                  name="professionalism"
-                  id={`professionalism-${idx + 1}`}
-                  label={lbl}
-                  checked={form.ratings.professionalism === idx + 1}
-                  onChange={() => handleChange('ratings.professionalism', idx + 1)}
-                />
-              ))}
-            </Stack>
-          </Col>
-
-          <Col md={6}>
-            <Form.Label>Ease of Scheduling</Form.Label>
-            <Stack direction="horizontal" gap={2}>
-              {scaleLabels.map((lbl, idx) => (
-                <Form.Check
-                  key={lbl}
-                  inline
-                  type="radio"
-                  name="schedulingEase"
-                  id={`schedulingEase-${idx + 1}`}
-                  label={lbl}
-                  checked={form.ratings.schedulingEase === idx + 1}
-                  onChange={() => handleChange('ratings.schedulingEase', idx + 1)}
-                />
-              ))}
-            </Stack>
-          </Col>
-
-          <Col md={6}>
-            <Form.Label>Ease of Payment</Form.Label>
-            <Stack direction="horizontal" gap={2}>
-              {scaleLabels.map((lbl, idx) => (
-                <Form.Check
-                  key={lbl}
-                  inline
-                  type="radio"
-                  name="paymentEase"
-                  id={`paymentEase-${idx + 1}`}
-                  label={lbl}
-                  checked={form.ratings.paymentEase === idx + 1}
-                  onChange={() => handleChange('ratings.paymentEase', idx + 1)}
-                />
-              ))}
-            </Stack>
-          </Col>
-
-          <Col md={6}>
-            <Form.Label>Cost Satisfaction</Form.Label>
-            <Stack direction="horizontal" gap={2}>
-              {scaleLabels.map((lbl, idx) => (
-                <Form.Check
-                  key={lbl}
-                  inline
-                  type="radio"
-                  name="costSatisfaction"
-                  id={`costSatisfaction-${idx + 1}`}
-                  label={lbl}
-                  checked={form.ratings.costSatisfaction === idx + 1}
-                  onChange={() => handleChange('ratings.costSatisfaction', idx + 1)}
-                />
-              ))}
-            </Stack>
-          </Col>
-
-          <Col md={6}>
-            <Form.Label>Timeliness (hours to completion)</Form.Label>
+          <Col md={6} className="mb-3">
+            <Form.Label className="fw-semibold">Timeliness (hours to completion)</Form.Label>
             <InputGroup>
               <Form.Control
                 type="number"
@@ -241,77 +235,75 @@ export default function SeasonalServiceFeedbackForm({ onSubmit }) {
                 step="0.5"
                 placeholder="e.g., 6"
                 value={form.ratings.timelinessHours}
-                onChange={(e) => handleChange('ratings.timelinessHours', e.target.value)}
+                onChange={(e) => update('ratings.timelinessHours', e.target.value)}
               />
               <InputGroup.Text>hours</InputGroup.Text>
             </InputGroup>
             <Form.Text className="text-muted">
-              Approximate total hours for your service completion.
+              Approximate total hours to complete your service(s).
             </Form.Text>
           </Col>
 
-          <Col md={6}>
-            <Form.Label>Amount of Services (count)</Form.Label>
+          <Col md={6} className="mb-3">
+            <Form.Label className="fw-semibold">Service Count</Form.Label>
             <InputGroup>
               <Form.Control
                 type="number"
                 min="0"
                 step="1"
                 placeholder="e.g., 3"
-                value={form.ratings.serviceVolume}
-                onChange={(e) => handleChange('ratings.serviceVolume', e.target.value)}
+                value={form.ratings.serviceCount}
+                onChange={(e) => update('ratings.serviceCount', e.target.value)}
               />
               <InputGroup.Text>tasks</InputGroup.Text>
             </InputGroup>
           </Col>
         </Row>
-      </fieldset>
+      </section>
 
-      {/* Open-Ended Feedback */}
-      <fieldset className="mb-4">
-        <legend className="h6">Open Feedback</legend>
-
+      {/* Open Feedback */}
+      <section className="mb-4">
+        <h6 className="text-uppercase text-muted mb-2">Open Feedback</h6>
         <Form.Group className="mb-3" controlId="likesMost">
-          <Form.Label>What did you like most?</Form.Label>
+          <Form.Label className="fw-semibold">What did you like most?</Form.Label>
           <Form.Control
             as="textarea"
             rows={3}
             placeholder="Tell us what stood out positively…"
             value={form.likesMost}
-            onChange={(e) => handleChange('likesMost', e.target.value)}
+            onChange={(e) => update('likesMost', e.target.value)}
           />
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="improveNextYear">
-          <Form.Label>What could we improve for next season?</Form.Label>
+          <Form.Label className="fw-semibold">What could we improve for next season?</Form.Label>
           <Form.Control
             as="textarea"
             rows={3}
             placeholder="Suggestions help us get better…"
             value={form.improveNextYear}
-            onChange={(e) => handleChange('improveNextYear', e.target.value)}
+            onChange={(e) => update('improveNextYear', e.target.value)}
           />
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="otherComments">
-          <Form.Label>Other comments</Form.Label>
+          <Form.Label className="fw-semibold">Other comments</Form.Label>
           <Form.Control
             as="textarea"
             rows={3}
             placeholder="Anything else we should know?"
             value={form.otherComments}
-            onChange={(e) => handleChange('otherComments', e.target.value)}
+            onChange={(e) => update('otherComments', e.target.value)}
           />
         </Form.Group>
-      </fieldset>
+      </section>
 
-      {/* Continuation */}
-      <fieldset className="mb-4">
-        <legend className="h6">Next Season</legend>
-
+      {/* Next Season */}
+      <section className="mb-4">
+        <h6 className="text-uppercase text-muted mb-2">Next Season</h6>
         <Form.Group className="mb-3" controlId="continueServices">
-          <Form.Label>Would you like to continue services next season?</Form.Label>
-          <Stack direction="horizontal" gap={3}>
+          <Form.Label className="fw-semibold">Continue services next season?</Form.Label>
+          <Stack direction="horizontal" gap={3} className="flex-wrap">
             {['yes', 'unsure', 'no'].map((val) => (
               <Form.Check
                 key={val}
@@ -321,7 +313,7 @@ export default function SeasonalServiceFeedbackForm({ onSubmit }) {
                 id={`continue-${val}`}
                 label={val[0].toUpperCase() + val.slice(1)}
                 checked={form.continueServices === val}
-                onChange={() => handleChange('continueServices', val)}
+                onChange={() => update('continueServices', val)}
               />
             ))}
           </Stack>
@@ -331,25 +323,25 @@ export default function SeasonalServiceFeedbackForm({ onSubmit }) {
           <Row className="gy-3">
             <Col md={6}>
               <Form.Group controlId="discontinueReason">
-                <Form.Label>If no, why?</Form.Label>
+                <Form.Label className="fw-semibold">If no, why?</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
                   placeholder="Share your reason for discontinuing…"
                   value={form.discontinueReason}
-                  onChange={(e) => handleChange('discontinueReason', e.target.value)}
+                  onChange={(e) => update('discontinueReason', e.target.value)}
                 />
               </Form.Group>
             </Col>
             <Col md={6}>
               <Form.Group controlId="canEarnBack">
-                <Form.Label>Can we earn back your business? How?</Form.Label>
+                <Form.Label className="fw-semibold">Can we earn back your business? How?</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
                   placeholder="What would change your mind?"
                   value={form.canEarnBack}
-                  onChange={(e) => handleChange('canEarnBack', e.target.value)}
+                  onChange={(e) => update('canEarnBack', e.target.value)}
                 />
               </Form.Group>
             </Col>
@@ -357,16 +349,16 @@ export default function SeasonalServiceFeedbackForm({ onSubmit }) {
         )}
 
         <Form.Group className="mt-3" controlId="newServicesWishList">
-          <Form.Label>Any services you’d like us to offer next season?</Form.Label>
+          <Form.Label className="fw-semibold">Any services you’d like us to offer next season?</Form.Label>
           <Form.Control
             as="textarea"
             rows={2}
             placeholder="e.g., irrigation setup, holiday lighting, pest control…"
             value={form.newServicesWishList}
-            onChange={(e) => handleChange('newServicesWishList', e.target.value)}
+            onChange={(e) => update('newServicesWishList', e.target.value)}
           />
         </Form.Group>
-      </fieldset>
+      </section>
 
       {submitted && (
         <Alert variant="success" className="mb-3">
@@ -376,34 +368,7 @@ export default function SeasonalServiceFeedbackForm({ onSubmit }) {
 
       <div className="d-flex gap-2">
         <Button type="submit" variant="primary">Submit Feedback</Button>
-        <Button
-          type="button"
-          variant="outline-secondary"
-          onClick={() => {
-            setForm({
-              clientName: '',
-              servicesUsed: [],
-              ratings: {
-                quality: 0,
-                professionalism: 0,
-                schedulingEase: 0,
-                paymentEase: 0,
-                timelinessHours: '',
-                costSatisfaction: 0,
-                serviceVolume: '',
-              },
-              likesMost: '',
-              improveNextYear: '',
-              otherComments: '',
-              continueServices: 'yes',
-              discontinueReason: '',
-              canEarnBack: '',
-              newServicesWishList: '',
-            });
-            setValidated(false);
-            setSubmitted(false);
-          }}
-        >
+        <Button type="button" variant="outline-secondary" onClick={resetForm}>
           Reset
         </Button>
       </div>
