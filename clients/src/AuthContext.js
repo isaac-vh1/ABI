@@ -21,6 +21,7 @@ export function AuthProvider({ children }) {
   const value = { user, loading };
   return (
     <AuthContext.Provider value={value}>
+      console.log("AuthContext using");
       {children}
     </AuthContext.Provider>
   );
