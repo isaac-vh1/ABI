@@ -88,7 +88,7 @@ const CreateAccount = () => {
   if (user) {
     return <Navigate to={"/"} />
   }
-  
+
   return (
     <div className="create-account-container">
       <h2>Create Account</h2>
@@ -104,28 +104,31 @@ const CreateAccount = () => {
             value={formData.displayName}
             onChange={handleChange}
             required
+            autoComplete='name'
           />
         </div>
         <div className="form-group">
           <label htmlFor="email">Email<span className='required'>*</span></label>
-          <input 
-            type="email" 
-            id="email" 
+          <input
+            type="email"
+            id="email"
             name="email"
-            value={formData.email} 
-            onChange={handleChange} 
-            required 
+            value={formData.email}
+            onChange={handleChange}
+            required
+            autoComplete='email'
           />
         </div>
         <div className="form-group">
           <label htmlFor="password">Password<span className='required'>*</span></label>
-          <input 
-            type="password" 
-            id="password" 
+          <input
+            type="password"
+            id="password"
             name="password"
-            value={formData.password} 
-            onChange={handleChange} 
-            required 
+            value={formData.password}
+            onChange={handleChange}
+            required
+            autoComplete='new-password'
           />
           <small>
             Password must contain at least one uppercase letter, one lowercase letter, and one number.
@@ -133,13 +136,14 @@ const CreateAccount = () => {
         </div>
         <div className="form-group">
           <label htmlFor="confirmPassword">Confirm Password<span className='required'>*</span></label>
-          <input 
-            type="password" 
-            id="confirmPassword" 
+          <input
+            type="password"
+            id="confirmPassword"
             name="confirmPassword"
-            value={formData.confirmPassword} 
-            onChange={handleChange} 
-            required 
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+            autoComplete='new-password'
           />
         </div>
         <button type="submit" className='submit'>Create Account</button>

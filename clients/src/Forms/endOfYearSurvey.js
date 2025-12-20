@@ -46,7 +46,7 @@ const initialState = {
   newServices: "",
 };
 
-export default function AcresFeedbackForm({ onSubmit }) {
+export default function EndOfYearSurvey({ onSubmit }) {
   const [data, setData] = useState(initialState);
   const [submitting, setSubmitting] = useState(false);
 

@@ -33,24 +33,26 @@ function Login() {
       <form onSubmit={handleLogin}>
         <div className="form-group">
           <label htmlFor="email">Email:</label>
-          <input 
-            type="email" 
-            id="email" 
+          <input
+            type="email"
+            id="email"
             name="email"
-            value={email} 
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required 
+            required
+            autoComplete="email"
           />
         </div>
         <div className="form-group">
           <label htmlFor="password">Password:</label>
-          <input 
-            type="password" 
-            id="password" 
+          <input
+            type="password"
+            id="password"
             name="password"
-            value={password} 
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required 
+            required
+            autoComplete="current-password"
           />
         </div>
         <button type="submit" className='submit'>Log In</button>

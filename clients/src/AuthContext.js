@@ -12,6 +12,7 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+      console.log("AuthContext using");
     });
     return () => unsubscribe();
   }, []);
@@ -21,7 +22,6 @@ export function AuthProvider({ children }) {
   const value = { user, loading };
   return (
     <AuthContext.Provider value={value}>
-      console.log("AuthContext using");
       {children}
     </AuthContext.Provider>
   );
