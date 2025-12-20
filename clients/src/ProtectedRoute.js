@@ -25,7 +25,7 @@ function ProtectedRoute({ setSavedPage, children }) {
           if (data === "true") {
             setVerified(true);
             setClient(true);
-          } else if (data === "Not Verified") { 
+          } else if (data === "Not Verified") {
             setVerified(false);
             setClient(false);
           } else if (data === "No Client") {
