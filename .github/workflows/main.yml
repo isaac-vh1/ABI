@@ -80,7 +80,7 @@ jobs:
           file: ${{ matrix.app.name }}/Dockerfile
           push: true
           tags: |
-            ghcr.io/isaac-vh1/${{ matrix.app.image }}:dev
+            ghcr.io/isaac-vh1/${{ matrix.app.image }}:prod
           # Cache for faster subsequent builds (optional)
           cache-from: type=gha
           cache-to: type=gha,mode=max
