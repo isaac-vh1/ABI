@@ -23,7 +23,7 @@ jobs:
     steps:
       # 1) Checkout
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # 2) Setup Node (for front-end build)
       - name: Setup Node.js
