@@ -2,7 +2,9 @@ name: Build & Push React Apps to GHCR
 
 on:
   push:
-    branches: [ main ]   # change to 'dev' if you want
+    branches:
+      - dev
+      - "feature/**"
 
 permissions:
   contents: read
@@ -23,11 +25,11 @@ jobs:
     steps:
       # 1) Checkout
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       # 2) Setup Node (for front-end build)
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
@@ -80,7 +82,7 @@ jobs:
           file: ${{ matrix.app.name }}/Dockerfile
           push: true
           tags: |
-            ghcr.io/isaac-vh1/${{ matrix.app.image }}:prod
+            ghcr.io/isaac-vh1/${{ matrix.app.image }}:dev
           # Cache for faster subsequent builds (optional)
           cache-from: type=gha
           cache-to: type=gha,mode=max
