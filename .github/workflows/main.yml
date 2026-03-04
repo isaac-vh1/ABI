@@ -55,7 +55,7 @@ jobs:
 
       # 4) (Optional) Upload the static build as a CI artifact for debugging
       - name: Upload build as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ matrix.app.name }}-build
           path: ${{ matrix.app.name }}/build
