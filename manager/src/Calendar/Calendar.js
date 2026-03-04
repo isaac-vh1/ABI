@@ -1,338 +1,349 @@
-import React, { useCallback, useState, useMemo, useRef, useEffect } from 'react';
-import { Calendar, Views, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
-import './Calendar.css';
-import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
-import CustomEvent from './CustomEvent';
-import DraggableEvent from './DraggableEvent';
-import HamburgerMenu from '../Components/HamburgerMenu';
-import { auth } from '../firebase';
-import { Helmet } from 'react-helmet';
-import { Button, Spinner } from 'react-bootstrap';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Calendar, Views, momentLocalizer } from "react-big-calendar";
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
+import moment from "moment";
+import { Helmet } from "react-helmet";
+import { Button, Spinner } from "react-bootstrap";
+
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
+import "./Calendar.css";
+
+import { auth } from "../firebase";
+import HamburgerMenu from "../Components/HamburgerMenu";
+import CustomEvent from "./CustomEvent";
+import DraggableEvent from "./DraggableEvent";
 
 const localizer = momentLocalizer(moment);
 const DnDCalendar = withDragAndDrop(Calendar);
+
+const CALENDAR_TABLE = "calendar";
+
+function normalizeEvent(row) {
+  const start = row.start ? new Date(row.start) : null;
+  const end = row.end ? new Date(row.end) : null;
+  const durationHours = start && end ? (end - start) / (60 * 60 * 1000) : 1;
+  return {
+    id: row.id,
+    client_id: row.client_id ?? row.clientId ?? null,
+    title: row.title ?? "",
+    description: row.description ?? "",
+    calendar: row.calendar,
+    start,
+    end,
+    duration: Number.isFinite(durationHours) && durationHours > 0 ? durationHours : 1,
+  };
+}
+
+function formatDateTimeLocal(date) {
+  if (!date) return "";
+  const pad = (n) => (n < 10 ? `0${n}` : `${n}`);
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(
+    date.getHours()
+  )}:${pad(date.getMinutes())}`;
+}
 
 export default function CalendarContainer({ toggleSidebar, collapsed }) {
   const [scheduledEvents, setScheduledEvents] = useState([]);
   const [unscheduledEvents, setUnscheduledEvents] = useState([]);
   const [workerSchedule, setWorkerSchedule] = useState([]);
-  const [clients, setClients] = useState([]);
-  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const user = auth.currentUser;
-  const eventIdRef = useRef(1000);
+  const [error, setError] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState(Views.MONTH);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [draggedEvent, setDraggedEvent] = useState(null);
+  const eventIdRef = useRef(1000);
 
-  // ===== FETCH EVENTS =====
-  useEffect(() => {
-    if (!user) return;
-    user.getIdToken().then(token => {
-      fetch('/api/manager/events', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((r) => r.json())
-        .then((data) => {
-          setScheduledEvents(formatEvents(data[0]) ?? []);
-          setUnscheduledEvents(formatEvents(data[1]) ?? []);
-          setWorkerSchedule(formatEvents(data[2]) ?? []);
-          setClients(formatEvents(data[3]) ?? []);
-          eventIdRef.current = data[4] ?? 1000;
-        })
-        .catch((e) => {
-          console.error(e);
-          setError(true);
-        })
-        .finally(() => setLoading(false));
-    });
-  }, [user]);
+  const user = auth.currentUser;
 
-  // ===== FORMAT EVENTS =====
-  const formatEvents = (rows = []) =>
-    rows.map(
-      ({
-        id,
-        client_id,
-        title,
-        description,
-        calendar,
-        start,
-        end,
-        duration_h,
-      }) => {
-        const startDate = new Date(start);
-        const endDate =
-          end != null
-            ? new Date(end)
-            : new Date(startDate.getTime() + (duration_h ?? 1) * 60 * 60 * 1000);
-            console.log(events.map(e => [e.start, e.end, typeof e.start, typeof e.end]));
-        return {
-          id,
-          client_id,
-          title,
-          start: startDate,
-          end: endDate,
-          calendar,
-          description: description ?? '',
-        };
-      }
-    );
-
-  // ===== SAVE CHANGES =====
-  const saveChanges = (items) => {
-    if (!user) return;
-    const selectedItem = Object.fromEntries(
-      Object.entries(items).map(([key, value]) => [
-        key,
-        {
-          ...value,
-          start: new Date(value.start).toUTCString(),
-        },
-      ])
-    );
-
-    user.getIdToken().then(async (token) => {
-      try {
-        const res = await fetch('/api/manager/update/calendar', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ selectedItem }),
-        });
-        const data = await res.json();
-        if (data !== "true") {
-          setError(true);
-          throw new Error('Update failed');
-        }
-      } catch (e) {
-        console.error(e);
-        setError(true);
-      }
-    });
-  };
-
-  // ===== COMBINE EVENTS =====
-  const events = useMemo(() => [
-    ...(scheduledEvents || []).map((event) => ({ ...event, calendar: 'scheduledEvents' })),
-    ...(workerSchedule || []).map((event) => ({ ...event, calendar: 'workerSchedule' })),
-  ], [scheduledEvents, workerSchedule]);
-
-  // ===== CALENDAR HELPERS =====
-  const getCalendar = (event) => {
-    switch (event.calendar) {
-      case 'unscheduledEvents': return unscheduledEvents;
-      case 'scheduledEvents': return scheduledEvents;
-      case 'workerSchedule': return workerSchedule;
-      default: alert("Calendar Not Found!!"); return [];
+  const getToken = async () => {
+    if (!user) {
+      throw new Error("No authenticated user found.");
     }
+    return user.getIdToken();
   };
 
-  const updateCalendar = (event, updated) => {
-    switch (event.calendar) {
-      case 'unscheduledEvents': setUnscheduledEvents(updated); break;
-      case 'scheduledEvents': setScheduledEvents(updated); break;
-      case 'workerSchedule': setWorkerSchedule(updated); break;
-      default: alert("Calendar Not Updated!!");
+  const authorizedFetch = useCallback(
+    async (url, options = {}) => {
+      const token = await getToken();
+      const merged = {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      return fetch(url, merged);
+    },
+    [user]
+  );
+
+  const loadCalendarData = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    setError("");
+    try {
+      const response = await authorizedFetch("/api/manager/events");
+      if (!response.ok) {
+        throw new Error("Failed to load calendar events.");
+      }
+      const data = await response.json();
+      setScheduledEvents((data[0] || []).map(normalizeEvent));
+      setUnscheduledEvents((data[1] || []).map(normalizeEvent));
+      setWorkerSchedule((data[2] || []).map(normalizeEvent));
+      eventIdRef.current = data[4] || 1000;
+    } catch (e) {
+      console.error(e);
+      setError("Failed to load calendar data.");
+    } finally {
+      setLoading(false);
+    }
+  }, [authorizedFetch, user]);
+
+  useEffect(() => {
+    loadCalendarData();
+  }, [loadCalendarData]);
+
+  const allScheduledLikeEvents = useMemo(
+    () => [...scheduledEvents, ...workerSchedule],
+    [scheduledEvents, workerSchedule]
+  );
+
+  const getCalendarSetter = (calendarName) => {
+    if (calendarName === "scheduledEvents") return setScheduledEvents;
+    if (calendarName === "unscheduledEvents") return setUnscheduledEvents;
+    return setWorkerSchedule;
+  };
+
+  const persistEvent = useCallback(
+    async (eventToSave) => {
+      const payload = {
+        id: eventToSave.id,
+        calendar: eventToSave.calendar,
+        title: eventToSave.title,
+        description: eventToSave.description ?? "",
+        client_id: eventToSave.client_id ?? null,
+        start: eventToSave.start ? new Date(eventToSave.start).toISOString() : null,
+        end: eventToSave.end ? new Date(eventToSave.end).toISOString() : null,
+      };
+
+      const response = await authorizedFetch("/api/manager/calendar/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to save event.");
+      }
+      const value = await response.json();
+      if (value !== "true") {
+        throw new Error("Backend rejected event save.");
+      }
+    },
+    [authorizedFetch]
+  );
+
+  const removeEvent = async (eventToDelete) => {
+    setError("");
+    try {
+      const response = await authorizedFetch("/api/manager/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify([CALENDAR_TABLE, eventToDelete.id]),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete event.");
+      }
+      const setter = getCalendarSetter(eventToDelete.calendar);
+      setter((prev) => prev.filter((e) => e.id !== eventToDelete.id));
+      setSelectedEvent(null);
+    } catch (e) {
+      console.error(e);
+      setError("Failed to delete event.");
     }
   };
 
   const eventStyleGetter = (event) => {
-    let backgroundColor;
-    switch (event.calendar) {
-      case 'unscheduledEvents': backgroundColor = '#FFFFFF'; break;
-      case 'scheduledEvents': backgroundColor = '#28a745'; break;
-      case 'workerSchedule': backgroundColor = 'blue'; break;
-      default: backgroundColor = '#6c757d';
-    }
+    let backgroundColor = "#6c757d";
+    if (event.calendar === "unscheduledEvents") backgroundColor = "#ffffff";
+    if (event.calendar === "scheduledEvents") backgroundColor = "#28a745";
+    if (event.calendar === "workerSchedule") backgroundColor = "#2f4fdb";
     return {
-      style: { backgroundColor, color: event.calendar === 'unscheduledEvents' ? '#000' : '#fff' }
+      style: {
+        backgroundColor,
+        color: event.calendar === "unscheduledEvents" ? "#000" : "#fff",
+      },
     };
   };
 
-  const formatDateTimeLocal = (date) => {
-    if (!date) return '';
-    const pad = n => n < 10 ? '0' + n : n;
-    return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  const onEventChange = async ({ event, start, end }) => {
+    const updated = { ...event, start: new Date(start), end: new Date(end) };
+    const setter = getCalendarSetter(event.calendar);
+    setter((prev) => prev.map((evt) => (evt.id === event.id ? updated : evt)));
+    try {
+      await persistEvent(updated);
+    } catch (e) {
+      console.error(e);
+      setError("Failed to update event.");
+      loadCalendarData();
+    }
   };
 
-  // ===== EVENT HANDLERS =====
-  const handleDoubleClickEvent = (event) => setSelectedEvent(event);
-  const handleCloseModal = () => setSelectedEvent(null);
-  const handleSelectSlot = (slotInfo) => {
-    setCurrentDate(slotInfo.start);
-    if (currentView !== Views.DAY) setCurrentView(Views.WEEK);
-  };
+  const handleDropFromOutside = useCallback(
+    async ({ start }) => {
+      if (!draggedEvent) return;
 
-  const onEventChange = ({ event, start, end }) => {
-    const calendar = getCalendar(event);
-    const updated = calendar.map((evt) =>
-      evt.id === event.id ? { ...evt, start: new Date(start), end: new Date(end) } : evt
-    );
-    updateCalendar(event, updated);
-    saveChanges({ ...event, start: new Date(start), end: new Date(end) });
-  };
+      const startDate = new Date(start);
+      const duration = draggedEvent.duration ?? 1;
+      const endDate = new Date(startDate.getTime() + duration * 60 * 60 * 1000);
+      const moved = {
+        ...draggedEvent,
+        calendar: "scheduledEvents",
+        start: startDate,
+        end: endDate,
+      };
 
-  const handleOnDragStart = useCallback((item) => {
-    setDraggedEvent(item);
-  }, []);
+      setUnscheduledEvents((prev) => prev.filter((evt) => evt.id !== draggedEvent.id));
+      setScheduledEvents((prev) => [...prev.filter((evt) => evt.id !== moved.id), moved]);
+      setDraggedEvent(null);
 
-  const handleDropFromOutside = useCallback(({ start }) => {
-    if (!draggedEvent) return;
-    const startDate = new Date(start);
-    const duration = draggedEvent.duration ?? 1;
-    const endDate = new Date(startDate.getTime() + duration * 60*60*1000);
-
-    const newEvent = {
-      ...draggedEvent,
-      start: startDate,
-      end: endDate,
-      calendar: 'scheduledEvents',
-    };
-
-    const isDuplicate = scheduledEvents.some(
-      evt => evt.title === newEvent.title && evt.start.getTime() === newEvent.start.getTime()
-    );
-
-    if (!isDuplicate) setScheduledEvents(prev => [...prev, newEvent]);
-    setUnscheduledEvents(prev => prev.filter(evt => evt.id !== draggedEvent.id));
-    saveChanges(newEvent);
-    setDraggedEvent(null);
-  }, [draggedEvent, scheduledEvents]);
+      try {
+        await persistEvent(moved);
+      } catch (e) {
+        console.error(e);
+        setError("Failed to move event.");
+        loadCalendarData();
+      }
+    },
+    [draggedEvent, loadCalendarData, persistEvent]
+  );
 
   const handleNewUnscheduledEvent = () => {
-    const newEvent = {
+    setSelectedEvent({
       id: eventIdRef.current++,
-      title: '',
-      description: '',
+      title: "",
+      description: "",
       client_id: null,
       start: null,
       end: null,
       duration: 1,
-      calendar: 'unscheduledEvents',
-    };
-    setSelectedEvent(newEvent);
+      calendar: "unscheduledEvents",
+    });
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     if (!selectedEvent) return;
-    const calendar = getCalendar(selectedEvent);
-    const updated = calendar.map(evt =>
-      evt.id === selectedEvent.id ? selectedEvent : evt
-    );
-    updateCalendar(selectedEvent, updated);
-    saveChanges(selectedEvent);
-    setSelectedEvent(null);
-  };
+    const setter = getCalendarSetter(selectedEvent.calendar);
+    const nextEvent = { ...selectedEvent };
+    if (nextEvent.start && !nextEvent.end) {
+      nextEvent.end = new Date(nextEvent.start.getTime() + (nextEvent.duration || 1) * 60 * 60 * 1000);
+    }
 
-  const deleteItem = (selectedEvent) => {
-    setLoading(true);
-    const calendar = getCalendar(selectedEvent)
-    user.getIdToken().then(token => {
-      fetch('/api/manager/delete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify([ "calendar", selectedEvent.id ])
-      })
-      .then(response => {
-        if (!response.ok) {
-          return response.json().then(err => {
-            console.error('Error response:', err);
-            setError(true);
-            throw new Error(err.error);
-          });
-        }
-        return response.json();
-      })
-      .catch(error => {console.error('Error fetching Data:', error); setError(true)})
-      .finally(() => {setLoading(false)});
-    });
-    calendar.map((row, index) => {
-      if(row[0] === selectedEvent[0]) {
-        calendar.splice(index, 1);
+    setter((prev) => {
+      const exists = prev.some((evt) => evt.id === nextEvent.id);
+      if (exists) {
+        return prev.map((evt) => (evt.id === nextEvent.id ? nextEvent : evt));
       }
+      return [...prev, nextEvent];
     });
-  }
+
+    try {
+      await persistEvent(nextEvent);
+      setSelectedEvent(null);
+    } catch (e) {
+      console.error(e);
+      setError("Failed to save event.");
+      loadCalendarData();
+    }
+  };
 
   if (loading) return <Spinner className="m-5" />;
 
   return (
     <div>
-      <Helmet><title>Calendar</title></Helmet>
+      <Helmet>
+        <title>Calendar</title>
+      </Helmet>
       <div>
-        {/* ===== SIDEBAR ===== */}
-        <div className={`calendar-toggle ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}>
+        <div className={`calendar-toggle ${collapsed ? "collapsed" : ""}`} onClick={toggleSidebar}>
           <HamburgerMenu collapsed={collapsed} />
         </div>
-        <div className={`calendar-drop-bar ${collapsed ? 'collapsed' : ''}`}>
-          <h2>Unscheduled <Button onClick={handleNewUnscheduledEvent}>+</Button></h2>
-          {(!unscheduledEvents || unscheduledEvents.length === 0) ? <p className='noJob'>No Jobs to Schedule</p> :
-            unscheduledEvents.map(item => (
-              <DraggableEvent key={item.id} event={item} onDragStart={handleOnDragStart} onClick={handleDoubleClickEvent} />
+        <div className={`calendar-drop-bar ${collapsed ? "collapsed" : ""}`}>
+          <h2>
+            Unscheduled <Button onClick={handleNewUnscheduledEvent}>+</Button>
+          </h2>
+          {!unscheduledEvents.length ? (
+            <p className="noJob">No Jobs to Schedule</p>
+          ) : (
+            unscheduledEvents.map((item) => (
+              <DraggableEvent
+                key={item.id}
+                event={item}
+                onDragStart={(event) => setDraggedEvent(event)}
+                onClick={() => setSelectedEvent(item)}
+              />
             ))
-          }
+          )}
+          {error ? <p className="noJob">{error}</p> : null}
         </div>
 
-        {/* ===== CALENDAR ===== */}
-        <div className={`my-custom-calendar-container ${collapsed ? 'collapsed' : ''}`}>
-          <div className='top-bar'>
-            <div className={`top-bar-button ${collapsed ? 'collapsed' : ''}`} onClick={toggleSidebar}>
+        <div className={`my-custom-calendar-container ${collapsed ? "collapsed" : ""}`}>
+          <div className="top-bar">
+            <div className={`top-bar-button ${collapsed ? "collapsed" : ""}`} onClick={toggleSidebar}>
               <HamburgerMenu collapsed={collapsed} />
             </div>
-            <Button className="calendar-button">View</Button>
-            <Button className="calendar-button" onClick={handleNewUnscheduledEvent}>New Job</Button>
+            <Button className="calendar-button" onClick={() => setCurrentView(Views.MONTH)}>
+              Month
+            </Button>
+            <Button className="calendar-button" onClick={handleNewUnscheduledEvent}>
+              New Job
+            </Button>
           </div>
 
           <DnDCalendar
             className="my-custom-calendar"
             localizer={localizer}
-            events={events}
+            events={allScheduledLikeEvents}
             eventPropGetter={eventStyleGetter}
             date={currentDate}
             view={currentView}
-            onNavigate={date => setCurrentDate(date)}
-            onView={view => setCurrentView(view)}
+            onNavigate={setCurrentDate}
+            onView={setCurrentView}
             defaultView={Views.MONTH}
             views={[Views.MONTH, Views.WEEK, Views.DAY]}
             step={15}
             timeslots={4}
             selectable
             resizable
-            dragFromOutsideItem={() => null}
+            dragFromOutsideItem={() => draggedEvent}
             onDropFromOutside={handleDropFromOutside}
-            onSelectSlot={handleSelectSlot}
+            onSelectSlot={({ start }) => {
+              setCurrentDate(start);
+              if (currentView !== Views.DAY) setCurrentView(Views.WEEK);
+            }}
             onEventDrop={onEventChange}
             onEventResize={onEventChange}
-            onSelectEvent={handleDoubleClickEvent}
+            onSelectEvent={setSelectedEvent}
             startAccessor="start"
             endAccessor="end"
             components={{
-              event: (props) => <CustomEvent {...props} onDoubleClick={handleDoubleClickEvent} />
+              event: (props) => <CustomEvent {...props} onDoubleClick={setSelectedEvent} />,
             }}
           />
         </div>
       </div>
 
-      {/* ===== MODAL ===== */}
       {selectedEvent && (
-        <div className="modal-backdrop" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <div className="modal-backdrop" onClick={() => setSelectedEvent(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Edit Event</h2>
             <label>
               Title:
               <input
                 type="text"
                 value={selectedEvent.title}
-                onChange={e => setSelectedEvent({ ...selectedEvent, title: e.target.value })}
+                onChange={(e) => setSelectedEvent({ ...selectedEvent, title: e.target.value })}
               />
             </label>
             <label>
@@ -340,29 +351,36 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
               <textarea
                 rows="3"
                 value={selectedEvent.description}
-                onChange={e => setSelectedEvent({ ...selectedEvent, description: e.target.value })}
+                onChange={(e) => setSelectedEvent({ ...selectedEvent, description: e.target.value })}
               />
             </label>
             <label>
               Start:
               <input
                 type="datetime-local"
-                value={selectedEvent.start ? formatDateTimeLocal(selectedEvent.start) : ''}
-                onChange={e => setSelectedEvent({ ...selectedEvent, start: e.target.value ? new Date(e.target.value) : null })}
+                value={selectedEvent.start ? formatDateTimeLocal(selectedEvent.start) : ""}
+                onChange={(e) =>
+                  setSelectedEvent({
+                    ...selectedEvent,
+                    start: e.target.value ? new Date(e.target.value) : null,
+                  })
+                }
               />
             </label>
             <label>
               Duration (hours):
               <input
                 type="number"
+                min="0.25"
+                step="0.25"
                 value={selectedEvent.duration || 1}
-                onChange={e => {
-                  const dur = Number(e.target.value) || 1;
-                  setSelectedEvent({
-                    ...selectedEvent,
-                    duration: dur,
-                    end: selectedEvent.start ? new Date(selectedEvent.start.getTime() + dur*60*60*1000) : null,
-                  });
+                onChange={(e) => {
+                  const duration = Number(e.target.value) || 1;
+                  setSelectedEvent((prev) => ({
+                    ...prev,
+                    duration,
+                    end: prev.start ? new Date(prev.start.getTime() + duration * 60 * 60 * 1000) : prev.end,
+                  }));
                 }}
               />
             </label>
@@ -370,21 +388,27 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
               End:
               <input
                 type="datetime-local"
-                value={selectedEvent.end ? formatDateTimeLocal(selectedEvent.end) : ''}
-                onChange={e => {
-                  const endDate = e.target.value ? new Date(e.target.value) : null;
-                  setSelectedEvent({
-                    ...selectedEvent,
-                    end: endDate,
-                    duration: selectedEvent.start && endDate ? (endDate - selectedEvent.start)/(60*60*1000) : selectedEvent.duration
-                  });
+                value={selectedEvent.end ? formatDateTimeLocal(selectedEvent.end) : ""}
+                onChange={(e) => {
+                  const end = e.target.value ? new Date(e.target.value) : null;
+                  setSelectedEvent((prev) => ({
+                    ...prev,
+                    end,
+                    duration: prev.start && end ? (end - prev.start) / (60 * 60 * 1000) : prev.duration,
+                  }));
                 }}
               />
             </label>
             <div className="modal-buttons">
-              <Button className="delete-button" onClick={() => {deleteItem(selectedEvent); handleCloseModal();}}>Delete</Button>
-              <Button className="cancel-button" onClick={handleCloseModal}>Cancel</Button>
-              <Button className="calendar-button" onClick={handleSaveChanges}>Save</Button>
+              <Button className="delete-button" onClick={() => removeEvent(selectedEvent)}>
+                Delete
+              </Button>
+              <Button className="cancel-button" onClick={() => setSelectedEvent(null)}>
+                Cancel
+              </Button>
+              <Button className="calendar-button" onClick={handleSaveChanges}>
+                Save
+              </Button>
             </div>
           </div>
         </div>

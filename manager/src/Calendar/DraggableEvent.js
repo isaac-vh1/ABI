@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import './DraggableEvent.css'; // Import your CSS styles
 
-const DraggableEvent = ({ event, onDragStart }) => {
+const DraggableEvent = ({ event, onDragStart, onClick }) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDragStart = () => {
@@ -22,6 +22,7 @@ const DraggableEvent = ({ event, onDragStart }) => {
       draggable
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onClick={onClick}
       role="button"
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
