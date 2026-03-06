@@ -74,7 +74,7 @@ jobs:
 
       # 7) Build & push container for each app (context = subfolder)
       - name: Build and push image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.app.name }}
           file: ${{ matrix.app.name }}/Dockerfile
