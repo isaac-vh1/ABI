@@ -298,18 +298,6 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
             <div className={`top-bar-button ${collapsed ? "collapsed" : ""}`} onClick={toggleSidebar}>
               <HamburgerMenu collapsed={collapsed} />
             </div>
-            <Button
-              className={`calendar-button ${currentView === Views.WEEK ? "active" : ""}`}
-              onClick={() => setCurrentView(Views.WEEK)}
-            >
-              Week
-            </Button>
-            <Button
-              className={`calendar-button ${currentView === Views.DAY ? "active" : ""}`}
-              onClick={() => setCurrentView(Views.DAY)}
-            >
-              Day
-            </Button>
             <Button className="calendar-button" onClick={handleNewUnscheduledEvent}>
               New Job
             </Button>
@@ -331,6 +319,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
             selectable
             resizable
             dragFromOutsideItem={() => draggedEvent}
+            onDragOver={(dragEvent) => dragEvent.preventDefault()}
             onDropFromOutside={handleDropFromOutside}
             onSelectSlot={({ start }) => {
               setCurrentDate(start);
