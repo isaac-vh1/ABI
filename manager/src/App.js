@@ -16,6 +16,7 @@ import ReceiptScanner from './reciepts/reciepts.js';
 import { Dropdown } from 'react-bootstrap'
 import ClientDetails from './Clients/ClientDetails.js';
 import SalesTaxReport from './SalesTax/SalesTaxReport.js';
+import Clients from './Clients/Clients.js';
 
 function App() {
   const [collapsed, setCollapsed] = useState(true);
@@ -42,6 +43,7 @@ function App() {
         </div>
         <Link to="/" className="nav-link" onClick={toggleSidebarSmall}>Home</Link>
         <Link to="/calendar" className="nav-link" onClick={toggleSidebar}>Calendar</Link>
+        <Link to="/clients" className="nav-link" onClick={toggleSidebarSmall}>Clients</Link>
         <Link to="/invoice-dashboard" className="nav-link" onClick={toggleSidebarSmall}>Invoices</Link>
         <Link to="/sales-tax" className="nav-link" onClick={toggleSidebarSmall}>Sales Tax</Link>
         <Link to="/reciepts" className="nav-link" onClick={toggleSidebarSmall}>Reciepts</Link>
@@ -71,6 +73,7 @@ function App() {
             <Route path="/login" element={<Login page={ savedPage }/>} />
             <Route path="/" element={<ProtectedRoute setSavedPage={setSavedPage}><Home toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute setSavedPage={setSavedPage}><Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            <Route path="/clients" element={<ProtectedRoute setSavedPage={setSavedPage}><Clients toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             {tables.map((table) => (
               <Route key={table} path={`/table/${table}`} element={<ProtectedRoute setSavedPage={setSavedPage}><Table page={table} toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             ))}

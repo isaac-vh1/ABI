@@ -100,9 +100,13 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
     taxableSales: 0,
     salesTaxCollected: 0,
     totalPaid: 0,
+    expenseCount: 0,
+    expenses: 0,
+    netCash: 0,
   };
   const locations = report?.locations || [];
   const paidInvoices = report?.paidInvoices || [];
+  const expensesByCategory = report?.expensesByCategory || [];
 
   return (
     <div className="sales-tax-page">
@@ -161,6 +165,14 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
               <span>Paid Invoices</span>
               <strong>{summary.invoiceCount}</strong>
             </article>
+            <article className="sales-tax-card">
+              <span>Quarter Expenses</span>
+              <strong>{formatCurrency(summary.expenses)}</strong>
+            </article>
+            <article className="sales-tax-card">
+              <span>Net Cash</span>
+              <strong>{formatCurrency(summary.netCash)}</strong>
+            </article>
           </section>
 
           <section className="sales-tax-panel">
@@ -200,6 +212,43 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
             ) : (
               <div className="sales-tax-empty">
                 No paid invoices found for this quarter. This report uses paid invoices with a `payment_date`.
+              </div>
+            )}
+          </section>
+
+          <section className="sales-tax-panel">
+            <div className="sales-tax-panel-header">
+              <div>
+                <h3>Expenses by Category</h3>
+                <p>Quarter expenses included in the cash-basis worksheet.</p>
+              </div>
+              <span>{summary.expenseCount} expense(s)</span>
+            </div>
+
+            {expensesByCategory.length ? (
+              <div className="sales-tax-table-wrap">
+                <table className="sales-tax-table">
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Entries</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {expensesByCategory.map((expense) => (
+                      <tr key={expense.category}>
+                        <td>{expense.category}</td>
+                        <td>{expense.expenseCount}</td>
+                        <td>{formatCurrency(expense.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="sales-tax-empty">
+                No expenses were recorded in this quarter.
               </div>
             )}
           </section>

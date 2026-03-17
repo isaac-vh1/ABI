@@ -165,7 +165,7 @@ const InvoicesPage = ({ toggleSidebar, collapsed }) => {
 
   const formatDate = (dateStr) => {
     const newDate = new Date(dateStr);
-    return newDate.getMonth() + '/' + newDate.getDate() + '/' + newDate.getFullYear();
+    return newDate.getMonth() + 1 + '/' + newDate.getDate() + '/' + newDate.getFullYear();
   };
 
   if (loading) return <Spinner className="m-5" />;

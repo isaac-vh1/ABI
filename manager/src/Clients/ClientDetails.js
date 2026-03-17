@@ -30,6 +30,17 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
   const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    city: '',
+    zipCode: '',
+    picturePreference: false,
+  });
 
   useEffect(() => {
     if (authLoading) return;
@@ -60,6 +71,16 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
         const nextPayload = await response.json();
         if (!cancelled) {
           setPayload(nextPayload);
+          setForm({
+            firstName: nextPayload.client?.firstName || '',
+            lastName: nextPayload.client?.lastName || '',
+            email: nextPayload.client?.email || '',
+            phoneNumber: nextPayload.client?.phoneNumber || '',
+            address: nextPayload.client?.address || '',
+            city: nextPayload.client?.city || '',
+            zipCode: nextPayload.client?.zipCode || '',
+            picturePreference: Boolean(nextPayload.client?.picturePreference),
+          });
         }
       } catch (err) {
         if (!cancelled) {
@@ -91,6 +112,48 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
   const invoices = payload?.invoices || [];
   const upcomingJobs = payload?.upcomingJobs || [];
 
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target;
+    setForm((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    setError('');
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/manager/client/${clientId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save client.');
+      }
+      setPayload((current) => current ? ({
+        ...current,
+        client: {
+          ...current.client,
+          ...form,
+          name: `${form.firstName} ${form.lastName}`.trim(),
+        },
+      }) : current);
+    } catch (err) {
+      console.error('Client save failed:', err);
+      setError(String(err.message || err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="client-details-page">
       <HeaderBar page="Client Overview" toggleSidebar={toggleSidebar} collapsed={collapsed} />
@@ -104,7 +167,7 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
             {client?.phoneNumber ? ` • ${client.phoneNumber}` : ''}
           </p>
         </div>
-        <button className="client-details-back" onClick={() => navigate('/table/clients')}>
+        <button className="client-details-back" onClick={() => navigate('/clients')}>
           Back to Clients
         </button>
       </section>
@@ -134,6 +197,57 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
           </section>
 
           <section className="client-details-grid">
+            <article className="client-details-panel">
+              <div className="client-details-panel-header">
+                <h3>Client Information</h3>
+                <span>Edit contact and service address</span>
+              </div>
+              <div className="client-details-form-grid">
+                <label>
+                  <span>First Name</span>
+                  <input name="firstName" value={form.firstName} onChange={handleChange} />
+                </label>
+                <label>
+                  <span>Last Name</span>
+                  <input name="lastName" value={form.lastName} onChange={handleChange} />
+                </label>
+                <label>
+                  <span>Email</span>
+                  <input name="email" value={form.email} onChange={handleChange} />
+                </label>
+                <label>
+                  <span>Phone Number</span>
+                  <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} />
+                </label>
+                <label className="client-details-form-wide">
+                  <span>Address</span>
+                  <input name="address" value={form.address} onChange={handleChange} />
+                </label>
+                <label>
+                  <span>City</span>
+                  <input name="city" value={form.city} onChange={handleChange} />
+                </label>
+                <label>
+                  <span>ZIP Code</span>
+                  <input name="zipCode" value={form.zipCode} onChange={handleChange} />
+                </label>
+                <label className="client-details-checkbox">
+                  <input
+                    type="checkbox"
+                    name="picturePreference"
+                    checked={form.picturePreference}
+                    onChange={handleChange}
+                  />
+                  <span>Picture updates preferred</span>
+                </label>
+              </div>
+              <div className="client-details-actions">
+                <button className="client-details-inline-button" onClick={handleSave} disabled={saving}>
+                  {saving ? 'Saving...' : 'Save Client'}
+                </button>
+              </div>
+            </article>
+
             <article className="client-details-panel">
               <div className="client-details-panel-header">
                 <h3>Invoices</h3>
