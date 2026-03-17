@@ -22,6 +22,13 @@ function formatCurrency(value) {
   return currencyFormatter.format(Number(value || 0));
 }
 
+function formatDate(value) {
+  if (!value) return 'Not recorded';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString();
+}
+
 function currentQuarter() {
   return Math.floor(new Date().getMonth() / 3) + 1;
 }
@@ -95,6 +102,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
     totalPaid: 0,
   };
   const locations = report?.locations || [];
+  const paidInvoices = report?.paidInvoices || [];
 
   return (
     <div className="sales-tax-page">
@@ -102,9 +110,9 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
 
       <section className="sales-tax-hero">
         <div>
-          <span className="sales-tax-kicker">Quarterly Filing</span>
-          <h2>Sales Tax Tracking</h2>
-          <p>Review paid invoices by location code, see tax collected, and confirm the quarter total before filing.</p>
+          <span className="sales-tax-kicker">Cash Basis Accounting</span>
+          <h2>Sales Tax Ledger</h2>
+          <p>Track tax actually collected in the quarter from paid invoices, grouped by location code and backed by a payment ledger.</p>
         </div>
         <div className="sales-tax-filters">
           <label>
@@ -131,6 +139,11 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
 
       {!loading && !error ? (
         <>
+          <section className="sales-tax-basis-note">
+            <strong>Basis:</strong> {report?.basis === 'cash' ? 'Cash basis' : report?.basis || 'Unknown'}
+            <span>Only invoices marked paid with a `payment_date` inside the selected quarter are included.</span>
+          </section>
+
           <section className="sales-tax-metrics">
             <article className="sales-tax-card">
               <span>Taxable Sales</span>
@@ -187,6 +200,49 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
             ) : (
               <div className="sales-tax-empty">
                 No paid invoices found for this quarter. This report uses paid invoices with a `payment_date`.
+              </div>
+            )}
+          </section>
+
+          <section className="sales-tax-panel">
+            <div className="sales-tax-panel-header">
+              <div>
+                <h3>Paid Invoice Ledger</h3>
+                <p>Audit trail for the amounts included in this cash-basis quarter.</p>
+              </div>
+              <span>{paidInvoices.length} paid invoice(s)</span>
+            </div>
+
+            {paidInvoices.length ? (
+              <div className="sales-tax-table-wrap">
+                <table className="sales-tax-table">
+                  <thead>
+                    <tr>
+                      <th>Paid Date</th>
+                      <th>Invoice</th>
+                      <th>Location Code</th>
+                      <th>Taxable Sales</th>
+                      <th>Sales Tax</th>
+                      <th>Total Paid</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paidInvoices.map((invoice) => (
+                      <tr key={`${invoice.invoiceNumber}-${invoice.paidDate}`}>
+                        <td>{formatDate(invoice.paidDate)}</td>
+                        <td>{invoice.invoiceNumber || `#${invoice.id}`}</td>
+                        <td>{invoice.locationCode}</td>
+                        <td>{formatCurrency(invoice.taxableSales)}</td>
+                        <td>{formatCurrency(invoice.salesTaxCollected)}</td>
+                        <td>{formatCurrency(invoice.totalPaid)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="sales-tax-empty">
+                There are no paid invoices recorded in this quarter yet.
               </div>
             )}
           </section>

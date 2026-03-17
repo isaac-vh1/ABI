@@ -69,7 +69,8 @@
 
 .sales-tax-state,
 .sales-tax-panel,
-.sales-tax-card {
+.sales-tax-card,
+.sales-tax-basis-note {
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 12px 26px rgba(24, 42, 68, 0.08);
@@ -88,6 +89,19 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
+}
+
+.sales-tax-basis-note {
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+  color: #2d3f5a;
+}
+
+.sales-tax-basis-note span {
+  color: #66737f;
 }
 
 .sales-tax-card {
@@ -170,6 +184,11 @@
 
   .sales-tax-filters {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .sales-tax-basis-note {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
