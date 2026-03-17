@@ -6,13 +6,16 @@ import './DraggableEvent.css'; // Import your CSS styles
 const DraggableEvent = ({ event, onDragStart, onClick }) => {
   const [isDragging, setIsDragging] = useState(false);
 
-  const handleDragStart = () => {
+  const handleDragStart = (e) => {
     setIsDragging(true);
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(event.id));
+    }
     onDragStart(event);
   };
 
   const handleDragEnd = () => {
-    console.log("Dragging End: ", event)
     setIsDragging(false);
   };
 
