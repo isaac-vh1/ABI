@@ -21,7 +21,7 @@ import Clients from './Clients/Clients.js';
 function App() {
   const [collapsed, setCollapsed] = useState(true);
   const [savedPage, setSavedPage] = useState("")
-  const tables = ["clients", "invoices", "invoice_items", "locations", "quarterly_information", "users", "expenses", "notifications",  "contractors",
+  const tables = ["invoices", "invoice_items", "locations", "quarterly_information", "users", "reciepts", "notifications",  "contractors",
     "contractor_payments",
     "owner_draws",
     "calendar"];
@@ -48,7 +48,6 @@ function App() {
         <Link to="/sales-tax" className="nav-link" onClick={toggleSidebarSmall}>Sales Tax</Link>
         <Link to="/reciepts" className="nav-link" onClick={toggleSidebarSmall}>Reciepts</Link>
         <Link to="/new-invoice" className="nav-link" onClick={toggleSidebarSmall}>New Invoice</Link>
-        <Link to="/settings" className="nav-link" onClick={toggleSidebarSmall}>Settings</Link>
         <Dropdown>
             <Dropdown.Toggle variant="secondary" id="tables-dropdown">
               Tables
@@ -74,6 +73,7 @@ function App() {
             <Route path="/" element={<ProtectedRoute setSavedPage={setSavedPage}><Home toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/calendar" element={<ProtectedRoute setSavedPage={setSavedPage}><Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="/clients" element={<ProtectedRoute setSavedPage={setSavedPage}><Clients toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
+            <Route path="/table/clients" element={<Navigate to="/clients" replace />} />
             {tables.map((table) => (
               <Route key={table} path={`/table/${table}`} element={<ProtectedRoute setSavedPage={setSavedPage}><Table page={table} toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             ))}

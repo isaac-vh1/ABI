@@ -31,6 +31,7 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -146,6 +147,7 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
           name: `${form.firstName} ${form.lastName}`.trim(),
         },
       }) : current);
+      setIsEditing(false);
     } catch (err) {
       console.error('Client save failed:', err);
       setError(String(err.message || err));
@@ -200,36 +202,36 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
             <article className="client-details-panel">
               <div className="client-details-panel-header">
                 <h3>Client Information</h3>
-                <span>Edit contact and service address</span>
+                <span>{isEditing ? 'Update contact and service address' : 'Contact and service address'}</span>
               </div>
               <div className="client-details-form-grid">
                 <label>
                   <span>First Name</span>
-                  <input name="firstName" value={form.firstName} onChange={handleChange} />
+                  <input name="firstName" value={form.firstName} onChange={handleChange} disabled={!isEditing} />
                 </label>
                 <label>
                   <span>Last Name</span>
-                  <input name="lastName" value={form.lastName} onChange={handleChange} />
+                  <input name="lastName" value={form.lastName} onChange={handleChange} disabled={!isEditing} />
                 </label>
                 <label>
                   <span>Email</span>
-                  <input name="email" value={form.email} onChange={handleChange} />
+                  <input name="email" value={form.email} onChange={handleChange} disabled={!isEditing} />
                 </label>
                 <label>
                   <span>Phone Number</span>
-                  <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} />
+                  <input name="phoneNumber" value={form.phoneNumber} onChange={handleChange} disabled={!isEditing} />
                 </label>
                 <label className="client-details-form-wide">
                   <span>Address</span>
-                  <input name="address" value={form.address} onChange={handleChange} />
+                  <input name="address" value={form.address} onChange={handleChange} disabled={!isEditing} />
                 </label>
                 <label>
                   <span>City</span>
-                  <input name="city" value={form.city} onChange={handleChange} />
+                  <input name="city" value={form.city} onChange={handleChange} disabled={!isEditing} />
                 </label>
                 <label>
                   <span>ZIP Code</span>
-                  <input name="zipCode" value={form.zipCode} onChange={handleChange} />
+                  <input name="zipCode" value={form.zipCode} onChange={handleChange} disabled={!isEditing} />
                 </label>
                 <label className="client-details-checkbox">
                   <input
@@ -237,14 +239,38 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
                     name="picturePreference"
                     checked={form.picturePreference}
                     onChange={handleChange}
+                    disabled={!isEditing}
                   />
                   <span>Picture updates preferred</span>
                 </label>
               </div>
               <div className="client-details-actions">
-                <button className="client-details-inline-button" onClick={handleSave} disabled={saving}>
-                  {saving ? 'Saving...' : 'Save Client'}
-                </button>
+                {isEditing ? (
+                  <>
+                    <button className="client-details-secondary-button" onClick={() => {
+                      setForm({
+                        firstName: client?.firstName || '',
+                        lastName: client?.lastName || '',
+                        email: client?.email || '',
+                        phoneNumber: client?.phoneNumber || '',
+                        address: client?.address || '',
+                        city: client?.city || '',
+                        zipCode: client?.zipCode || '',
+                        picturePreference: Boolean(client?.picturePreference),
+                      });
+                      setIsEditing(false);
+                    }}>
+                      Cancel
+                    </button>
+                    <button className="client-details-inline-button" onClick={handleSave} disabled={saving}>
+                      {saving ? 'Saving...' : 'Save Client'}
+                    </button>
+                  </>
+                ) : (
+                  <button className="client-details-inline-button" onClick={() => setIsEditing(true)}>
+                    Edit Client
+                  </button>
+                )}
               </div>
             </article>
 
