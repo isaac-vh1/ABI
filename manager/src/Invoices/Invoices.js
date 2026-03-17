@@ -180,7 +180,7 @@ const InvoicesPage = ({ toggleSidebar, collapsed }) => {
           <HamburgerMenu collapsed={collapsed} />
         </div>
         <h1>Invoice Manager</h1>
-        <Button>New Invoice</Button>
+        <Button onClick={() => navigate('/new-invoice')}>New Invoice</Button>
       <Button size="sm" onClick={handleExportCSV} variant="outline-secondary">
         Export CSV
       </Button>

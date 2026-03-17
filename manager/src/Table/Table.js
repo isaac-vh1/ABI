@@ -6,6 +6,7 @@ import { auth } from '../firebase';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { Spinner } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 function Table({ page, toggleSidebar, collapsed }) {
   const [update, setUpdate] = useState(false);
@@ -17,6 +18,7 @@ function Table({ page, toggleSidebar, collapsed }) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const user = auth.currentUser;
+  const navigate = useNavigate();
 
   useEffect(() => {
     setDataHeader([]);
@@ -74,6 +76,10 @@ function Table({ page, toggleSidebar, collapsed }) {
     setFilteredData(filtered);
   };
   const handleRowClick = (item) => {
+    if (page === 'clients') {
+      navigate(`/clients/${item[0]}`);
+      return;
+    }
     setSelectedItem(item)
   };
   const closePopup = () => {
@@ -174,6 +180,9 @@ function Table({ page, toggleSidebar, collapsed }) {
         value={searchFilter}
         onChange={handleFilterChange}
       />
+      {page === 'clients' ? (
+        <p className="table-helper-copy">Click a client row to open invoices, upcoming jobs, and year-to-date spend.</p>
+      ) : null}
       <table className="table">
         <thead>
           <tr>
@@ -184,7 +193,7 @@ function Table({ page, toggleSidebar, collapsed }) {
         </thead>
         <tbody>
           {filteredData.map((row) => (
-            <tr key={row[0]} onClick={() => handleRowClick(row)}>
+            <tr key={row[0]} onClick={() => handleRowClick(row)} className={page === 'clients' ? 'clickable-row' : ''}>
               {row.slice(1).map((cell, cellIndex) => (
                 <td key={cellIndex}>{cell}</td>
               ))}

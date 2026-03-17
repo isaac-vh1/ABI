@@ -14,6 +14,7 @@ import InvoiceNew from './new-invoice/InvoiceNew.js';
 import Invoices from './Invoices/Invoices.js'
 import ReceiptScanner from './reciepts/reciepts.js';
 import { Dropdown } from 'react-bootstrap'
+import ClientDetails from './Clients/ClientDetails.js';
 
 function App() {
   const [collapsed, setCollapsed] = useState(true);
@@ -75,8 +76,9 @@ function App() {
             <Route path="/invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoicePage /></ProtectedRoute>} />
             <Route path="/invoice-dashboard" element={<ProtectedRoute setSavedPage={setSavedPage}><Invoices toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/new-invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoiceNew toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/clients/:clientId" element={<ProtectedRoute setSavedPage={setSavedPage}><ClientDetails toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/reciepts" element={<ProtectedRoute setSavedPage={setSavedPage}><ReceiptScanner toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
       </AuthProvider>
