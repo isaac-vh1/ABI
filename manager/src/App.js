@@ -15,6 +15,7 @@ import Invoices from './Invoices/Invoices.js'
 import ReceiptScanner from './reciepts/reciepts.js';
 import { Dropdown } from 'react-bootstrap'
 import ClientDetails from './Clients/ClientDetails.js';
+import SalesTaxReport from './SalesTax/SalesTaxReport.js';
 
 function App() {
   const [collapsed, setCollapsed] = useState(true);
@@ -42,6 +43,7 @@ function App() {
         <Link to="/" className="nav-link" onClick={toggleSidebarSmall}>Home</Link>
         <Link to="/calendar" className="nav-link" onClick={toggleSidebar}>Calendar</Link>
         <Link to="/invoice-dashboard" className="nav-link" onClick={toggleSidebarSmall}>Invoices</Link>
+        <Link to="/sales-tax" className="nav-link" onClick={toggleSidebarSmall}>Sales Tax</Link>
         <Link to="/reciepts" className="nav-link" onClick={toggleSidebarSmall}>Reciepts</Link>
         <Link to="/new-invoice" className="nav-link" onClick={toggleSidebarSmall}>New Invoice</Link>
         <Link to="/settings" className="nav-link" onClick={toggleSidebarSmall}>Settings</Link>
@@ -75,6 +77,7 @@ function App() {
             <Route path="/settings" element={<ProtectedRoute setSavedPage={setSavedPage}><Settings toggleSidebar={toggleSidebar}/></ProtectedRoute>} />
             <Route path="/invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoicePage /></ProtectedRoute>} />
             <Route path="/invoice-dashboard" element={<ProtectedRoute setSavedPage={setSavedPage}><Invoices toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
+            <Route path="/sales-tax" element={<ProtectedRoute setSavedPage={setSavedPage}><SalesTaxReport toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/new-invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoiceNew toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="/clients/:clientId" element={<ProtectedRoute setSavedPage={setSavedPage}><ClientDetails toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/reciepts" element={<ProtectedRoute setSavedPage={setSavedPage}><ReceiptScanner toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
