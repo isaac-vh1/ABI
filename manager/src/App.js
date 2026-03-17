@@ -1,7 +1,6 @@
 import './App.css';
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 import React, { useState } from 'react';
-import { useLocation } from "react-router-dom";
 import Home from "./Home/Home.js";
 import Calendar from "./Calendar/Calendar.js";
 import Table from "./Table/Table.js";
@@ -19,12 +18,10 @@ import { Dropdown } from 'react-bootstrap'
 function App() {
   const [collapsed, setCollapsed] = useState(true);
   const [savedPage, setSavedPage] = useState("")
-  const location = useLocation();
-  const isCalendarRoute = location.pathname === "/calendar";
-  const [tables, setTables] = useState(["clients", "invoices", "invoice_items", "locations", "quarterly_information", "users", "expenses", "notifications",  "contractors",
+  const tables = ["clients", "invoices", "invoice_items", "locations", "quarterly_information", "users", "expenses", "notifications",  "contractors",
     "contractor_payments",
     "owner_draws",
-    "calendar"]);
+    "calendar"];
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
@@ -66,11 +63,11 @@ function App() {
         </Dropdown>
       </nav>
       <AuthProvider>
-        <main className={`main-content ${isCalendarRoute ? "no-collapse-on-calendar" : (collapsed ? 'collapsed' : '')}`}>
+        <main className={`main-content ${collapsed ? 'collapsed' : ''}`}>
           <Routes>
             <Route path="/login" element={<Login page={ savedPage }/>} />
             <Route path="/" element={<ProtectedRoute setSavedPage={setSavedPage}><Home toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
-            <Route path="/calendar" element={<Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/>} />
+            <Route path="/calendar" element={<ProtectedRoute setSavedPage={setSavedPage}><Calendar toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             {tables.map((table) => (
               <Route key={table} path={`/table/${table}`} element={<ProtectedRoute setSavedPage={setSavedPage}><Table page={table} toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             ))}
