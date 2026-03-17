@@ -87,13 +87,6 @@ body {
   margin-left: 0px;
 }
 
-.no-collapse-on-calendar {
-  transition: none !important;
-  margin-left: 20%;
-}
-
-
-
 @media (max-width: 767px) {
   .sidebar {
     width: 100%;
