@@ -219,7 +219,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
         tax_amount: form.tax_amount ? String(form.tax_amount) : '',
       };
 
-      const response = await fetch('/api/manager/update/reciepts', {
+      const response = await fetch('/api/manager/update/receipts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
