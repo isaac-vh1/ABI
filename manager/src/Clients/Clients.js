@@ -33,6 +33,7 @@ export default function Clients({ toggleSidebar, collapsed }) {
     address: '',
     city: '',
     zipCode: '',
+    dorLocationCode: '',
     picturePreference: false,
   });
 
@@ -140,6 +141,7 @@ export default function Clients({ toggleSidebar, collapsed }) {
       address: '',
       city: '',
       zipCode: '',
+      dorLocationCode: '',
       picturePreference: false,
     });
   };
@@ -275,6 +277,15 @@ export default function Clients({ toggleSidebar, collapsed }) {
             <label>
               <span>ZIP Code</span>
               <input name="zipCode" value={newClient.zipCode} onChange={handleNewClientChange} />
+            </label>
+            <label>
+              <span>DOR Location Code</span>
+              <input
+                name="dorLocationCode"
+                value={newClient.dorLocationCode}
+                onChange={handleNewClientChange}
+                placeholder="Manual entry"
+              />
             </label>
             <label className="clients-create-checkbox">
               <input

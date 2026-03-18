@@ -40,6 +40,7 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
     address: '',
     city: '',
     zipCode: '',
+    dorLocationCode: '',
     picturePreference: false,
   });
 
@@ -80,6 +81,7 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
             address: nextPayload.client?.address || '',
             city: nextPayload.client?.city || '',
             zipCode: nextPayload.client?.zipCode || '',
+            dorLocationCode: nextPayload.client?.dorLocationCode || '',
             picturePreference: Boolean(nextPayload.client?.picturePreference),
           });
         }
@@ -233,6 +235,15 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
                   <span>ZIP Code</span>
                   <input name="zipCode" value={form.zipCode} onChange={handleChange} disabled={!isEditing} />
                 </label>
+                <label>
+                  <span>DOR Location Code</span>
+                  <input
+                    name="dorLocationCode"
+                    value={form.dorLocationCode}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                  />
+                </label>
                 <label className="client-details-checkbox">
                   <input
                     type="checkbox"
@@ -256,6 +267,7 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
                         address: client?.address || '',
                         city: client?.city || '',
                         zipCode: client?.zipCode || '',
+                        dorLocationCode: client?.dorLocationCode || '',
                         picturePreference: Boolean(client?.picturePreference),
                       });
                       setIsEditing(false);

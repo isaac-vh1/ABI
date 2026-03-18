@@ -145,7 +145,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
         <>
           <section className="sales-tax-basis-note">
             <strong>Basis:</strong> {report?.basis === 'cash' ? 'Cash basis' : report?.basis || 'Unknown'}
-            <span>Only invoices marked paid with a `payment_date` inside the selected quarter are included.</span>
+            <span>Only invoices marked paid with a `payment_date` inside the selected quarter are included and grouped by the stored DOR location code on each service location.</span>
           </section>
 
           <section className="sales-tax-metrics">
@@ -190,6 +190,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
                   <thead>
                     <tr>
                       <th>Location Code</th>
+                      <th>Service Address</th>
                       <th>Invoices</th>
                       <th>Taxable Sales</th>
                       <th>Sales Tax Collected</th>
@@ -198,8 +199,9 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
                   </thead>
                   <tbody>
                     {locations.map((row) => (
-                      <tr key={row.locationCode}>
+                      <tr key={`${row.locationCode}-${row.locationId || 'na'}`}>
                         <td>{row.locationCode}</td>
+                        <td>{[row.address, row.city, row.zipCode].filter(Boolean).join(', ') || 'No address linked'}</td>
                         <td>{row.invoiceCount}</td>
                         <td>{formatCurrency(row.taxableSales)}</td>
                         <td>{formatCurrency(row.salesTaxCollected)}</td>
@@ -270,6 +272,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
                       <th>Paid Date</th>
                       <th>Invoice</th>
                       <th>Location Code</th>
+                      <th>Service Address</th>
                       <th>Taxable Sales</th>
                       <th>Sales Tax</th>
                       <th>Total Paid</th>
@@ -281,6 +284,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
                         <td>{formatDate(invoice.paidDate)}</td>
                         <td>{invoice.invoiceNumber || `#${invoice.id}`}</td>
                         <td>{invoice.locationCode}</td>
+                        <td>{[invoice.locationAddress, invoice.locationCity].filter(Boolean).join(', ') || 'No address linked'}</td>
                         <td>{formatCurrency(invoice.taxableSales)}</td>
                         <td>{formatCurrency(invoice.salesTaxCollected)}</td>
                         <td>{formatCurrency(invoice.totalPaid)}</td>
