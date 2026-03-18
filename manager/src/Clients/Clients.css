@@ -75,6 +75,83 @@
   background: #f7fbfc;
 }
 
+.clients-toolbar {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.clients-primary-action,
+.clients-secondary-action {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.clients-primary-action {
+  background: #164a46;
+  color: #f8fdfd;
+  white-space: nowrap;
+}
+
+.clients-secondary-action {
+  background: #edf3f5;
+  color: #24414c;
+}
+
+.clients-create-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.clients-create-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clients-create-form label span {
+  color: #46606b;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.clients-create-form input {
+  padding: 12px 13px;
+  border-radius: 12px;
+  border: 1px solid #d8e6e9;
+  background: #f7fbfc;
+}
+
+.clients-create-form-wide {
+  grid-column: 1 / -1;
+}
+
+.clients-create-checkbox {
+  flex-direction: row !important;
+  align-items: center;
+  padding-top: 26px;
+}
+
+.clients-create-checkbox input {
+  width: 18px;
+  height: 18px;
+}
+
+.clients-create-checkbox span {
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+}
+
+.clients-create-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
 .clients-error {
   background: #fff0e8;
   color: #844100;
@@ -168,5 +245,18 @@
 
   .clients-hero-stat {
     text-align: left;
+  }
+
+  .clients-toolbar,
+  .clients-create-actions {
+    flex-direction: column;
+  }
+
+  .clients-create-form {
+    grid-template-columns: 1fr;
+  }
+
+  .clients-create-form-wide {
+    grid-column: auto;
   }
 }

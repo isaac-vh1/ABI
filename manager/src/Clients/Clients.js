@@ -23,6 +23,18 @@ export default function Clients({ toggleSidebar, collapsed }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newClient, setNewClient] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    city: '',
+    zipCode: '',
+    picturePreference: false,
+  });
 
   useEffect(() => {
     if (authLoading) return;
@@ -111,6 +123,85 @@ export default function Clients({ toggleSidebar, collapsed }) {
     }
   };
 
+  const handleNewClientChange = (event) => {
+    const { name, value, type, checked } = event.target;
+    setNewClient((current) => ({
+      ...current,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const resetCreateForm = () => {
+    setNewClient({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      address: '',
+      city: '',
+      zipCode: '',
+      picturePreference: false,
+    });
+  };
+
+  const handleCreateClient = async (event) => {
+    event.preventDefault();
+    if (!user || creating) return;
+
+    const firstName = newClient.firstName.trim();
+    const lastName = newClient.lastName.trim();
+    const address = newClient.address.trim();
+    const city = newClient.city.trim();
+    const zipCode = newClient.zipCode.trim();
+
+    if (!firstName || !lastName) {
+      setError('First and last name are required.');
+      return;
+    }
+
+    if (!address || !city || !zipCode) {
+      setError('Address, city, and ZIP code are required.');
+      return;
+    }
+
+    setCreating(true);
+    setError('');
+
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch('/api/manager/client', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...newClient,
+          firstName,
+          lastName,
+          address,
+          city,
+          zipCode,
+          email: newClient.email.trim(),
+          phoneNumber: newClient.phoneNumber.trim(),
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || 'Failed to create client.');
+      }
+
+      resetCreateForm();
+      setIsCreating(false);
+      navigate(`/clients/${payload.id}`);
+    } catch (err) {
+      console.error('Client create failed:', err);
+      setError(String(err.message || err));
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="clients-page">
       <HeaderBar page="Clients" toggleSidebar={toggleSidebar} collapsed={collapsed} />
@@ -135,10 +226,83 @@ export default function Clients({ toggleSidebar, collapsed }) {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, email, phone, or address"
         />
+        <button
+          className="clients-primary-action"
+          type="button"
+          onClick={() => {
+            setError('');
+            setIsCreating((current) => !current);
+          }}
+        >
+          {isCreating ? 'Close Form' : 'New Client'}
+        </button>
       </section>
 
       {loading ? <div className="clients-state">Loading clients...</div> : null}
       {error ? <div className="clients-state clients-error">{error}</div> : null}
+
+      {isCreating ? (
+        <section className="clients-panel">
+          <div className="clients-panel-header">
+            <h3>Create Client</h3>
+            <span>Add the contact and service address before scheduling work.</span>
+          </div>
+          <form className="clients-create-form" onSubmit={handleCreateClient}>
+            <label>
+              <span>First Name</span>
+              <input name="firstName" value={newClient.firstName} onChange={handleNewClientChange} />
+            </label>
+            <label>
+              <span>Last Name</span>
+              <input name="lastName" value={newClient.lastName} onChange={handleNewClientChange} />
+            </label>
+            <label>
+              <span>Email</span>
+              <input name="email" value={newClient.email} onChange={handleNewClientChange} />
+            </label>
+            <label>
+              <span>Phone Number</span>
+              <input name="phoneNumber" value={newClient.phoneNumber} onChange={handleNewClientChange} />
+            </label>
+            <label className="clients-create-form-wide">
+              <span>Address</span>
+              <input name="address" value={newClient.address} onChange={handleNewClientChange} />
+            </label>
+            <label>
+              <span>City</span>
+              <input name="city" value={newClient.city} onChange={handleNewClientChange} />
+            </label>
+            <label>
+              <span>ZIP Code</span>
+              <input name="zipCode" value={newClient.zipCode} onChange={handleNewClientChange} />
+            </label>
+            <label className="clients-create-checkbox">
+              <input
+                type="checkbox"
+                name="picturePreference"
+                checked={newClient.picturePreference}
+                onChange={handleNewClientChange}
+              />
+              <span>Client prefers picture updates</span>
+            </label>
+            <div className="clients-create-actions clients-create-form-wide">
+              <button className="clients-primary-action" type="submit" disabled={creating}>
+                {creating ? 'Creating...' : 'Create Client'}
+              </button>
+              <button
+                className="clients-secondary-action"
+                type="button"
+                onClick={() => {
+                  resetCreateForm();
+                  setIsCreating(false);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
 
       {!loading && !error ? (
         <section className="clients-panel">
