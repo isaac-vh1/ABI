@@ -40,6 +40,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
   const [error, setError] = useState('');
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [quarter, setQuarter] = useState(String(currentQuarter()));
+  const [locationCode, setLocationCode] = useState('');
 
   const yearOptions = useMemo(() => {
     const now = new Date().getFullYear();
@@ -60,7 +61,11 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
       setError('');
       try {
         const token = await user.getIdToken();
-        const response = await fetch(`/api/manager/sales-tax-report?year=${year}&quarter=${quarter}`, {
+        const params = new URLSearchParams({ year, quarter });
+        if (locationCode) {
+          params.set('locationCode', locationCode);
+        }
+        const response = await fetch(`/api/manager/sales-tax-report?${params.toString()}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -93,7 +98,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
     return () => {
       cancelled = true;
     };
-  }, [authLoading, quarter, user, year]);
+  }, [authLoading, locationCode, quarter, user, year]);
 
   const summary = report?.summary || {
     invoiceCount: 0,
@@ -107,6 +112,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
   const locations = report?.locations || [];
   const paidInvoices = report?.paidInvoices || [];
   const expensesByCategory = report?.expensesByCategory || [];
+  const availableLocationCodes = report?.availableLocationCodes || [];
 
   return (
     <div className="sales-tax-page">
@@ -132,6 +138,15 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
             <select value={quarter} onChange={(e) => setQuarter(e.target.value)}>
               {Object.entries(quarterLabels).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>Location Code</span>
+            <select value={locationCode} onChange={(e) => setLocationCode(e.target.value)}>
+              <option value="">All locations</option>
+              {availableLocationCodes.map((code) => (
+                <option key={code} value={code}>{code}</option>
               ))}
             </select>
           </label>
@@ -181,7 +196,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
                 <h3>{quarterLabels[report?.quarter] || `Q${quarter}`} {report?.year || year}</h3>
                 <p>{report?.periodStart} through {report?.periodEnd}</p>
               </div>
-              <span>{locations.length} location code(s)</span>
+              <span>{locationCode ? `Filtered to ${locationCode}` : `${locations.length} location code(s)`}</span>
             </div>
 
             {locations.length ? (
