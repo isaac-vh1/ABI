@@ -139,6 +139,30 @@ const InvoicesPage = ({ toggleSidebar, collapsed }) => {
     saveChanges(updated);
   };
 
+  const handleDelete = (invoiceId) => {
+    if (!user) return;
+    user.getIdToken().then(async (token) => {
+      try {
+        const res = await fetch('/api/manager/delete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(['invoices', invoiceId]),
+        });
+        if (!res.ok) throw new Error('Delete failed');
+        setInvoices((cur) => cur.filter((row) => row[IDX.INVOICE_ID] !== invoiceId));
+        if (selectedItem && selectedItem[IDX.INVOICE_ID] === invoiceId) {
+          closePopup();
+        }
+      } catch (e) {
+        console.error(e);
+        setError(true);
+      }
+    });
+  };
+
   const saveChanges = (selectedItem) => {
     if (!user) return;
     user.getIdToken().then(async (token) => {
@@ -165,7 +189,7 @@ const InvoicesPage = ({ toggleSidebar, collapsed }) => {
 
   const formatDate = (dateStr) => {
     const newDate = new Date(dateStr);
-    return newDate.getMonth() + '/' + newDate.getDate() + '/' + newDate.getFullYear();
+    return newDate.getMonth() + 1 + '/' + newDate.getDate() + '/' + newDate.getFullYear();
   };
 
   if (loading) return <Spinner className="m-5" />;
@@ -180,7 +204,7 @@ const InvoicesPage = ({ toggleSidebar, collapsed }) => {
           <HamburgerMenu collapsed={collapsed} />
         </div>
         <h1>Invoice Manager</h1>
-        <Button>New Invoice</Button>
+        <Button onClick={() => navigate('/new-invoice')}>New Invoice</Button>
       <Button size="sm" onClick={handleExportCSV} variant="outline-secondary">
         Export CSV
       </Button>
@@ -239,7 +263,7 @@ const InvoicesPage = ({ toggleSidebar, collapsed }) => {
                 <Button size="sm" className="me-1" variant="outline-warning" onClick={() => handleRowClick(raw)}>
                   Edit
                 </Button>
-                <Button size="sm" variant="outline-danger">
+                <Button size="sm" variant="outline-danger" onClick={() => handleDelete(raw[IDX.INVOICE_ID])}>
                   Delete
                 </Button>
               </td>
@@ -288,6 +312,9 @@ const InvoicesPage = ({ toggleSidebar, collapsed }) => {
               </Button>
               <Button variant="primary" onClick={() => saveChanges(selectedItem)}>
                 Save
+              </Button>
+              <Button variant="danger" className="ms-2" onClick={() => handleDelete(selectedItem[IDX.INVOICE_ID])}>
+                Delete
               </Button>
             </div>
           </div>

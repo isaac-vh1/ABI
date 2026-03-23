@@ -1,0 +1,204 @@
+.sales-tax-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sales-tax-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: end;
+  padding: 24px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 30%),
+    linear-gradient(135deg, #2a2f52 0%, #365f8f 55%, #a2d2d8 100%);
+  color: #f5fbff;
+  box-shadow: 0 18px 38px rgba(24, 42, 68, 0.18);
+}
+
+.sales-tax-kicker {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  opacity: 0.84;
+}
+
+.sales-tax-hero h2 {
+  margin: 0 0 10px;
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+.sales-tax-hero p {
+  margin: 0;
+  max-width: 54ch;
+  color: rgba(245, 251, 255, 0.88);
+}
+
+.sales-tax-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.sales-tax-filters label {
+  display: grid;
+  gap: 8px;
+}
+
+.sales-tax-filters span {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.sales-tax-filters select {
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.sales-tax-filters option {
+  color: #173223;
+}
+
+.sales-tax-state,
+.sales-tax-panel,
+.sales-tax-card,
+.sales-tax-basis-note {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 26px rgba(24, 42, 68, 0.08);
+}
+
+.sales-tax-state {
+  padding: 16px 18px;
+}
+
+.sales-tax-error {
+  background: #fff0e8;
+  color: #844100;
+}
+
+.sales-tax-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.sales-tax-basis-note {
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+  color: #2d3f5a;
+}
+
+.sales-tax-basis-note span {
+  color: #66737f;
+}
+
+.sales-tax-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sales-tax-card span {
+  color: #66737f;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.84rem;
+}
+
+.sales-tax-card strong {
+  color: #1a2d4c;
+  font-size: clamp(1.5rem, 2.2vw, 2.4rem);
+}
+
+.sales-tax-panel {
+  padding: 18px;
+}
+
+.sales-tax-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.sales-tax-panel-header h3 {
+  margin: 0 0 4px;
+  color: #1a2d4c;
+}
+
+.sales-tax-panel-header p,
+.sales-tax-panel-header span {
+  margin: 0;
+  color: #66737f;
+}
+
+.sales-tax-table-wrap {
+  overflow-x: auto;
+}
+
+.sales-tax-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sales-tax-table th,
+.sales-tax-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #e8edf3;
+  text-align: left;
+}
+
+.sales-tax-table th {
+  color: #66737f;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.82rem;
+}
+
+.sales-tax-empty {
+  padding: 18px;
+  border-radius: 14px;
+  background: #f6f9fc;
+  color: #66737f;
+}
+
+@media (max-width: 900px) {
+  .sales-tax-hero,
+  .sales-tax-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .sales-tax-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sales-tax-basis-note {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .sales-tax-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .sales-tax-panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

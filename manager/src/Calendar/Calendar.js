@@ -9,8 +9,8 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "./Calendar.css";
 
-import { auth } from "../firebase";
 import HamburgerMenu from "../Components/HamburgerMenu";
+import { useAuth } from "../AuthContext";
 import CustomEvent from "./CustomEvent";
 import DraggableEvent from "./DraggableEvent";
 
@@ -55,14 +55,14 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   const [draggedEvent, setDraggedEvent] = useState(null);
   const eventIdRef = useRef(1000);
 
-  const user = auth.currentUser;
+  const { user, loading: authLoading } = useAuth();
 
-  const getToken = async () => {
+  const getToken = useCallback(async () => {
     if (!user) {
       throw new Error("No authenticated user found.");
     }
     return user.getIdToken();
-  };
+  }, [user]);
 
   const authorizedFetch = useCallback(
     async (url, options = {}) => {
@@ -76,11 +76,14 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
       };
       return fetch(url, merged);
     },
-    [user]
+    [getToken]
   );
 
   const loadCalendarData = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -102,8 +105,9 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   }, [authorizedFetch, user]);
 
   useEffect(() => {
+    if (authLoading) return;
     loadCalendarData();
-  }, [loadCalendarData]);
+  }, [authLoading, loadCalendarData]);
 
   const allScheduledLikeEvents = useMemo(
     () => [...scheduledEvents, ...workerSchedule],
@@ -234,6 +238,10 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
 
   const handleSaveChanges = async () => {
     if (!selectedEvent) return;
+    if (!selectedEvent.title.trim()) {
+      setError("Event title is required.");
+      return;
+    }
     const setter = getCalendarSetter(selectedEvent.calendar);
     const nextEvent = { ...selectedEvent };
     if (nextEvent.start && !nextEvent.end) {
@@ -261,15 +269,12 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   if (loading) return <Spinner className="m-5" />;
 
   return (
-    <div>
+    <div className="calendar-page">
       <Helmet>
         <title>Calendar</title>
       </Helmet>
-      <div>
-        <div className={`calendar-toggle ${collapsed ? "collapsed" : ""}`} onClick={toggleSidebar}>
-          <HamburgerMenu collapsed={collapsed} />
-        </div>
-        <div className={`calendar-drop-bar ${collapsed ? "collapsed" : ""}`}>
+      <div className="calendar-layout">
+        <aside className="calendar-drop-bar">
           <h2>
             Unscheduled <Button onClick={handleNewUnscheduledEvent}>+</Button>
           </h2>
@@ -286,16 +291,13 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
             ))
           )}
           {error ? <p className="noJob">{error}</p> : null}
-        </div>
+        </aside>
 
-        <div className={`my-custom-calendar-container ${collapsed ? "collapsed" : ""}`}>
+        <section className="calendar-main-panel">
           <div className="top-bar">
             <div className={`top-bar-button ${collapsed ? "collapsed" : ""}`} onClick={toggleSidebar}>
               <HamburgerMenu collapsed={collapsed} />
             </div>
-            <Button className="calendar-button" onClick={() => setCurrentView(Views.MONTH)}>
-              Month
-            </Button>
             <Button className="calendar-button" onClick={handleNewUnscheduledEvent}>
               New Job
             </Button>
@@ -317,6 +319,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
             selectable
             resizable
             dragFromOutsideItem={() => draggedEvent}
+            onDragOver={(dragEvent) => dragEvent.preventDefault()}
             onDropFromOutside={handleDropFromOutside}
             onSelectSlot={({ start }) => {
               setCurrentDate(start);
@@ -331,12 +334,12 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
               event: (props) => <CustomEvent {...props} onDoubleClick={setSelectedEvent} />,
             }}
           />
-        </div>
+        </section>
       </div>
 
       {selectedEvent && (
-        <div className="modal-backdrop" onClick={() => setSelectedEvent(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="calendar-modal-backdrop" onClick={() => setSelectedEvent(null)}>
+          <div className="calendar-modal-content" onClick={(e) => e.stopPropagation()}>
             <h2>Edit Event</h2>
             <label>
               Title:
@@ -399,7 +402,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
                 }}
               />
             </label>
-            <div className="modal-buttons">
+            <div className="calendar-modal-buttons">
               <Button className="delete-button" onClick={() => removeEvent(selectedEvent)}>
                 Delete
               </Button>
