@@ -2,46 +2,86 @@ import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
+const VERIFY_REQUEST_TIMEOUT_MS = 15000;
+
 function ProtectedRoute({ setSavedPage, children }) {
   const { user, loading } = useAuth();
   const location = useLocation();
   const [verified, setVerified] = useState(null);
   const [client, setClient] = useState(null);
+  const [verificationError, setVerificationError] = useState('');
 
   useEffect(() => {
-    setVerified(null)
-    if (user) {
-      user.getIdToken().then(token => {
+    let cancelled = false;
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), VERIFY_REQUEST_TIMEOUT_MS);
+
+    setVerified(null);
+    setClient(null);
+    setVerificationError('');
+
+    if (!user) {
+      window.clearTimeout(timeoutId);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    user.getIdToken()
+      .then((token) =>
         fetch('https://www.client.acresbyisaac.com/api/get-verified', {
           method: 'GET',
           headers: {
             'Authorization': 'Bearer ' + token
-          }
+          },
+          signal: controller.signal,
         })
-        .then(response => {
-          return response.json();
-        })
-        .then(data => {
-          if (data === "true") {
-            setVerified(true);
-            setClient(true);
-          } else if (data === "Not Verified") {
-            setVerified(false);
-            setClient(false);
-          } else if (data === "No Client") {
-            setVerified(true);
-            setClient(false);
-          } else {
-            setVerified(false);
-            setClient(false);
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching Data:', error);
+      )
+      .then(async (response) => {
+        const data = await response.json().catch(() => null);
+        if (!response.ok) {
+          const message = data && typeof data === 'object' ? data.error : '';
+          throw new Error(message || 'Unable to verify your account.');
+        }
+        return data;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        if (data === "true") {
+          setVerified(true);
+          setClient(true);
+        } else if (data === "Not Verified") {
           setVerified(false);
-        });
+          setClient(false);
+        } else if (data === "No Client") {
+          setVerified(true);
+          setClient(false);
+        } else {
+          setVerified(false);
+          setClient(false);
+          setVerificationError('Unexpected verification response from the server.');
+        }
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error('Error fetching verification state:', error);
+        setVerified(false);
+        setClient(false);
+        setVerificationError(
+          error.name === 'AbortError'
+            ? 'Account verification timed out. Please try again.'
+            : String(error.message || error)
+        );
+      })
+      .finally(() => {
+        window.clearTimeout(timeoutId);
       });
-    }
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [user, location]);
 
   if (loading) {
@@ -50,6 +90,9 @@ function ProtectedRoute({ setSavedPage, children }) {
   if (!user) {
     setSavedPage(location.pathname);
     return <Navigate to="/login" />;
+  }
+  if (verificationError) {
+    return <div>{verificationError}</div>;
   }
   if (verified === null || client === null) {
     return <div>Loading</div>;
