@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Image, ProgressBar, Row, Spinner } from 'react-bootstrap';
 import heic2any from 'heic2any';
+import { useNavigate } from 'react-router-dom';
 import { createWorker } from 'tesseract.js';
 
 import HeaderBar from '../Components/HeaderBar';
@@ -187,9 +188,11 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
   const fileRef = useRef(null);
   const workerRef = useRef(null);
   const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
 
   const [recentReceipts, setRecentReceipts] = useState([]);
   const [preview, setPreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [ocrText, setOcrText] = useState('');
   const [processing, setProcessing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -285,11 +288,13 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
     setSuccess('');
     setProgress(0);
     setProcessing(true);
+    setSelectedFile(null);
 
     try {
       const file = await normalizeUploadFile(rawFile);
       const nextPreview = URL.createObjectURL(file);
       setPreview(nextPreview);
+      setSelectedFile(file);
 
       if (!workerRef.current) {
         workerRef.current = await createWorker('eng', 1, {
@@ -337,6 +342,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
       URL.revokeObjectURL(preview);
       setPreview(null);
     }
+    setSelectedFile(null);
     if (fileRef.current) {
       fileRef.current.value = '';
     }
@@ -366,14 +372,29 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
         tax_amount: form.tax_amount ? String(form.tax_amount) : '',
       };
 
-      const response = await fetch('/api/manager/update/receipts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ selectedItem }),
-      });
+      const requestOptions = selectedFile
+        ? (() => {
+            const body = new FormData();
+            body.append('selectedItem', JSON.stringify(selectedItem));
+            body.append('receiptImage', selectedFile, selectedFile.name || 'receipt');
+            return {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              body,
+            };
+          })()
+        : {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ selectedItem }),
+          };
+
+      const response = await fetch('/api/manager/update/receipts', requestOptions);
 
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
@@ -595,7 +616,19 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
                     </thead>
                     <tbody>
                       {recentReceipts.map((receipt) => (
-                        <tr key={receipt.id}>
+                        <tr
+                          key={receipt.id}
+                          role="button"
+                          tabIndex={0}
+                          style={{ cursor: 'pointer' }}
+                          onClick={() => navigate(`/receipts/${receipt.id}`)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                              event.preventDefault();
+                              navigate(`/receipts/${receipt.id}`);
+                            }
+                          }}
+                        >
                           <td>{receipt.expense_date || 'N/A'}</td>
                           <td>{receipt.category || 'Uncategorized'}</td>
                           <td>{receipt.description || 'No description'}</td>
