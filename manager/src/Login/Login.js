@@ -1,48 +1,70 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { auth } from '../firebase';
 import "./Login.css"
 
+function normalizePath(path) {
+  if (!path || path === '/') return '/';
+  return path.startsWith('/') ? path : `/${path}`;
+}
 
 function Login({ page }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const { user, loading } = useAuth();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTarget = useMemo(() => {
+    const fromState = location.state?.from?.pathname;
+    return normalizePath(fromState || page || '/');
+  }, [location.state, page]);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const userCredential = signInWithEmailAndPassword(auth, email, password)
-      .then(userCredential => {
-        console.log('Logged in:', userCredential.user);
-        return <Navigate to={"/" + page} />
-      })
-      .catch(error => {
-        console.error('Login error:', error);
+    if (submitting) return;
+
+    try {
+      setSubmitting(true);
+      setError('');
+
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const token = await userCredential.user.getIdToken();
+      const response = await fetch('/api/manager/login', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      userCredential.user.getIdToken().then(token => {
-        fetch('https://www.client.acresbyisaac.com/api/manager/login', {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Bearer ' + token,
-            },
-        }).then(response => {
-          return response.json();
-        }).then(data => {
-          if(data !=="true") {
-            signOut(auth)
-            alert("You are not authorized to access this page. Please contact the administrator.")
-          } else {
-            return navigate("/" + page);
-          }
-        })
-        .catch(error => signOut(auth))
-      })
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || data !== 'true') {
+        await signOut(auth);
+        throw new Error(
+          typeof data?.error === 'string'
+            ? data.error
+            : 'You are not authorized to access the manager dashboard.'
+        );
+      }
+
+      navigate(redirectTarget, { replace: true });
+    } catch (loginError) {
+      console.error('Login error:', loginError);
+      setError(String(loginError.message || loginError));
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return <div>Checking session...</div>;
+  }
+
   if (user) {
-    return <Navigate to={"/" + page} />
+    return <Navigate to={redirectTarget} replace />;
   }
 
 
@@ -56,6 +78,7 @@ function Login({ page }) {
             type="email"
             value={email}
             onChange={(e)=> setEmail(e.target.value)}
+            autoComplete="email"
           />
         </div>
         <div>
@@ -64,9 +87,11 @@ function Login({ page }) {
             type="password"
             value={password}
             onChange={(e)=> setPassword(e.target.value)}
+            autoComplete="current-password"
           />
         </div>
-        <button type="submit">Log In</button>
+        {error ? <p>{error}</p> : null}
+        <button type="submit" disabled={submitting}>{submitting ? 'Logging In...' : 'Log In'}</button>
       </form>
     </div>
   );
