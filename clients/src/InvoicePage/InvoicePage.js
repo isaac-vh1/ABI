@@ -218,8 +218,8 @@ const InvoicePage = () => {
             <div className="invoice-section">
               <h3>Payment Methods</h3>
               <ul className="invoice-payment-list">
-                <li>Zelle: `acres.by.isaac@gmail.com` (Neat Nature LLC)</li>
-                <li>Debit or credit card available by text at (206) 595-5831. A 3% surcharge applies.</li>
+                <li>Zelle: acres.by.isaac@gmail.com (Neat Nature LLC)</li>
+                <li>Debit or credit card available by text at (206) 595-5831. ( 3% surcharge applies )</li>
                 <li>Cash or check accepted.</li>
               </ul>
             </div>

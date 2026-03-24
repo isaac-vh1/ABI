@@ -299,6 +299,23 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.invoice-card.invoice-pdf-mode {
+  width: 1040px;
+  max-width: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 28px;
+}
+
+.invoice-card.invoice-pdf-mode .invoice-header,
+.invoice-card.invoice-pdf-mode .invoice-grid {
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.9fr);
+}
+
+.invoice-card.invoice-pdf-mode .invoice-highlights {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 @media (max-width: 1024px) {
   .invoice-header,
   .invoice-grid {
