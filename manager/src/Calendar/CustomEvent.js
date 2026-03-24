@@ -9,9 +9,9 @@ const CustomEvent = ({ event, onDoubleClick }) => {
   };
 
   return (
-    <div onDoubleClick={handleDoubleClick} style={{ cursor: 'pointer', height:'100%' }}>
+    <div onDoubleClick={handleDoubleClick} className="calendar-event-card">
       <strong>{event.title}</strong>
-      <h5>{event.description}</h5>
+      {event.clientName ? <span>{event.clientName}</span> : null}
     </div>
   );
 };
