@@ -181,7 +181,7 @@ const InvoicePage = () => {
         </section>
 
         <section className="invoice-grid">
-          <div className="invoice-section">
+          <div className="invoice-section invoice-section-compact">
             <h3>Bill To</h3>
             <div className="invoice-billto">
               <p>{invoiceData[10]} {invoiceData[11]}</p>

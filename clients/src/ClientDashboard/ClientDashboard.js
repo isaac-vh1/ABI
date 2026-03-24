@@ -10,14 +10,13 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
   currency: 'USD',
   maximumFractionDigits: 2,
 });
-
 const statusLabels = {
-  requested: 'Requested',
-  review: 'In Review',
-  scheduled: 'Scheduled',
-  in_progress: 'In Progress',
-  completed: 'Completed',
+  draft: 'Draft invoice',
+  pending: 'Awaiting payment',
+  paid: 'Paid in full',
 };
+const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const monthLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 function formatCurrency(value) {
   return currencyFormatter.format(Number(value || 0));
@@ -28,6 +27,22 @@ function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString();
+}
+
+function formatDateTime(value) {
+  if (!value) return 'Not scheduled';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString();
+}
+
+function dayKey(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function MetricCard({ label, value, detail, tone = 'default' }) {
@@ -48,6 +63,11 @@ export default function ClientDashboard() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [selectedInvoiceYear, setSelectedInvoiceYear] = useState('');
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState('');
   const [jobForm, setJobForm] = useState({
     title: '',
     details: '',
@@ -127,6 +147,27 @@ export default function ClientDashboard() {
   };
   const invoices = dashboard?.invoices || [];
   const jobRequests = dashboard?.jobRequests || [];
+  const scheduledJobs = dashboard?.scheduledJobs || [];
+  const scheduledJobsByDay = useMemo(
+    () =>
+      scheduledJobs.reduce((acc, job) => {
+        const key = dayKey(job.start);
+        if (!key) return acc;
+        acc[key] = [...(acc[key] || []), job];
+        return acc;
+      }, {}),
+    [scheduledJobs]
+  );
+  const selectedDayJobs = selectedCalendarDate ? (scheduledJobsByDay[selectedCalendarDate] || []) : [];
+  const calendarDays = useMemo(() => {
+    const startOfMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
+    const totalDays = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0).getDate();
+    const cells = Array.from({ length: startOfMonth.getDay() }, () => null);
+    for (let day = 1; day <= totalDays; day += 1) {
+      cells.push(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), day));
+    }
+    return cells;
+  }, [calendarMonth]);
   const invoiceYears = useMemo(
     () =>
       Array.from(
@@ -155,6 +196,15 @@ export default function ClientDashboard() {
     });
   }, [invoices, selectedInvoiceYear]);
   const latestInvoices = useMemo(() => filteredInvoices.slice(0, 5), [filteredInvoices]);
+
+  useEffect(() => {
+    const firstScheduledDay = Object.keys(scheduledJobsByDay).sort()[0] || '';
+    if (!selectedCalendarDate && firstScheduledDay) {
+      setSelectedCalendarDate(firstScheduledDay);
+      const firstDate = new Date(firstScheduledDay);
+      setCalendarMonth(new Date(firstDate.getFullYear(), firstDate.getMonth(), 1));
+    }
+  }, [scheduledJobsByDay, selectedCalendarDate]);
 
   const handleFormChange = (event) => {
     const { name, value } = event.target;
@@ -225,7 +275,9 @@ export default function ClientDashboard() {
           <span className="client-kicker">Client Portal</span>
           <h1>{dashboard?.client?.name || 'My Dashboard'}</h1>
           <p>
-            Review invoices, submit job requests, and keep track of what the team is actively planning.
+            {[dashboard?.client?.address, dashboard?.client?.city, dashboard?.client?.zipCode]
+              .filter(Boolean)
+              .join(', ') || 'No service address on file.'}
           </p>
         </div>
         <div className="client-hero-summary">
@@ -322,36 +374,67 @@ export default function ClientDashboard() {
         <article className="client-panel">
           <div className="client-panel-header">
             <div>
-              <h2>Request Status</h2>
-              <p>Track requests independently from scheduled appointments.</p>
+              <h2>Scheduled Calendar</h2>
+              <p>Click a highlighted day to view the jobs already booked for that date.</p>
             </div>
           </div>
-          {jobRequests.length ? (
-            <div className="client-request-list">
-              {jobRequests.map((request) => (
-                <article className="client-request-card" key={request.id}>
-                  <div className="client-request-topline">
-                    <strong>{request.title}</strong>
-                    <span className={`client-status-pill client-status-${request.status}`}>
-                      {statusLabels[request.status] || request.status}
-                    </span>
+          <div className="client-calendar-header">
+            <button
+              type="button"
+              className="client-calendar-nav"
+              onClick={() => setCalendarMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))}
+            >
+              Prev
+            </button>
+            <strong>{monthLabels[calendarMonth.getMonth()]} {calendarMonth.getFullYear()}</strong>
+            <button
+              type="button"
+              className="client-calendar-nav"
+              onClick={() => setCalendarMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))}
+            >
+              Next
+            </button>
+          </div>
+          <div className="client-calendar-grid">
+            {weekdayLabels.map((label) => (
+              <div key={label} className="client-calendar-weekday">{label}</div>
+            ))}
+            {calendarDays.map((date, index) => {
+              if (!date) {
+                return <div key={`empty-${index}`} className="client-calendar-cell client-calendar-empty" />;
+              }
+              const key = dayKey(date);
+              const jobs = scheduledJobsByDay[key] || [];
+              const isSelected = key === selectedCalendarDate;
+              return (
+                <button
+                  type="button"
+                  key={key}
+                  className={`client-calendar-cell ${jobs.length ? 'has-jobs' : ''} ${isSelected ? 'selected' : ''}`}
+                  onClick={() => setSelectedCalendarDate(key)}
+                >
+                  <span>{date.getDate()}</span>
+                  {jobs.length ? <strong>{jobs.length} job{jobs.length > 1 ? 's' : ''}</strong> : null}
+                </button>
+              );
+            })}
+          </div>
+          {selectedDayJobs.length ? (
+            <div className="client-scheduled-list">
+              {selectedDayJobs.map((job) => (
+                <article className="client-scheduled-card" key={job.id}>
+                  <strong>{job.title}</strong>
+                  <p>{job.description || 'No additional details provided.'}</p>
+                  <div className="client-scheduled-meta">
+                    <span>{formatDateTime(job.start)}</span>
+                    {job.end ? <span>Ends {formatDateTime(job.end)}</span> : null}
                   </div>
-                  <p>{request.details || 'No additional notes provided.'}</p>
-                  <div className="client-request-meta">
-                    <span>Priority: {request.priority}</span>
-                    <span>Requested: {formatDate(request.createdAt)}</span>
-                  </div>
-                  {request.preferredWindow ? (
-                    <div className="client-request-meta">
-                      <span>Preferred timing: {request.preferredWindow}</span>
-                    </div>
-                  ) : null}
                 </article>
               ))}
             </div>
           ) : (
             <div className="client-empty-state">
-              You have not submitted any job requests yet.
+              {selectedCalendarDate ? 'No jobs are scheduled on that day.' : 'No scheduled jobs yet.'}
             </div>
           )}
         </article>

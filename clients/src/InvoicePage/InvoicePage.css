@@ -182,9 +182,23 @@
   font-size: 1.2rem;
 }
 
+.invoice-section-compact {
+  padding: 16px 18px;
+}
+
+.invoice-section-compact h3 {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
 .invoice-billto {
   display: grid;
-  gap: 5px;
+  gap: 3px;
+}
+
+.invoice-section-compact .invoice-billto p {
+  font-size: 0.94rem;
+  line-height: 1.35;
 }
 
 .invoice-items-table {

@@ -1,7 +1,7 @@
 .client-portal {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 32px 24px 120px;
+  padding: 28px 22px 110px;
   color: #162418;
 }
 
@@ -23,7 +23,7 @@
 }
 
 .client-hero-copy {
-  padding: 32px;
+  padding: 26px;
 }
 
 .client-kicker {
@@ -32,15 +32,15 @@
   border-radius: 999px;
   background: #e4f0df;
   color: #33553b;
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .client-hero-copy h1 {
-  margin: 16px 0 10px;
-  font-size: clamp(2.2rem, 5vw, 4rem);
+  margin: 14px 0 8px;
+  font-size: clamp(1.9rem, 4vw, 3.3rem);
   line-height: 0.95;
 }
 
@@ -51,25 +51,26 @@
 .client-request-card p {
   margin: 0;
   color: #516856;
+  font-size: 0.94rem;
 }
 
 .client-hero-summary {
-  padding: 28px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .client-hero-summary span {
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #4b6f54;
 }
 
 .client-hero-summary strong {
-  font-size: clamp(2rem, 4vw, 3.2rem);
-  margin: 10px 0 8px;
+  font-size: clamp(1.7rem, 3vw, 2.6rem);
+  margin: 8px 0 6px;
 }
 
 .client-dashboard-state {
@@ -92,19 +93,20 @@
 }
 
 .client-metric {
-  padding: 24px;
+  padding: 20px;
 }
 
 .client-metric span {
   display: block;
   color: #51705a;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
 }
 
 .client-metric strong {
   display: block;
-  font-size: 2rem;
-  margin-bottom: 8px;
+  font-size: 1.7rem;
+  margin-bottom: 6px;
 }
 
 .client-metric-warning {
@@ -122,7 +124,7 @@
 }
 
 .client-panel {
-  padding: 24px;
+  padding: 20px;
 }
 
 .client-panel-wide {
@@ -133,13 +135,13 @@
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   align-items: flex-start;
 }
 
 .client-panel-header h2 {
-  margin: 0 0 8px;
-  font-size: 1.4rem;
+  margin: 0 0 6px;
+  font-size: 1.22rem;
 }
 
 .client-invoice-year-filter {
@@ -152,7 +154,7 @@
 }
 
 .client-invoice-year-filter span {
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -160,7 +162,7 @@
 .client-invoice-year-filter select {
   border: 1px solid #d4dfd2;
   border-radius: 14px;
-  padding: 10px 12px;
+  padding: 9px 11px;
   font: inherit;
   background: rgba(255, 255, 255, 0.88);
   color: #162418;
@@ -175,13 +177,13 @@
 .client-job-form label {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   font-weight: 600;
   color: #26412d;
 }
 
 .client-job-form span {
-  font-size: 0.92rem;
+  font-size: 0.86rem;
 }
 
 .client-job-form input,
@@ -189,7 +191,7 @@
 .client-job-form textarea {
   border: 1px solid #d4dfd2;
   border-radius: 16px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   font: inherit;
   background: rgba(255, 255, 255, 0.88);
   color: #162418;
@@ -197,7 +199,7 @@
 
 .client-job-form textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: 104px;
 }
 
 .client-job-form-wide {
@@ -212,7 +214,7 @@
 .client-primary-button {
   border: none;
   border-radius: 999px;
-  padding: 12px 20px;
+  padding: 10px 18px;
   background: linear-gradient(135deg, #2c6a43, #3c8758);
   color: #fff;
   font-weight: 700;
@@ -229,8 +231,125 @@
   gap: 12px;
 }
 
+.client-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.client-calendar-header strong {
+  color: #1f3625;
+  font-size: 1rem;
+}
+
+.client-calendar-nav {
+  border: 1px solid #d6e1d4;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #24402b;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.client-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.client-calendar-weekday {
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #607460;
+  padding-bottom: 2px;
+}
+
+.client-calendar-cell {
+  min-height: 74px;
+  border: 1px solid #dde7da;
+  border-radius: 18px;
+  background: #f8fbf6;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  color: #294130;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.client-calendar-cell span {
+  font-weight: 700;
+}
+
+.client-calendar-cell strong {
+  font-size: 0.74rem;
+  color: #42644b;
+}
+
+.client-calendar-cell.has-jobs {
+  background: linear-gradient(160deg, #edf7ef, #f8fcf7);
+  border-color: #b9d4bf;
+}
+
+.client-calendar-cell.selected {
+  border-color: #2f6f45;
+  box-shadow: 0 12px 24px rgba(27, 74, 41, 0.12);
+  transform: translateY(-1px);
+}
+
+.client-calendar-empty {
+  min-height: 74px;
+  border-radius: 18px;
+  background: transparent;
+}
+
+.client-scheduled-list {
+  display: grid;
+  gap: 12px;
+}
+
+.client-scheduled-card {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #f4f8f1;
+  border: 1px solid #d9e4d6;
+}
+
+.client-scheduled-card strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #1d3323;
+}
+
+.client-scheduled-card p {
+  margin: 0;
+  color: #516856;
+  font-size: 0.9rem;
+}
+
+.client-scheduled-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+  color: #5c715f;
+  font-size: 0.82rem;
+}
+
 .client-request-card {
-  padding: 16px 18px;
+  padding: 14px 16px;
   border-radius: 18px;
   background: #f4f8f1;
   border: 1px solid #d9e4d6;
@@ -250,7 +369,7 @@
   gap: 12px;
   margin-top: 10px;
   color: #5c715f;
-  font-size: 0.9rem;
+  font-size: 0.84rem;
 }
 
 .client-status-pill {
@@ -259,7 +378,7 @@
   justify-content: center;
   padding: 6px 10px;
   border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   font-weight: 700;
   text-transform: capitalize;
   background: #e8eeea;
@@ -303,7 +422,7 @@
 .client-invoice-highlight {
   border: 1px solid #d8e2d5;
   border-radius: 20px;
-  padding: 18px;
+  padding: 16px;
   background: linear-gradient(160deg, #f9fcf8, #eef5eb);
   text-align: left;
   cursor: pointer;
@@ -316,8 +435,8 @@
 
 .client-invoice-highlight strong {
   display: block;
-  font-size: 1.6rem;
-  margin: 8px 0 6px;
+  font-size: 1.35rem;
+  margin: 6px 0 4px;
 }
 
 .client-invoice-table-wrap {
@@ -332,9 +451,9 @@
 
 .client-invoice-table thead th {
   text-align: left;
-  padding: 0 14px 10px;
+  padding: 0 12px 8px;
   color: #5f765f;
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -345,7 +464,7 @@
 }
 
 .client-invoice-table tbody td {
-  padding: 16px 14px;
+  padding: 13px 12px;
   border-top: 1px solid #dfe8db;
   border-bottom: 1px solid #dfe8db;
 }
@@ -372,10 +491,11 @@
 }
 
 .client-empty-state {
-  padding: 18px;
+  padding: 16px;
   border-radius: 16px;
   background: #f6f8f4;
   color: #5a705f;
+  font-size: 0.94rem;
 }
 
 @media (max-width: 1024px) {
@@ -392,7 +512,22 @@
 
 @media (max-width: 767px) {
   .client-portal {
-    padding: 20px 14px 120px;
+    padding: 18px 12px 104px;
+  }
+
+  .client-calendar-grid {
+    gap: 6px;
+  }
+
+  .client-calendar-cell,
+  .client-calendar-empty {
+    min-height: 64px;
+    border-radius: 14px;
+    padding: 8px;
+  }
+
+  .client-calendar-header {
+    flex-wrap: wrap;
   }
 
   .client-job-form {
@@ -407,6 +542,6 @@
   .client-panel,
   .client-hero-copy,
   .client-hero-summary {
-    padding: 18px;
+    padding: 16px;
   }
 }
