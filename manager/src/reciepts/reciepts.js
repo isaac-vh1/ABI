@@ -107,19 +107,80 @@ function isHeicFile(file) {
   return type.includes('heic') || type.includes('heif') || name.endsWith('.heic') || name.endsWith('.heif');
 }
 
+function blobToImage(blob) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(blob);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Image decode failed'));
+    };
+    image.src = objectUrl;
+  });
+}
+
+async function canvasConvertToJpeg(file) {
+  if (typeof document === 'undefined') {
+    throw new Error('Canvas conversion unavailable');
+  }
+
+  const image = await blobToImage(file);
+  const canvas = document.createElement('canvas');
+  canvas.width = image.naturalWidth || image.width;
+  canvas.height = image.naturalHeight || image.height;
+  const context = canvas.getContext('2d');
+  if (!context) {
+    throw new Error('Canvas context unavailable');
+  }
+  context.drawImage(image, 0, 0);
+
+  const jpegBlob = await new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Canvas export failed'));
+        }
+      },
+      'image/jpeg',
+      0.92
+    );
+  });
+
+  const baseName = String(file.name || 'receipt').replace(/\.(heic|heif)$/i, '');
+  return new File([jpegBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
+}
+
 async function normalizeUploadFile(file) {
   if (!isHeicFile(file)) {
     return file;
   }
 
-  const convertedBlob = await heic2any({
-    blob: file,
-    toType: 'image/jpeg',
-    quality: 0.92,
-  });
-  const normalizedBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
-  const baseName = String(file.name || 'receipt').replace(/\.(heic|heif)$/i, '');
-  return new File([normalizedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
+  try {
+    return await canvasConvertToJpeg(file);
+  } catch (nativeError) {
+    try {
+      const convertedBlob = await heic2any({
+        blob: file,
+        toType: 'image/jpeg',
+        quality: 0.92,
+      });
+      const normalizedBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+      const baseName = String(file.name || 'receipt').replace(/\.(heic|heif)$/i, '');
+      return new File([normalizedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
+    } catch (libraryError) {
+      throw new Error(
+        `HEIC conversion failed: ${nativeError instanceof Error ? nativeError.message : nativeError}; ${
+          libraryError instanceof Error ? libraryError.message : libraryError
+        }`
+      );
+    }
+  }
 }
 
 function ReceiptScanner({ toggleSidebar, collapsed }) {
