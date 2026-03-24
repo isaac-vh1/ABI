@@ -50,34 +50,38 @@ const InvoicePage = () => {
     if (!invoiceRef.current) return;
 
     try {
-      // 1. Capture the invoice container with html2canvas
-      const canvas = await html2canvas(invoiceRef.current, { scale: 2 });
+      const canvas = await html2canvas(invoiceRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        windowWidth: 1280,
+        onclone: (documentClone) => {
+          const clonedInvoice = documentClone.querySelector('.invoice-card');
+          if (clonedInvoice) {
+            clonedInvoice.classList.add('invoice-pdf-mode');
+          }
+        },
+      });
       const imageData = canvas.toDataURL('image/png');
-
-      // 2. Initialize jsPDF (portrait, mm units, A4 page size)
       const pdf = new jsPDF('p', 'mm', 'letter');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      // 3. Get the original width/height of the canvas image
       const imgProps = pdf.getImageProperties(imageData);
       const originalWidth = imgProps.width;
       const originalHeight = imgProps.height;
+      const margin = 10;
+      const usableWidth = pdfWidth - margin * 2;
+      const usableHeight = pdfHeight - margin * 2;
+      let renderedWidth = usableWidth;
+      let renderedHeight = (originalHeight * usableWidth) / originalWidth;
 
-      // 4. Scale the image to fit the PDF width, preserving aspect ratio
-      let renderedWidth = pdfWidth; // fill full width
-      let renderedHeight = (originalHeight * pdfWidth) / originalWidth;
-
-      // 5. If the scaled height is too long for one page, scale to fit height instead
-      if (renderedHeight > pdfHeight) {
-        renderedHeight = pdfHeight;
-        renderedWidth = (originalWidth * pdfHeight) / originalHeight;
+      if (renderedHeight > usableHeight) {
+        renderedHeight = usableHeight;
+        renderedWidth = (originalWidth * usableHeight) / originalHeight;
       }
 
-      // 6. Add the image to the PDF at (x=0, y=0)
-      pdf.addImage(imageData, 'PNG', 0, 0, renderedWidth, renderedHeight);
-
-      // 7. Save (download) the PDF with the invoice number in filename
+      const x = (pdfWidth - renderedWidth) / 2;
+      const y = margin;
+      pdf.addImage(imageData, 'PNG', x, y, renderedWidth, renderedHeight);
       pdf.save(`invoice-${invoiceNum}.pdf`);
     } catch (err) {
       console.error('Failed to download PDF', err);
@@ -102,6 +106,8 @@ const InvoicePage = () => {
   const tips = Number(invoiceData?.[6] || 0);
   const taxRate = subtotal > 0 ? (salesTax / subtotal) * 100 : 0;
   const items = invoiceData ? invoiceData.slice(15) : [];
+  const invoiceStatus = String(invoiceData?.[7] || 'pending').toLowerCase();
+  const invoiceStatusLabel = invoiceStatus === 'paid' ? 'Paid' : invoiceStatus.charAt(0).toUpperCase() + invoiceStatus.slice(1);
 
   if (
     !invoiceData ||
@@ -141,7 +147,7 @@ const InvoicePage = () => {
             <article className="invoice-meta-card">
               <span>Invoice Number</span>
               <strong>#{invoiceData[0]}</strong>
-              <p>Issued for your completed service work.</p>
+              <div className={`invoice-status-pill invoice-status-${invoiceStatus}`}>{invoiceStatusLabel}</div>
             </article>
             <article className="invoice-meta-card">
               <span>Date of Completion</span>
@@ -163,6 +169,10 @@ const InvoicePage = () => {
           <article className="invoice-highlight">
             <span>Tax Rate</span>
             <strong>{taxRate.toFixed(2)}%</strong>
+          </article>
+          <article className="invoice-highlight">
+            <span>Status</span>
+            <strong className={`invoice-highlight-status invoice-status-${invoiceStatus}`}>{invoiceStatusLabel}</strong>
           </article>
           <article className="invoice-highlight">
             <span>Total Due</span>

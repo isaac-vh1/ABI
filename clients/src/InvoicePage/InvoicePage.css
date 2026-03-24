@@ -113,6 +113,33 @@
   margin-bottom: 4px;
 }
 
+.invoice-status-pill,
+.invoice-highlight-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.invoice-status-paid {
+  background: #dff3e3;
+  color: #1f6b39;
+}
+
+.invoice-status-pending {
+  background: #fff1cc;
+  color: #8a5a00;
+}
+
+.invoice-status-draft {
+  background: #e7ecf1;
+  color: #506171;
+}
+
 .invoice-highlights {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -253,6 +280,23 @@
   background: #fff0eb;
   color: #8a261a;
   text-align: center;
+}
+
+.invoice-card.invoice-pdf-mode {
+  width: 1040px;
+  max-width: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 28px;
+}
+
+.invoice-card.invoice-pdf-mode .invoice-header,
+.invoice-card.invoice-pdf-mode .invoice-grid {
+  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.9fr);
+}
+
+.invoice-card.invoice-pdf-mode .invoice-highlights {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 @media (max-width: 1024px) {
