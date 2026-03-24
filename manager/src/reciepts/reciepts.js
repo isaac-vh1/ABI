@@ -199,6 +199,13 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
   const [success, setSuccess] = useState('');
   const [form, setForm] = useState(initialForm);
 
+  useEffect(() => () => {
+    if (workerRef.current) {
+      workerRef.current.terminate().catch(() => {});
+      workerRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     if (authLoading || !user) return;
 
@@ -285,15 +292,13 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
       setPreview(nextPreview);
 
       if (!workerRef.current) {
-        workerRef.current = await createWorker({
+        workerRef.current = await createWorker('eng', 1, {
           logger: (message) => {
-            if (message.progress) {
+            if (typeof message.progress === 'number') {
               setProgress(Math.round(message.progress * 100));
             }
           },
         });
-        await workerRef.current.loadLanguage('eng');
-        await workerRef.current.initialize('eng');
       }
 
       const { data } = await workerRef.current.recognize(file);
@@ -310,8 +315,8 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
       console.error('OCR error:', err);
       setError(
         isHeicFile(rawFile)
-          ? 'This HEIC image could not be converted. Please retake it as JPG in iPhone camera settings or upload a JPG/PNG copy.'
-          : 'Could not read the receipt automatically. Enter the values manually.'
+          ? 'This HEIC image could not be converted or read for OCR. You can still enter the receipt manually below.'
+          : 'Could not read the receipt automatically. You can still enter the values manually below.'
       );
     } finally {
       setProcessing(false);
