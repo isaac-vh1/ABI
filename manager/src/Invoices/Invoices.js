@@ -129,14 +129,37 @@ const InvoicesPage = ({ toggleSidebar, collapsed }) => {
   const handleRowClick = (inv) => setSelectedItem({...inv});
 
   const handlePaid = (inv) => {
-    const today   = DateTime.local();
+    const today = DateTime.local();
     const updated = {
       ...inv,
-    [IDX.STATUS]:'paid',
-    [IDX.BALANCE_DUE]: 0,
-    [IDX.PAYMENT_DATE]: today.toUTC().toHTTP(),
-    }
-    saveChanges(updated);
+      [IDX.STATUS]: 'paid',
+      [IDX.BALANCE_DUE]: 0,
+      [IDX.PAYMENT_DATE]: today.toUTC().toISO(),
+    };
+    if (!user) return;
+    user.getIdToken().then(async (token) => {
+      try {
+        const res = await fetch(`/api/manager/invoice/${inv[IDX.INVOICE_ID]}/mark-paid`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ payment_date: updated[IDX.PAYMENT_DATE] }),
+        });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          throw new Error(payload.error || 'Mark paid failed');
+        }
+        setInvoices((cur) => cur.map((row) => (row[IDX.INVOICE_ID] === inv[IDX.INVOICE_ID] ? updated : row)));
+        if (selectedItem && selectedItem[IDX.INVOICE_ID] === inv[IDX.INVOICE_ID]) {
+          closePopup();
+        }
+      } catch (e) {
+        console.error(e);
+        setError(true);
+      }
+    });
   };
 
   const handleDelete = (invoiceId) => {
