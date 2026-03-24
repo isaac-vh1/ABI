@@ -28,6 +28,7 @@ export default function ReceiptDetails({ toggleSidebar, collapsed }) {
   const { user, loading: authLoading } = useAuth();
   const [receipt, setReceipt] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -76,6 +77,36 @@ export default function ReceiptDetails({ toggleSidebar, collapsed }) {
     };
   }, [authLoading, receiptId, user]);
 
+  const handleDelete = async () => {
+    if (!user || deleting) return;
+    if (!window.confirm('Delete this receipt record?')) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError('');
+      const token = await user.getIdToken();
+      const response = await fetch('/api/manager/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(['receipts', Number(receiptId)]),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || 'Failed to delete receipt.');
+      }
+      navigate('/receipts');
+    } catch (err) {
+      console.error('Receipt delete failed:', err);
+      setError(String(err.message || err));
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="receipt-details-page">
       <HeaderBar page="Receipt Details" toggleSidebar={toggleSidebar} collapsed={collapsed} />
@@ -86,9 +117,14 @@ export default function ReceiptDetails({ toggleSidebar, collapsed }) {
           <h2>Receipt #{receiptId}</h2>
           <p>{receipt?.description || 'View the stored receipt image and expense fields.'}</p>
         </div>
-        <button className="receipt-details-back" onClick={() => navigate('/receipts')}>
-          Back to Receipts
-        </button>
+        <div className="receipt-details-hero-actions">
+          <button className="receipt-details-delete" onClick={handleDelete} disabled={loading || deleting}>
+            {deleting ? 'Deleting…' : 'Delete Receipt'}
+          </button>
+          <button className="receipt-details-back" onClick={() => navigate('/receipts')}>
+            Back to Receipts
+          </button>
+        </div>
       </section>
 
       {loading ? <div className="receipt-details-state">Loading receipt...</div> : null}

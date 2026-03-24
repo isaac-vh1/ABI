@@ -197,6 +197,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
   const [processing, setProcessing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loadingReceipts, setLoadingReceipts] = useState(false);
+  const [deletingReceiptId, setDeletingReceiptId] = useState(null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -423,6 +424,39 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
     }
   };
 
+  const handleDeleteReceipt = async (receiptId) => {
+    if (!user || deletingReceiptId === receiptId) return;
+    if (!window.confirm('Delete this receipt record?')) {
+      return;
+    }
+
+    try {
+      setDeletingReceiptId(receiptId);
+      setError('');
+      setSuccess('');
+      const token = await user.getIdToken();
+      const response = await fetch('/api/manager/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(['receipts', receiptId]),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || 'Failed to delete receipt.');
+      }
+      setRecentReceipts((current) => current.filter((receipt) => receipt.id !== receiptId));
+      setSuccess('Receipt deleted.');
+    } catch (err) {
+      console.error('Receipt delete failed:', err);
+      setError(String(err.message || err));
+    } finally {
+      setDeletingReceiptId(null);
+    }
+  };
+
   return (
     <div>
       <HeaderBar page="Receipts" toggleSidebar={toggleSidebar} collapsed={collapsed} />
@@ -612,6 +646,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
                         <th>Category</th>
                         <th>Description</th>
                         <th className="text-end">Amount</th>
+                        <th className="text-end">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -633,6 +668,19 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
                           <td>{receipt.category || 'Uncategorized'}</td>
                           <td>{receipt.description || 'No description'}</td>
                           <td className="text-end">{receipt.amount || '0.00'}</td>
+                          <td className="text-end">
+                            <Button
+                              size="sm"
+                              variant="outline-danger"
+                              disabled={deletingReceiptId === receipt.id}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleDeleteReceipt(receipt.id);
+                              }}
+                            >
+                              {deletingReceiptId === receipt.id ? 'Deleting…' : 'Delete'}
+                            </Button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>

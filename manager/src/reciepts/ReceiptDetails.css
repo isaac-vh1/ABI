@@ -16,6 +16,13 @@
   color: #f5fbf8;
 }
 
+.receipt-details-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .receipt-details-kicker {
   display: inline-block;
   margin-bottom: 8px;
@@ -43,6 +50,21 @@
   background: #f7c66a;
   color: #183028;
   font-weight: 600;
+}
+
+.receipt-details-delete {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #b33a3a;
+  color: #fff7f7;
+  font-weight: 600;
+}
+
+.receipt-details-delete:disabled,
+.receipt-details-back:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .receipt-details-grid {
