@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Image, ProgressBar, Row, Spinner } from 'react-bootstrap';
 import heic2any from 'heic2any';
 import { createWorker } from 'tesseract.js';
@@ -258,17 +258,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
     };
   }, [preview]);
 
-  const requiredFields = useMemo(
-    () => ({
-      expense_date: form.expense_date,
-      category: form.category,
-      amount: form.amount,
-      description: form.description,
-    }),
-    [form]
-  );
-
-  const canSubmit = Object.values(requiredFields).every(Boolean) && !processing && !saving;
+  const canSubmit = !processing && !saving && !authLoading;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -351,6 +341,10 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
     e.preventDefault();
     if (authLoading || !user) {
       setError('You must be signed in to save an expense.');
+      return;
+    }
+    if (!form.expense_date || !form.category || !form.amount || !form.description.trim()) {
+      setError('Expense date, category, amount, and description are required.');
       return;
     }
 
