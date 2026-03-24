@@ -14,7 +14,7 @@ const ClientDashboard = () => {
     const fetchInvoices = async () => {
       try {
         user.getIdToken().then(token => {
-          fetch('https://www.client.acresbyisaac.com/api/client/invoices', {
+          fetch('/api/client/invoices', {
             method: 'GET',
             headers: {
               'Authorization': 'Bearer ' + token

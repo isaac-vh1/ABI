@@ -57,7 +57,7 @@ function Login() {
         </div>
         <button type="submit" className='submit'>Log In</button>
       </form>
-      <a href="https://www.client.acresbyisaac.com/create-account">Create an account here!</a>
+      <a href="/create-account">Create an account here!</a>
     </div>
   );
 }

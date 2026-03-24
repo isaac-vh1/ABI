@@ -29,7 +29,7 @@ function ProtectedRoute({ setSavedPage, children }) {
 
     user.getIdToken()
       .then((token) =>
-        fetch('https://www.client.acresbyisaac.com/api/get-verified', {
+        fetch('/api/get-verified', {
           method: 'GET',
           headers: {
             'Authorization': 'Bearer ' + token
