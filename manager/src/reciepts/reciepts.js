@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Button, Card, Col, Form, Image, ProgressBar, Row, Spinner } from 'react-bootstrap';
+import heic2any from 'heic2any';
 import { createWorker } from 'tesseract.js';
 
 import HeaderBar from '../Components/HeaderBar';
@@ -100,6 +101,27 @@ function parseReceiptText(text) {
   };
 }
 
+function isHeicFile(file) {
+  const name = String(file?.name || '').toLowerCase();
+  const type = String(file?.type || '').toLowerCase();
+  return type.includes('heic') || type.includes('heif') || name.endsWith('.heic') || name.endsWith('.heif');
+}
+
+async function normalizeUploadFile(file) {
+  if (!isHeicFile(file)) {
+    return file;
+  }
+
+  const convertedBlob = await heic2any({
+    blob: file,
+    toType: 'image/jpeg',
+    quality: 0.92,
+  });
+  const normalizedBlob = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+  const baseName = String(file.name || 'receipt').replace(/\.(heic|heif)$/i, '');
+  return new File([normalizedBlob], `${baseName}.jpg`, { type: 'image/jpeg' });
+}
+
 function ReceiptScanner({ toggleSidebar, collapsed }) {
   const fileRef = useRef(null);
   const workerRef = useRef(null);
@@ -193,15 +215,13 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
   };
 
   const handleFile = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const rawFile = e.target.files?.[0];
+    if (!rawFile) return;
 
     if (preview) {
       URL.revokeObjectURL(preview);
     }
 
-    const nextPreview = URL.createObjectURL(file);
-    setPreview(nextPreview);
     setOcrText('');
     setError('');
     setSuccess('');
@@ -209,6 +229,10 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
     setProcessing(true);
 
     try {
+      const file = await normalizeUploadFile(rawFile);
+      const nextPreview = URL.createObjectURL(file);
+      setPreview(nextPreview);
+
       if (!workerRef.current) {
         workerRef.current = await createWorker({
           logger: (message) => {
@@ -233,7 +257,11 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
       setProgress(100);
     } catch (err) {
       console.error('OCR error:', err);
-      setError('Could not read the receipt automatically. Enter the values manually.');
+      setError(
+        isHeicFile(rawFile)
+          ? 'This HEIC image could not be converted. Please retake it as JPG in iPhone camera settings or upload a JPG/PNG copy.'
+          : 'Could not read the receipt automatically. Enter the values manually.'
+      );
     } finally {
       setProcessing(false);
     }
@@ -343,7 +371,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
                   <Form.Control
                     ref={fileRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.heic,.heif"
                     capture="environment"
                     onChange={handleFile}
                   />
