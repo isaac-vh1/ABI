@@ -21,6 +21,7 @@ const CALENDAR_TABLE = "calendar";
 const EMPTY_EVENT = {
   id: null,
   client_id: "",
+  clientSearch: "",
   title: "",
   description: "",
   start: null,
@@ -161,6 +162,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
     (event) => ({
       ...event,
       clientName: getClientName(event.client_id),
+      clientSearch: getClientName(event.client_id),
     }),
     [getClientName]
   );
@@ -371,9 +373,21 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
       };
     });
   };
+  const handleClientSelection = (inputValue) => {
+    setSelectedEvent((prev) => {
+      if (!prev) return prev;
+      const foundClient = clientOptions.find((client) => client.name === inputValue);
+      return {
+        ...prev,
+        clientSearch: inputValue,
+        client_id: foundClient ? foundClient.id : "",
+      };
+    });
+  };
   const handleDuplicateSelectedEvent = () => {
     if (!selectedEvent) return;
     const duplicate = buildEventDraft({
+      clientSearch: getClientName(selectedEvent.client_id),
       title: selectedEvent.title,
       description: selectedEvent.description,
       client_id: selectedEvent.client_id,
@@ -500,18 +514,19 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
             </label>
             <label>
               Client:
-              <select
-                value={selectedEvent.client_id ?? ""}
-                onChange={(e) => setSelectedEvent({ ...selectedEvent, client_id: e.target.value })}
-              >
-                <option value="">No client linked</option>
-                {clientOptions.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name}
-                  </option>
-                ))}
-              </select>
+              <input
+                type="text"
+                list="calendar-client-options"
+                value={selectedEvent.clientSearch ?? getClientName(selectedEvent.client_id)}
+                onChange={(e) => handleClientSelection(e.target.value)}
+                placeholder="Type to search clients..."
+              />
             </label>
+            <datalist id="calendar-client-options">
+              {clientOptions.map((client) => (
+                <option key={client.id} value={client.name} />
+              ))}
+            </datalist>
             <label>
               Calendar:
               <select

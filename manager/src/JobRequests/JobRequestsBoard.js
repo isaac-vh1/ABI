@@ -27,6 +27,16 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
   const [error, setError] = useState('');
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newRequest, setNewRequest] = useState({
+    clientId: '',
+    clientSearch: '',
+    title: '',
+    details: '',
+    priority: 'normal',
+    preferredWindow: '',
+    serviceAddress: '',
+  });
 
   useEffect(() => {
     if (authLoading) return;
@@ -75,15 +85,49 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
   }, [authLoading, user]);
 
   const summary = payload?.summary || { total: 0, highPriority: 0, open: 0 };
+  const clients = payload?.clients || [];
   const columns = payload?.columns || [];
   const selectedStatusLabel = useMemo(
     () => statusOptions.find((option) => option.value === selectedRequest?.status)?.label || selectedRequest?.status,
     [selectedRequest]
   );
+  const rebuildBoardState = (current, requestRecord) => {
+    const existingItems = current.columns.flatMap((column) => column.items).filter((item) => item.id !== requestRecord.id);
+    const nextItems = [requestRecord, ...existingItems];
+    return {
+      ...current,
+      columns: current.columns.map((column) => ({
+        ...column,
+        items: nextItems
+          .filter((item) => item.status === column.key)
+          .sort((left, right) => String(right.updatedAt || right.createdAt || '').localeCompare(String(left.updatedAt || left.createdAt || ''))),
+      })),
+      summary: {
+        total: nextItems.length,
+        highPriority: nextItems.filter((item) => item.priority === 'high').length,
+        open: nextItems.filter((item) => item.status !== 'completed').length,
+      },
+    };
+  };
 
   const handleRequestChange = (event) => {
     const { name, value } = event.target;
     setSelectedRequest((current) => current ? ({ ...current, [name]: value }) : current);
+  };
+  const handleNewRequestChange = (event) => {
+    const { name, value } = event.target;
+    setNewRequest((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+  const handleClientSelection = (inputValue) => {
+    const matchedClient = clients.find((client) => client.name === inputValue);
+    setNewRequest((current) => ({
+      ...current,
+      clientSearch: inputValue,
+      clientId: matchedClient ? String(matchedClient.id) : '',
+    }));
   };
 
   const handleSave = async () => {
@@ -104,36 +148,58 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
       if (!response.ok) {
         throw new Error(updated.error || 'Failed to save job request.');
       }
-      setPayload((current) => current ? ({
-        ...current,
-        columns: current.columns.map((column) => ({
-          ...column,
-          items: column.items.filter((item) => item.id !== updated.id),
-        })).map((column) => (
-          column.key === updated.status
-            ? { ...column, items: [updated, ...column.items] }
-            : column
-        )),
-        summary: {
-          ...current.summary,
-          open: current.columns
-            .flatMap((column) => column.items)
-            .filter((item) => item.id !== updated.id)
-            .concat(updated)
-            .filter((item) => item.status !== 'completed').length,
-          highPriority: current.columns
-            .flatMap((column) => column.items)
-            .filter((item) => item.id !== updated.id)
-            .concat(updated)
-            .filter((item) => item.priority === 'high').length,
-        },
-      }) : current);
+      setPayload((current) => current ? rebuildBoardState(current, updated) : current);
       setSelectedRequest(updated);
     } catch (err) {
       console.error('Job request save failed:', err);
       setError(String(err.message || err));
     } finally {
       setSaving(false);
+    }
+  };
+  const handleCreate = async (event) => {
+    event.preventDefault();
+    if (!user || creating) return;
+    if (!newRequest.clientId) {
+      setError('Select a client before creating a job.');
+      return;
+    }
+    if (!newRequest.title.trim()) {
+      setError('Job title is required.');
+      return;
+    }
+    setCreating(true);
+    setError('');
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch('/api/manager/job-request', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newRequest),
+      });
+      const created = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(created.error || 'Failed to create job request.');
+      }
+      setPayload((current) => current ? rebuildBoardState(current, created) : current);
+      setNewRequest({
+        clientId: '',
+        clientSearch: '',
+        title: '',
+        details: '',
+        priority: 'normal',
+        preferredWindow: '',
+        serviceAddress: '',
+      });
+      setSelectedRequest(created);
+    } catch (err) {
+      console.error('Job request create failed:', err);
+      setError(String(err.message || err));
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -167,6 +233,61 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
       {error ? <div className="job-board-state job-board-error">{error}</div> : null}
 
       {!loading && !error ? (
+        <>
+        <section className="job-board-create">
+          <div className="job-board-create-header">
+            <div>
+              <h3>Create Job</h3>
+              <p>Add manager-created work requests directly to the board.</p>
+            </div>
+          </div>
+          <form className="job-board-create-form" onSubmit={handleCreate}>
+            <label>
+              <span>Client</span>
+              <input
+                type="text"
+                list="job-board-client-options"
+                value={newRequest.clientSearch}
+                onChange={(event) => handleClientSelection(event.target.value)}
+                placeholder="Type to search clients..."
+              />
+            </label>
+            <datalist id="job-board-client-options">
+              {clients.map((client) => (
+                <option key={client.id} value={client.name} />
+              ))}
+            </datalist>
+            <label>
+              <span>Priority</span>
+              <select name="priority" value={newRequest.priority} onChange={handleNewRequestChange}>
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+              </select>
+            </label>
+            <label className="job-board-create-wide">
+              <span>Job Title</span>
+              <input name="title" value={newRequest.title} onChange={handleNewRequestChange} />
+            </label>
+            <label className="job-board-create-wide">
+              <span>Preferred Timing</span>
+              <input name="preferredWindow" value={newRequest.preferredWindow} onChange={handleNewRequestChange} />
+            </label>
+            <label className="job-board-create-wide">
+              <span>Service Address</span>
+              <input name="serviceAddress" value={newRequest.serviceAddress} onChange={handleNewRequestChange} />
+            </label>
+            <label className="job-board-create-wide">
+              <span>Client Notes</span>
+              <textarea name="details" rows="4" value={newRequest.details} onChange={handleNewRequestChange} />
+            </label>
+            <div className="job-board-create-actions job-board-create-wide">
+              <button className="job-board-primary" type="submit" disabled={creating}>
+                {creating ? 'Creating...' : 'Create Job'}
+              </button>
+            </div>
+          </form>
+        </section>
         <section className="job-board-columns">
           {columns.map((column) => (
             <article className="job-board-column" key={column.key}>
@@ -197,6 +318,7 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
             </article>
           ))}
         </section>
+        </>
       ) : null}
 
       {selectedRequest ? (

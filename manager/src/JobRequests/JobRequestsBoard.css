@@ -72,6 +72,57 @@
   margin-bottom: 18px;
 }
 
+.job-board-create {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(243, 247, 242, 0.94));
+  border: 1px solid rgba(38, 66, 46, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  padding: 22px;
+  margin-bottom: 18px;
+}
+
+.job-board-create-header h3 {
+  margin: 0 0 6px;
+  font-size: 1.35rem;
+}
+
+.job-board-create-header p {
+  margin: 0 0 16px;
+  color: #5a6d5d;
+}
+
+.job-board-create-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.job-board-create-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #29422f;
+  font-weight: 600;
+}
+
+.job-board-create-form input,
+.job-board-create-form select,
+.job-board-create-form textarea {
+  border: 1px solid #d6ded3;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: inherit;
+}
+
+.job-board-create-wide {
+  grid-column: 1 / -1;
+}
+
+.job-board-create-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
 .job-board-error {
   background: #ffe7e2;
   color: #912018;
@@ -278,10 +329,12 @@
 }
 
 @media (max-width: 767px) {
+  .job-board-create-form,
   .job-board-modal-grid {
     grid-template-columns: 1fr;
   }
 
+  .job-board-create-wide,
   .job-board-modal-wide {
     grid-column: auto;
   }

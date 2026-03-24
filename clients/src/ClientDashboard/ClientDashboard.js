@@ -47,6 +47,7 @@ export default function ClientDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [selectedInvoiceYear, setSelectedInvoiceYear] = useState('');
   const [jobForm, setJobForm] = useState({
     title: '',
     details: '',
@@ -80,6 +81,14 @@ export default function ClientDashboard() {
         }
         if (!cancelled) {
           setDashboard(payload);
+          const availableYears = (payload.invoices || [])
+            .map((invoice) => {
+              const date = new Date(invoice.issueDate || invoice.dueDate || invoice.paymentDate || '');
+              return Number.isNaN(date.getTime()) ? null : String(date.getFullYear());
+            })
+            .filter(Boolean)
+            .sort((a, b) => Number(b) - Number(a));
+          setSelectedInvoiceYear((current) => current || availableYears[0] || '');
           setJobForm((current) => ({
             ...current,
             serviceAddress:
@@ -118,7 +127,34 @@ export default function ClientDashboard() {
   };
   const invoices = dashboard?.invoices || [];
   const jobRequests = dashboard?.jobRequests || [];
-  const latestInvoices = useMemo(() => invoices.slice(0, 5), [invoices]);
+  const invoiceYears = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          invoices
+            .map((invoice) => {
+              const date = new Date(invoice.issueDate || invoice.dueDate || invoice.paymentDate || '');
+              return Number.isNaN(date.getTime()) ? null : String(date.getFullYear());
+            })
+            .filter(Boolean)
+        )
+      ).sort((a, b) => Number(b) - Number(a)),
+    [invoices]
+  );
+  const filteredInvoices = useMemo(() => {
+    const filtered = selectedInvoiceYear
+      ? invoices.filter((invoice) => {
+          const date = new Date(invoice.issueDate || invoice.dueDate || invoice.paymentDate || '');
+          return !Number.isNaN(date.getTime()) && String(date.getFullYear()) === selectedInvoiceYear;
+        })
+      : invoices;
+    return [...filtered].sort((a, b) => {
+      const left = new Date(a.issueDate || a.dueDate || a.paymentDate || 0).getTime();
+      const right = new Date(b.issueDate || b.dueDate || b.paymentDate || 0).getTime();
+      return right - left;
+    });
+  }, [invoices, selectedInvoiceYear]);
+  const latestInvoices = useMemo(() => filteredInvoices.slice(0, 5), [filteredInvoices]);
 
   const handleFormChange = (event) => {
     const { name, value } = event.target;
@@ -326,6 +362,16 @@ export default function ClientDashboard() {
               <h2>Invoices</h2>
               <p>A cleaner view of balances, due dates, and invoice history.</p>
             </div>
+            {invoiceYears.length ? (
+              <label className="client-invoice-year-filter">
+                <span>Year</span>
+                <select value={selectedInvoiceYear} onChange={(event) => setSelectedInvoiceYear(event.target.value)}>
+                  {invoiceYears.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
           </div>
 
           {latestInvoices.length ? (
@@ -344,7 +390,7 @@ export default function ClientDashboard() {
             </div>
           ) : null}
 
-          {invoices.length ? (
+          {filteredInvoices.length ? (
             <div className="client-invoice-table-wrap">
               <table className="client-invoice-table">
                 <thead>
@@ -355,10 +401,11 @@ export default function ClientDashboard() {
                     <th>Status</th>
                     <th>Total</th>
                     <th>Balance</th>
+                    <th>Open</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {invoices.map((invoice) => (
+                  {filteredInvoices.map((invoice) => (
                     <tr key={invoice.id} onClick={() => navigate(`/invoice#${invoice.id}`)}>
                       <td>
                         <strong>{invoice.invoiceNumber || `#${invoice.id}`}</strong>
@@ -372,6 +419,18 @@ export default function ClientDashboard() {
                       </td>
                       <td>{formatCurrency(invoice.subtotal + invoice.salesTax + invoice.tips)}</td>
                       <td>{formatCurrency(invoice.balanceDue)}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className="client-open-button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            navigate(`/invoice#${invoice.id}`);
+                          }}
+                        >
+                          Open
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -379,7 +438,7 @@ export default function ClientDashboard() {
             </div>
           ) : (
             <div className="client-empty-state">
-              No invoices are available yet.
+              No invoices are available for {selectedInvoiceYear || 'the selected year'}.
             </div>
           )}
         </article>
