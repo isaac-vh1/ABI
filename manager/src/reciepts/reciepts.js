@@ -24,6 +24,8 @@ const initialForm = {
   tax_amount: '',
 };
 
+const categoryOptions = CATEGORY_KEYWORDS.map(({ category }) => category);
+
 function standardizeDate(input) {
   if (!input) return '';
   if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
@@ -103,13 +105,67 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
   const workerRef = useRef(null);
   const { user, loading: authLoading } = useAuth();
 
+  const [recentReceipts, setRecentReceipts] = useState([]);
   const [preview, setPreview] = useState(null);
   const [ocrText, setOcrText] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [loadingReceipts, setLoadingReceipts] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [form, setForm] = useState(initialForm);
+
+  useEffect(() => {
+    if (authLoading || !user) return;
+
+    let cancelled = false;
+
+    async function loadReceipts() {
+      try {
+        setLoadingReceipts(true);
+        const token = await user.getIdToken();
+        const response = await fetch('/api/manager/receipts', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const payload = await response.json().catch(() => []);
+        if (!response.ok) {
+          throw new Error(payload.error || 'Failed to load receipts.');
+        }
+        if (cancelled) return;
+        const rows = Array.isArray(payload) ? payload : [];
+        const [, ...dataRows] = rows;
+        setRecentReceipts(
+          dataRows
+            .map((row) => ({
+              id: row[0],
+              expense_date: row[1],
+              category: row[2],
+              amount: row[3],
+              description: row[4],
+            }))
+            .sort((a, b) => String(b.expense_date || '').localeCompare(String(a.expense_date || '')))
+            .slice(0, 8)
+        );
+      } catch (err) {
+        if (!cancelled) {
+          console.error('Failed to load receipts:', err);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingReceipts(false);
+        }
+      }
+    }
+
+    loadReceipts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, user]);
 
   useEffect(() => {
     return () => {
@@ -129,7 +185,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
     [form]
   );
 
-  const canSubmit = Object.values(requiredFields).every(Boolean) && !loading;
+  const canSubmit = Object.values(requiredFields).every(Boolean) && !processing && !saving;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -150,7 +206,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
     setError('');
     setSuccess('');
     setProgress(0);
-    setLoading(true);
+    setProcessing(true);
 
     try {
       if (!workerRef.current) {
@@ -179,17 +235,20 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
       console.error('OCR error:', err);
       setError('Could not read the receipt automatically. Enter the values manually.');
     } finally {
-      setLoading(false);
+      setProcessing(false);
     }
   };
 
-  const resetAll = () => {
+  const resetAll = ({ clearMessages = true } = {}) => {
     setForm(initialForm);
     setOcrText('');
-    setError('');
-    setSuccess('');
+    if (clearMessages) {
+      setError('');
+      setSuccess('');
+    }
     setProgress(0);
-    setLoading(false);
+    setProcessing(false);
+    setSaving(false);
     if (preview) {
       URL.revokeObjectURL(preview);
       setPreview(null);
@@ -207,7 +266,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
     }
 
     try {
-      setLoading(true);
+      setSaving(true);
       setError('');
       setSuccess('');
       const token = await user.getIdToken();
@@ -233,13 +292,25 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
         throw new Error(payload.error || 'Failed to save expense.');
       }
 
+      const payload = await response.json().catch(() => ({}));
+      const createdId = payload?.return;
+      setRecentReceipts((current) => [
+        {
+          id: createdId || `new-${Date.now()}`,
+          expense_date: form.expense_date,
+          category: form.category,
+          amount: form.amount,
+          description: form.description,
+        },
+        ...current,
+      ].slice(0, 8));
       setSuccess('Expense saved.');
-      resetAll();
+      resetAll({ clearMessages: false });
     } catch (err) {
       console.error('Expense save failed:', err);
       setError(String(err.message || err));
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -277,7 +348,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
                     onChange={handleFile}
                   />
 
-                  {loading && progress > 0 && progress < 100 ? (
+                  {processing && progress > 0 && progress < 100 ? (
                     <ProgressBar now={progress} label={`${progress}%`} className="mt-3" />
                   ) : null}
                 </div>
@@ -313,13 +384,17 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
                     <Col md={6}>
                       <Form.Group>
                         <Form.Label>Category</Form.Label>
-                        <Form.Control
+                        <Form.Select
                           name="category"
                           value={form.category}
                           onChange={handleChange}
-                          placeholder="Fuel, Materials, Meals..."
                           required
-                        />
+                        >
+                          <option value="">Select category</option>
+                          {categoryOptions.map((category) => (
+                            <option key={category} value={category}>{category}</option>
+                          ))}
+                        </Form.Select>
                       </Form.Group>
                     </Col>
 
@@ -392,7 +467,7 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
 
                   <div className="d-flex gap-2 mt-4">
                     <Button type="submit" disabled={!canSubmit} className="flex-grow-1">
-                      {loading ? (
+                      {saving ? (
                         <>
                           <Spinner as="span" animation="border" size="sm" /> Saving…
                         </>
@@ -407,6 +482,45 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
                 </Form>
               </Col>
             </Row>
+
+            <hr className="my-4" />
+
+            <div>
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <h5 className="mb-1">Recent Receipts</h5>
+                  <div className="text-muted small">Latest saved expenses from the receipts table.</div>
+                </div>
+                {loadingReceipts ? <Spinner animation="border" size="sm" /> : null}
+              </div>
+
+              {recentReceipts.length ? (
+                <div className="table-responsive">
+                  <table className="table table-sm align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th className="text-end">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentReceipts.map((receipt) => (
+                        <tr key={receipt.id}>
+                          <td>{receipt.expense_date || 'N/A'}</td>
+                          <td>{receipt.category || 'Uncategorized'}</td>
+                          <td>{receipt.description || 'No description'}</td>
+                          <td className="text-end">{receipt.amount || '0.00'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-muted">No receipts saved yet.</div>
+              )}
+            </div>
           </Card.Body>
         </Card>
       </div>
