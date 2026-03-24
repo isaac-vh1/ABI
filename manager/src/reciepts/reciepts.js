@@ -14,6 +14,7 @@ const CATEGORY_KEYWORDS = [
   { category: 'Materials', terms: ['home depot', 'lowes', 'lumber', 'hardware', 'supply'] },
   { category: 'Travel', terms: ['hotel', 'inn', 'airlines', 'uber', 'lyft', 'parking'] },
   { category: 'Equipment', terms: ['tool', 'equipment', 'rental', 'repair'] },
+  { category: 'Dump Waste', terms: ['dump', 'waste', 'transfer station', 'landfill', 'disposal'] },
 ];
 
 const initialForm = {
