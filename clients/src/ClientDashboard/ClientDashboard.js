@@ -14,7 +14,7 @@ const ClientDashboard = () => {
     const fetchInvoices = async () => {
       try {
         user.getIdToken().then(token => {
-          fetch('https://www.client.acresbyisaac.com/api/client/invoices', {
+          fetch('/api/client/invoices', {
             method: 'GET',
             headers: {
               'Authorization': 'Bearer ' + token
@@ -48,7 +48,6 @@ const ClientDashboard = () => {
 
   return (
     <div>
-    <div className='announcement'> Thank you for signing up! Currently only invoicing is available, however new features are being added daily! If an error is encountered please email support@acresbyisaac.com so it can be addressed promptly</div>
     <div className="client-dashboard">
       <h1>My Invoices</h1>
         <table className="invoice-table">

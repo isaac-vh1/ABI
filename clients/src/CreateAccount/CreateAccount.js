@@ -69,7 +69,7 @@ const CreateAccount = () => {
         formData.password
       );
       userCredential.user.getIdToken().then(token => {
-        fetch('https://www.client.acresbyisaac.com/api/create-account', {
+        fetch('/api/create-account', {
             method: 'POST',
             headers: {
                 'Authorization': 'Bearer ' + token,
@@ -148,7 +148,7 @@ const CreateAccount = () => {
         </div>
         <button type="submit" className='submit'>Create Account</button>
       </form>
-      <a href='client.acresbyisaac.com/login'>Login Here!</a>
+      <a href='/login'>Login Here!</a>
     </div>
   );
 };

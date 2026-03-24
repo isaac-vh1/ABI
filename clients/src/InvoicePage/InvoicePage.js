@@ -16,7 +16,7 @@ const InvoicePage = () => {
     setInvoiceData(null);
     if (!user) return;
     user.getIdToken().then(token => {
-      fetch('https://www.client.acresbyisaac.com/api/invoice/' + invoiceNum, {
+      fetch('/api/invoice/' + invoiceNum, {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer ' + token

@@ -11,6 +11,7 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
   currency: 'USD',
   maximumFractionDigits: 2,
 });
+const CLIENTS_REQUEST_TIMEOUT_MS = 15000;
 
 function formatCurrency(value) {
   return currencyFormatter.format(Number(value || 0));
@@ -49,12 +50,15 @@ export default function Clients({ toggleSidebar, collapsed }) {
     async function loadClients() {
       setLoading(true);
       setError('');
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), CLIENTS_REQUEST_TIMEOUT_MS);
       try {
         const token = await user.getIdToken();
         const response = await fetch('/api/manager/clients-list', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          signal: controller.signal,
         });
         if (!response.ok) {
           const body = await response.json().catch(() => ({}));
@@ -62,14 +66,22 @@ export default function Clients({ toggleSidebar, collapsed }) {
         }
         const payload = await response.json();
         if (!cancelled) {
-          setClients(payload);
+          setClients(Array.isArray(payload) ? payload : []);
+          if (!Array.isArray(payload)) {
+            setError('Client list returned an invalid response.');
+          }
         }
       } catch (err) {
         if (!cancelled) {
           console.error('Client list failed:', err);
-          setError(String(err.message || err));
+          setError(
+            err.name === 'AbortError'
+              ? 'Loading clients timed out. Check the server and try again.'
+              : String(err.message || err)
+          );
         }
       } finally {
+        window.clearTimeout(timeoutId);
         if (!cancelled) {
           setLoading(false);
         }

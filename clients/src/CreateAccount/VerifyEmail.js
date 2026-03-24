@@ -20,7 +20,7 @@ const VerifyEmail = () => {
       if (user) {
         try {
           const token = await user.getIdToken();
-          const response = await fetch('https://www.client.acresbyisaac.com/api/verify-email', {
+          const response = await fetch('/api/verify-email', {
             method: 'GET',
             headers: {
               'Authorization': 'Bearer ' + token,
@@ -62,7 +62,7 @@ const VerifyEmail = () => {
 
     try {
       const token = await user.getIdToken();
-      const response = await fetch('https://www.client.acresbyisaac.com/api/verify', {
+      const response = await fetch('/api/verify', {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + token,
@@ -91,7 +91,7 @@ const VerifyEmail = () => {
       setSuccess('')
       setError('')
       const token = await user.getIdToken();
-      const response = await fetch('https://www.client.acresbyisaac.com/api/verify-email-force', {
+      const response = await fetch('/api/verify-email-force', {
         method: 'GET',
         headers: {
           'Authorization': 'Bearer ' + token,
