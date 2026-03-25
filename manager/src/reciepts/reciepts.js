@@ -23,8 +23,6 @@ const initialForm = {
   amount: '',
   description: '',
   vendor_name: '',
-  subtotal: '',
-  tax_amount: '',
 };
 
 const categoryOptions = CATEGORY_KEYWORDS.map(({ category }) => category);
@@ -52,18 +50,14 @@ function parseAmounts(text) {
     .filter((value) => Number.isFinite(value));
 
   if (!matches.length) {
-    return { amount: '', subtotal: '', tax_amount: '' };
+    return { amount: '' };
   }
 
   const sorted = [...matches].sort((a, b) => b - a);
   const total = sorted[0];
-  const maybeSubtotal = sorted.find((value) => value < total) ?? '';
-  const maybeTax = maybeSubtotal !== '' ? Number((total - maybeSubtotal).toFixed(2)) : '';
 
   return {
     amount: total.toFixed(2),
-    subtotal: maybeSubtotal === '' ? '' : maybeSubtotal.toFixed(2),
-    tax_amount: maybeTax === '' || maybeTax < 0 ? '' : maybeTax.toFixed(2),
   };
 }
 
@@ -98,8 +92,6 @@ function parseReceiptText(text) {
     amount: amounts.amount,
     description,
     vendor_name: parseVendor(normalized),
-    subtotal: amounts.subtotal,
-    tax_amount: amounts.tax_amount,
   };
 }
 
@@ -370,8 +362,6 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
       const selectedItem = {
         ...form,
         amount: String(form.amount),
-        subtotal: form.subtotal ? String(form.subtotal) : '',
-        tax_amount: form.tax_amount ? String(form.tax_amount) : '',
       };
 
       const requestOptions = selectedFile
@@ -564,32 +554,6 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
                           value={form.vendor_name}
                           onChange={handleChange}
                           placeholder="Optional unless schema supports it"
-                        />
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label>Subtotal</Form.Label>
-                        <Form.Control
-                          type="number"
-                          step="0.01"
-                          name="subtotal"
-                          value={form.subtotal}
-                          onChange={handleChange}
-                        />
-                      </Form.Group>
-                    </Col>
-
-                    <Col md={6}>
-                      <Form.Group>
-                        <Form.Label>Tax Amount</Form.Label>
-                        <Form.Control
-                          type="number"
-                          step="0.01"
-                          name="tax_amount"
-                          value={form.tax_amount}
-                          onChange={handleChange}
                         />
                       </Form.Group>
                     </Col>

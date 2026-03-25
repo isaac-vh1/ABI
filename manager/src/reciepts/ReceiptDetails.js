@@ -30,8 +30,6 @@ function normalizeReceiptForm(receipt) {
     amount: receipt?.amount === null || receipt?.amount === undefined ? '' : String(receipt.amount),
     description: receipt?.description || '',
     vendor_name: receipt?.vendor_name || '',
-    subtotal: receipt?.subtotal === null || receipt?.subtotal === undefined ? '' : String(receipt.subtotal),
-    tax_amount: receipt?.tax_amount === null || receipt?.tax_amount === undefined ? '' : String(receipt.tax_amount),
   };
 }
 
@@ -123,8 +121,6 @@ export default function ReceiptDetails({ toggleSidebar, collapsed }) {
         amount: String(form.amount),
         description: form.description.trim(),
         vendor_name: form.vendor_name.trim(),
-        subtotal: form.subtotal ? String(form.subtotal) : '',
-        tax_amount: form.tax_amount ? String(form.tax_amount) : '',
       };
 
       const response = await fetch('/api/manager/update/receipts', {
@@ -274,17 +270,6 @@ export default function ReceiptDetails({ toggleSidebar, collapsed }) {
                 <span>Vendor</span>
                 <input type="text" name="vendor_name" value={form.vendor_name} onChange={handleChange} placeholder="Vendor name" />
               </label>
-
-              <label className="receipt-details-field">
-                <span>Subtotal</span>
-                <input type="number" step="0.01" min="0" name="subtotal" value={form.subtotal} onChange={handleChange} placeholder="Optional" />
-              </label>
-
-              <label className="receipt-details-field">
-                <span>Tax</span>
-                <input type="number" step="0.01" min="0" name="tax_amount" value={form.tax_amount} onChange={handleChange} placeholder="Optional" />
-              </label>
-
               <label className="receipt-details-field receipt-details-field-wide">
                 <span>Description</span>
                 <textarea
