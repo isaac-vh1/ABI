@@ -14,6 +14,7 @@ import InvoiceNew from './new-invoice/InvoiceNew.js';
 import Invoices from './Invoices/Invoices.js'
 import ReceiptScanner from './reciepts/reciepts.js';
 import ReceiptDetails from './reciepts/ReceiptDetails.js';
+import ReceiptsTablePage from './reciepts/ReceiptsTablePage.js';
 import { Dropdown } from 'react-bootstrap'
 import ClientDetails from './Clients/ClientDetails.js';
 import SalesTaxReport from './SalesTax/SalesTaxReport.js';
@@ -146,7 +147,8 @@ function App() {
             <Route path="/sales-tax" element={<ProtectedRoute setSavedPage={setSavedPage}><SalesTaxReport toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/new-invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoiceNew toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="/clients/:clientId" element={<ProtectedRoute setSavedPage={setSavedPage}><ClientDetails toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
-            <Route path="/receipts" element={<ProtectedRoute setSavedPage={setSavedPage}><ReceiptScanner toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            <Route path="/receipts" element={<ProtectedRoute setSavedPage={setSavedPage}><ReceiptsTablePage toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
+            <Route path="/receipts/new" element={<ProtectedRoute setSavedPage={setSavedPage}><ReceiptScanner toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="/receipts/:receiptId" element={<ProtectedRoute setSavedPage={setSavedPage}><ReceiptDetails toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="/reciepts" element={<Navigate to="/receipts" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
