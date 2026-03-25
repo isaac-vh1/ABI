@@ -10,10 +10,11 @@ const categoryOptions = [
   'Fuel',
   'Meals',
   'Office Supplies',
-  'Materials',
-  'Travel',
-  'Equipment',
+  'Materials and Supplies',
+  'Equipment and Tools',
+  'Insurance and Licenses',
   'Dump Waste',
+  'Other',
 ];
 
 function formatDate(value) {
