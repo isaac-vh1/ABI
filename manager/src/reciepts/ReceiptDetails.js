@@ -9,10 +9,11 @@ import { useAuth } from '../AuthContext';
 const categoryOptions = [
   'Fuel',
   'Meals',
-  'Office Supplies',
+  'Supplies',
   'Materials and Supplies',
   'Equipment and Tools',
-  'Insurance and Licenses',
+  'Insurance',
+  'Licenses',
   'Dump Waste',
   'Other',
 ];

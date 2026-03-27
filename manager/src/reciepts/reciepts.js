@@ -10,10 +10,11 @@ import { useAuth } from '../AuthContext';
 const CATEGORY_KEYWORDS = [
   { category: 'Fuel', terms: ['shell', 'chevron', '76', 'gas', 'fuel', 'exxon'] },
   { category: 'Meals', terms: ['restaurant', 'cafe', 'coffee', 'burger', 'grill', 'pizza'] },
-  { category: 'Office Supplies', terms: ['office', 'staples', 'depot', 'printer', 'paper'] },
-  { category: 'Materials and Supplies', terms: ['home depot', 'lowes', 'lumber', 'hardware', 'supply', 'supplies', 'material'] },
+  { category: 'Supplies', terms: ['office', 'staples', 'depot', 'printer', 'paper', 'supply', 'supplies'] },
+  { category: 'Materials and Supplies', terms: ['home depot', 'lowes', 'lumber', 'hardware', 'material'] },
   { category: 'Equipment and Tools', terms: ['tool', 'tools', 'equipment', 'rental', 'repair'] },
-  { category: 'Insurance and Licenses', terms: ['insurance', 'license', 'licenses', 'licence', 'permit', 'registration'] },
+  { category: 'Insurance', terms: ['insurance', 'premium', 'policy'] },
+  { category: 'Licenses', terms: ['license', 'licenses', 'licence', 'permit', 'registration'] },
   { category: 'Dump Waste', terms: ['dump', 'waste', 'transfer station', 'landfill', 'disposal'] },
   { category: 'Other', terms: [] },
 ];
