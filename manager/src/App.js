@@ -20,6 +20,7 @@ import ClientDetails from './Clients/ClientDetails.js';
 import SalesTaxReport from './SalesTax/SalesTaxReport.js';
 import Clients from './Clients/Clients.js';
 import JobRequestsBoard from './JobRequests/JobRequestsBoard.js';
+import WorkerPayPage from './Workers/WorkerPayPage.js';
 
 function NavIcon({ path }) {
   return (
@@ -56,14 +57,19 @@ const navItems = [
     icon: "M6 2h9l5 5v14a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V8h4.5L14 3.5zM8 12h8v2H8v-2zm0 4h8v2H8v-2z",
   },
   {
-    to: "/sales-tax",
-    label: "Sales Tax",
+    to: "/financials",
+    label: "Financials",
     icon: "M12 2l4 4-6 6-3-3-5 5 1.5 1.5L7 12l3 3 7.5-7.5L22 12V2h-10zM4 18h16v2H4z",
   },
   {
     to: "/receipts",
     label: "Receipts",
     icon: "M7 2h10a1 1 0 0 1 1 1v18l-3-2-2 2-2-2-2 2-2-2-3 2V3a1 1 0 0 1 1-1zm2 5v2h6V7H9zm0 4v2h6v-2H9z",
+  },
+  {
+    to: "/workers",
+    label: "Workers",
+    icon: "M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm6 1a3 3 0 1 0-3-3 3 3 0 0 0 3 3zM6 13c-3.2 0-6 1.6-6 4v3h12v-3c0-2.4-2.8-4-6-4zm12 2c-1.2 0-2.4.2-3.4.7 1 1 1.4 2 1.4 3.3V20h8v-1c0-2.3-2.6-4-6-4z",
   },
   {
     to: "/new-invoice",
@@ -144,7 +150,9 @@ function App() {
             <Route path="/settings" element={<ProtectedRoute setSavedPage={setSavedPage}><Settings toggleSidebar={toggleSidebar}/></ProtectedRoute>} />
             <Route path="/invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoicePage /></ProtectedRoute>} />
             <Route path="/invoice-dashboard" element={<ProtectedRoute setSavedPage={setSavedPage}><Invoices toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
-            <Route path="/sales-tax" element={<ProtectedRoute setSavedPage={setSavedPage}><SalesTaxReport toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
+            <Route path="/financials" element={<ProtectedRoute setSavedPage={setSavedPage}><SalesTaxReport toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
+            <Route path="/sales-tax" element={<Navigate to="/financials" replace />} />
+            <Route path="/workers" element={<ProtectedRoute setSavedPage={setSavedPage}><WorkerPayPage toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/new-invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoiceNew toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="/clients/:clientId" element={<ProtectedRoute setSavedPage={setSavedPage}><ClientDetails toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/receipts" element={<ProtectedRoute setSavedPage={setSavedPage}><ReceiptsTablePage toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />

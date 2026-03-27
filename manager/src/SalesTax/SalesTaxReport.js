@@ -109,20 +109,26 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
     expenses: 0,
     netCash: 0,
   };
+  const yearlySummary = report?.yearlySummary || {
+    expenseCount: 0,
+    expenses: 0,
+    workerCompensation: 0,
+  };
   const locations = report?.locations || [];
   const paidInvoices = report?.paidInvoices || [];
   const expensesByCategory = report?.expensesByCategory || [];
+  const yearlyExpensesByCategory = report?.yearlyExpensesByCategory || [];
   const availableLocationCodes = report?.availableLocationCodes || [];
 
   return (
     <div className="sales-tax-page">
-      <HeaderBar page="Sales Tax" toggleSidebar={toggleSidebar} collapsed={collapsed} />
+      <HeaderBar page="Financials" toggleSidebar={toggleSidebar} collapsed={collapsed} />
 
       <section className="sales-tax-hero">
         <div>
-          <span className="sales-tax-kicker">Cash Basis Accounting</span>
-          <h2>Sales Tax Ledger</h2>
-          <p>Track tax actually collected in the quarter from paid invoices, grouped by location code and backed by a payment ledger.</p>
+          <span className="sales-tax-kicker">Financial Reporting</span>
+          <h2>Financials</h2>
+          <p>Review the quarterly sales-tax ledger alongside year-to-date expenses and category breakdowns, including worker compensation.</p>
         </div>
         <div className="sales-tax-filters">
           <label>
@@ -153,7 +159,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
         </div>
       </section>
 
-      {loading ? <div className="sales-tax-state">Loading sales tax report...</div> : null}
+      {loading ? <div className="sales-tax-state">Loading financial report...</div> : null}
       {error ? <div className="sales-tax-state sales-tax-error">{error}</div> : null}
 
       {!loading && !error ? (
@@ -181,12 +187,31 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
               <strong>{summary.invoiceCount}</strong>
             </article>
             <article className="sales-tax-card">
-              <span>Quarter Expenses</span>
+              <span>Quarter Receipt Expenses</span>
               <strong>{formatCurrency(summary.expenses)}</strong>
             </article>
             <article className="sales-tax-card">
               <span>Net Cash</span>
               <strong>{formatCurrency(summary.netCash)}</strong>
+            </article>
+          </section>
+
+          <section className="sales-tax-metrics">
+            <article className="sales-tax-card">
+              <span>{report?.year || year} Total Expenses</span>
+              <strong>{formatCurrency(yearlySummary.expenses)}</strong>
+            </article>
+            <article className="sales-tax-card">
+              <span>Worker Compensation</span>
+              <strong>{formatCurrency(yearlySummary.workerCompensation)}</strong>
+            </article>
+            <article className="sales-tax-card">
+              <span>Year Expense Entries</span>
+              <strong>{yearlySummary.expenseCount}</strong>
+            </article>
+            <article className="sales-tax-card">
+              <span>Selected Quarter</span>
+              <strong>{quarterLabels[report?.quarter] || `Q${quarter}`}</strong>
             </article>
           </section>
 
@@ -234,8 +259,45 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
           <section className="sales-tax-panel">
             <div className="sales-tax-panel-header">
               <div>
-                <h3>Expenses by Category</h3>
-                <p>Quarter expenses included in the cash-basis worksheet.</p>
+                <h3>{report?.year || year} Expense Breakdown</h3>
+                <p>Year-to-date expenses by category, including worker compensation from contractor payments.</p>
+              </div>
+              <span>{yearlySummary.expenseCount} expense(s)</span>
+            </div>
+
+            {yearlyExpensesByCategory.length ? (
+              <div className="sales-tax-table-wrap">
+                <table className="sales-tax-table">
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Entries</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {yearlyExpensesByCategory.map((expense) => (
+                      <tr key={expense.category}>
+                        <td>{expense.category}</td>
+                        <td>{expense.expenseCount}</td>
+                        <td>{formatCurrency(expense.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="sales-tax-empty">
+                No expenses were recorded in {report?.year || year}.
+              </div>
+            )}
+          </section>
+
+          <section className="sales-tax-panel">
+            <div className="sales-tax-panel-header">
+              <div>
+                <h3>Quarter Receipt Expenses</h3>
+                <p>Receipt-based expenses recorded inside the selected quarter.</p>
               </div>
               <span>{summary.expenseCount} expense(s)</span>
             </div>
@@ -263,7 +325,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
               </div>
             ) : (
               <div className="sales-tax-empty">
-                No expenses were recorded in this quarter.
+                No receipt expenses were recorded in this quarter.
               </div>
             )}
           </section>
@@ -272,7 +334,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
             <div className="sales-tax-panel-header">
               <div>
                 <h3>Paid Invoice Ledger</h3>
-                <p>Audit trail for the amounts included in this cash-basis quarter.</p>
+                <p>Audit trail for the sales-tax ledger in the selected quarter.</p>
               </div>
               <span>{paidInvoices.length} paid invoice(s)</span>
             </div>
