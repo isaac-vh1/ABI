@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, Button, Spinner, Table } from 'react-bootstrap';
+import { Alert, Button, Form, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 import HeaderBar from '../Components/HeaderBar';
@@ -17,6 +17,7 @@ function ReceiptsTablePage({ toggleSidebar, collapsed }) {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [receipts, setReceipts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loadingReceipts, setLoadingReceipts] = useState(true);
   const [deletingReceiptId, setDeletingReceiptId] = useState(null);
   const [error, setError] = useState('');
@@ -75,7 +76,30 @@ function ReceiptsTablePage({ toggleSidebar, collapsed }) {
     };
   }, [authLoading, user]);
 
-  const receiptCountLabel = useMemo(() => `${receipts.length} receipt${receipts.length === 1 ? '' : 's'}`, [receipts.length]);
+  const filteredReceipts = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase();
+    if (!normalizedSearch) {
+      return receipts;
+    }
+
+    return receipts.filter((receipt) => {
+      const fields = [
+        receipt.expense_date,
+        receipt.category,
+        receipt.vendor_name,
+        receipt.description,
+        String(receipt.amount ?? ''),
+      ];
+      return fields.some((field) => String(field || '').toLowerCase().includes(normalizedSearch));
+    });
+  }, [receipts, searchTerm]);
+
+  const receiptCountLabel = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return `${receipts.length} receipt${receipts.length === 1 ? '' : 's'}`;
+    }
+    return `${filteredReceipts.length} of ${receipts.length} receipt${receipts.length === 1 ? '' : 's'}`;
+  }, [filteredReceipts.length, receipts.length, searchTerm]);
 
   const handleDeleteReceipt = async (receiptId) => {
     if (!user || deletingReceiptId === receiptId) return;
@@ -124,6 +148,13 @@ function ReceiptsTablePage({ toggleSidebar, collapsed }) {
             <Button onClick={() => navigate('/receipts/new')}>New Receipt</Button>
           </div>
 
+          <Form.Control
+            className="mb-3"
+            placeholder="Search by date, category, vendor, description, or amount"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+
           {error ? <Alert variant="warning">{error}</Alert> : null}
           {success ? <Alert variant="success">{success}</Alert> : null}
 
@@ -133,7 +164,7 @@ function ReceiptsTablePage({ toggleSidebar, collapsed }) {
                 <Spinner animation="border" size="sm" />
                 <span>Loading receipt records...</span>
               </div>
-            ) : receipts.length ? (
+            ) : filteredReceipts.length ? (
               <div className="table-responsive">
                 <Table hover className="align-middle mb-0">
                   <thead>
@@ -147,7 +178,7 @@ function ReceiptsTablePage({ toggleSidebar, collapsed }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {receipts.map((receipt) => (
+                    {filteredReceipts.map((receipt) => (
                       <tr
                         key={receipt.id}
                         role="button"
@@ -185,7 +216,9 @@ function ReceiptsTablePage({ toggleSidebar, collapsed }) {
                 </Table>
               </div>
             ) : (
-              <div className="text-muted">No receipts saved yet.</div>
+              <div className="text-muted">
+                {receipts.length ? 'No receipts matched this search.' : 'No receipts saved yet.'}
+              </div>
             )}
           </div>
         </div>
