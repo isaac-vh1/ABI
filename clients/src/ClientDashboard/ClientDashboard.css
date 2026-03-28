@@ -1,15 +1,20 @@
 .client-portal {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 28px 22px 110px;
+  min-height: calc(100vh - 120px);
+  padding: 16px 20px 20px;
   color: #162418;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 14px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .client-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.85fr);
   gap: 20px;
-  margin-bottom: 22px;
 }
 
 .client-hero-copy,
@@ -26,22 +31,12 @@
   padding: 26px;
 }
 
-.client-kicker {
-  display: inline-flex;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: #e4f0df;
-  color: #33553b;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .client-hero-copy h1 {
-  margin: 14px 0 8px;
-  font-size: clamp(1.9rem, 4vw, 3.3rem);
-  line-height: 0.95;
+  margin: 0 0 8px;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  line-height: 1.15;
+  font-weight: 700;
+  color: #2c4031;
 }
 
 .client-hero-copy p,
@@ -89,7 +84,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 22px;
 }
 
 .client-section-link {
@@ -116,7 +110,6 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-  margin-bottom: 22px;
 }
 
 .client-metrics-grid-compact {
@@ -152,6 +145,8 @@
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
   gap: 18px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .client-dashboard-grid-single {
@@ -164,6 +159,8 @@
 
 .client-panel {
   padding: 20px;
+  min-height: 0;
+  overflow: auto;
 }
 
 .client-panel-wide {
@@ -287,7 +284,7 @@
 
 .client-calendar-shell {
   max-width: 760px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
 .client-calendar-header strong {
@@ -497,6 +494,7 @@
 
 .client-invoice-table-wrap {
   overflow-x: auto;
+  overflow-y: auto;
 }
 
 .client-invoice-table {
@@ -554,7 +552,30 @@
   font-size: 0.94rem;
 }
 
+.client-portal-overview .client-dashboard-grid,
+.client-portal-requests .client-dashboard-grid,
+.client-portal-schedule .client-dashboard-grid,
+.client-portal-invoices .client-dashboard-grid {
+  align-self: stretch;
+}
+
+.client-portal-overview .client-dashboard-grid {
+  grid-template-rows: 1fr;
+}
+
+.client-portal-overview .client-panel,
+.client-portal-requests .client-panel,
+.client-portal-schedule .client-panel,
+.client-portal-invoices .client-panel {
+  height: 100%;
+}
+
 @media (max-width: 1024px) {
+  .client-portal {
+    min-height: auto;
+    overflow: visible;
+  }
+
   .client-hero,
   .client-dashboard-grid {
     grid-template-columns: 1fr;
@@ -568,11 +589,17 @@
   .client-calendar-shell {
     max-width: 100%;
   }
+
+  .client-dashboard-grid,
+  .client-panel {
+    overflow: visible;
+  }
 }
 
 @media (max-width: 767px) {
   .client-portal {
-    padding: 18px 12px 104px;
+    padding: 14px 12px 18px;
+    gap: 12px;
   }
 
   .client-calendar-grid {

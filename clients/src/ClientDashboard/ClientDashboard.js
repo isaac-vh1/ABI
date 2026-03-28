@@ -582,11 +582,10 @@ export default function ClientDashboard({ section = 'overview' }) {
   );
 
   return (
-    <div className="client-portal">
+    <div className={`client-portal client-portal-${section}`}>
       <section className="client-hero">
         <div className="client-hero-copy">
-          <span className="client-kicker">Client Portal</span>
-          <h1>{dashboard?.client?.name || 'My Dashboard'}</h1>
+          <h1>{dashboard?.client?.name || 'Dashboard'}</h1>
           <p>
             {[dashboard?.client?.address, dashboard?.client?.city, dashboard?.client?.zipCode]
               .filter(Boolean)
