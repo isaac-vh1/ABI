@@ -85,11 +85,42 @@
   color: #912018;
 }
 
+.client-section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.client-section-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(44, 88, 57, 0.14);
+  background: rgba(255, 255, 255, 0.82);
+  color: #2d4b35;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.client-section-link.active {
+  background: linear-gradient(135deg, #2c6a43, #3c8758);
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(24, 65, 37, 0.16);
+}
+
 .client-metrics-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 22px;
+}
+
+.client-metrics-grid-compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .client-metric {
@@ -123,6 +154,14 @@
   gap: 18px;
 }
 
+.client-dashboard-grid-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.client-dashboard-grid-overview {
+  align-items: start;
+}
+
 .client-panel {
   padding: 20px;
 }
@@ -142,6 +181,13 @@
 .client-panel-header h2 {
   margin: 0 0 6px;
   font-size: 1.22rem;
+}
+
+.client-inline-link {
+  color: #2d6b43;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .client-invoice-year-filter {
@@ -239,6 +285,11 @@
   margin-bottom: 14px;
 }
 
+.client-calendar-shell {
+  max-width: 760px;
+  margin-bottom: 18px;
+}
+
 .client-calendar-header strong {
   color: #1f3625;
   font-size: 1rem;
@@ -273,16 +324,16 @@
 }
 
 .client-calendar-cell {
-  min-height: 74px;
+  min-height: 58px;
   border: 1px solid #dde7da;
-  border-radius: 18px;
+  border-radius: 16px;
   background: #f8fbf6;
-  padding: 10px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
   color: #294130;
   font: inherit;
   cursor: pointer;
@@ -294,7 +345,7 @@
 }
 
 .client-calendar-cell strong {
-  font-size: 0.74rem;
+  font-size: 0.68rem;
   color: #42644b;
 }
 
@@ -310,8 +361,8 @@
 }
 
 .client-calendar-empty {
-  min-height: 74px;
-  border-radius: 18px;
+  min-height: 58px;
+  border-radius: 16px;
   background: transparent;
 }
 
@@ -419,6 +470,11 @@
   margin-bottom: 18px;
 }
 
+.client-invoice-highlights-stack {
+  grid-template-columns: 1fr;
+  margin-bottom: 0;
+}
+
 .client-invoice-highlight {
   border: 1px solid #d8e2d5;
   border-radius: 20px;
@@ -508,6 +564,10 @@
   .client-invoice-highlights {
     grid-template-columns: 1fr;
   }
+
+  .client-calendar-shell {
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 767px) {
@@ -521,9 +581,9 @@
 
   .client-calendar-cell,
   .client-calendar-empty {
-    min-height: 64px;
+    min-height: 54px;
     border-radius: 14px;
-    padding: 8px;
+    padding: 7px;
   }
 
   .client-calendar-header {

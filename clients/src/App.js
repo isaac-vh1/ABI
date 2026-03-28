@@ -95,7 +95,37 @@ export default function App() {
           element={
             <AuthLayout>
               <ProtectedRoute setSavedPage={setSavedPage}>
-                <ClientDashboard />
+                <ClientDashboard section="overview" />
+              </ProtectedRoute>
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/client-requests"
+          element={
+            <AuthLayout>
+              <ProtectedRoute setSavedPage={setSavedPage}>
+                <ClientDashboard section="requests" />
+              </ProtectedRoute>
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/client-schedule"
+          element={
+            <AuthLayout>
+              <ProtectedRoute setSavedPage={setSavedPage}>
+                <ClientDashboard section="schedule" />
+              </ProtectedRoute>
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/client-invoices"
+          element={
+            <AuthLayout>
+              <ProtectedRoute setSavedPage={setSavedPage}>
+                <ClientDashboard section="invoices" />
               </ProtectedRoute>
             </AuthLayout>
           }
