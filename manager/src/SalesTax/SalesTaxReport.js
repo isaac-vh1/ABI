@@ -41,6 +41,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [quarter, setQuarter] = useState(String(currentQuarter()));
   const [locationCode, setLocationCode] = useState('');
+  const [activeSummaryTab, setActiveSummaryTab] = useState('expenses');
 
   const yearOptions = useMemo(() => {
     const now = new Date().getFullYear();
@@ -114,22 +115,56 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
     expenses: 0,
     workerCompensation: 0,
   };
+  const yearlyRevenueSummary = report?.yearlyRevenueSummary || {
+    invoiceCount: 0,
+    taxableSales: 0,
+    salesTaxCollected: 0,
+    totalPaid: 0,
+  };
   const locations = report?.locations || [];
   const paidInvoices = report?.paidInvoices || [];
   const expensesByCategory = report?.expensesByCategory || [];
   const yearlyExpensesByCategory = report?.yearlyExpensesByCategory || [];
   const availableLocationCodes = report?.availableLocationCodes || [];
+  const summaryTabs = [
+    {
+      id: 'expenses',
+      label: 'Expenses',
+      metrics: [
+        { label: 'Quarter Receipt Expenses', value: formatCurrency(summary.expenses) },
+        { label: `${report?.year || year} Total Expenses`, value: formatCurrency(yearlySummary.expenses) },
+        { label: 'Worker Compensation', value: formatCurrency(yearlySummary.workerCompensation) },
+        { label: 'Year Expense Entries', value: yearlySummary.expenseCount },
+      ],
+    },
+    {
+      id: 'sales-tax',
+      label: 'Sales Tax',
+      metrics: [
+        { label: 'Quarter Taxable Sales', value: formatCurrency(summary.taxableSales) },
+        { label: 'Sales Tax Collected', value: formatCurrency(summary.salesTaxCollected) },
+        { label: 'Quarter Total Paid', value: formatCurrency(summary.totalPaid) },
+        { label: 'Paid Invoices', value: summary.invoiceCount },
+      ],
+    },
+    {
+      id: 'revenue',
+      label: `Revenue ${report?.year || year}`,
+      metrics: [
+        { label: 'Year Taxable Sales', value: formatCurrency(yearlyRevenueSummary.taxableSales) },
+        { label: 'Year Sales Tax', value: formatCurrency(yearlyRevenueSummary.salesTaxCollected) },
+        { label: 'Year Total Paid', value: formatCurrency(yearlyRevenueSummary.totalPaid) },
+        { label: 'Year Paid Invoices', value: yearlyRevenueSummary.invoiceCount },
+      ],
+    },
+  ];
+  const selectedSummaryTab = summaryTabs.find((tab) => tab.id === activeSummaryTab) || summaryTabs[0];
 
   return (
     <div className="sales-tax-page">
       <HeaderBar page="Financials" toggleSidebar={toggleSidebar} collapsed={collapsed} />
 
-      <section className="sales-tax-hero">
-        <div>
-          <span className="sales-tax-kicker">Financial Reporting</span>
-          <h2>Financials</h2>
-          <p>Review the quarterly sales-tax ledger alongside year-to-date expenses and category breakdowns, including worker compensation.</p>
-        </div>
+      <section className="sales-tax-toolbar">
         <div className="sales-tax-filters">
           <label>
             <span>Year</span>
@@ -169,50 +204,28 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
             <span>Only invoices marked paid with a `payment_date` inside the selected quarter are included and grouped by the stored DOR location code on each service location.</span>
           </section>
 
-          <section className="sales-tax-metrics">
-            <article className="sales-tax-card">
-              <span>Taxable Sales</span>
-              <strong>{formatCurrency(summary.taxableSales)}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Sales Tax Collected</span>
-              <strong>{formatCurrency(summary.salesTaxCollected)}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Total Paid</span>
-              <strong>{formatCurrency(summary.totalPaid)}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Paid Invoices</span>
-              <strong>{summary.invoiceCount}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Quarter Receipt Expenses</span>
-              <strong>{formatCurrency(summary.expenses)}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Net Cash</span>
-              <strong>{formatCurrency(summary.netCash)}</strong>
-            </article>
-          </section>
+          <section className="sales-tax-summary-panel">
+            <div className="sales-tax-tabs" role="tablist" aria-label="Financial summary groups">
+              {summaryTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`sales-tax-tab ${tab.id === selectedSummaryTab.id ? 'active' : ''}`}
+                  onClick={() => setActiveSummaryTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
 
-          <section className="sales-tax-metrics">
-            <article className="sales-tax-card">
-              <span>{report?.year || year} Total Expenses</span>
-              <strong>{formatCurrency(yearlySummary.expenses)}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Worker Compensation</span>
-              <strong>{formatCurrency(yearlySummary.workerCompensation)}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Year Expense Entries</span>
-              <strong>{yearlySummary.expenseCount}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Selected Quarter</span>
-              <strong>{quarterLabels[report?.quarter] || `Q${quarter}`}</strong>
-            </article>
+            <div className="sales-tax-metrics">
+              {selectedSummaryTab.metrics.map((metric) => (
+                <article key={metric.label} className="sales-tax-card">
+                  <span>{metric.label}</span>
+                  <strong>{metric.value}</strong>
+                </article>
+              ))}
+            </div>
           </section>
 
           <section className="sales-tax-panel">
