@@ -16,7 +16,7 @@ export const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export const monthLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 export const navItems = [
   { key: 'overview', label: 'Overview', to: '/' },
-  { key: 'requests', label: 'Requests', to: '/client-requests' },
+  { key: 'requests', label: 'Service Request', to: '/client-requests' },
   { key: 'schedule', label: 'Schedule', to: '/client-schedule' },
   { key: 'invoices', label: 'Invoices', to: '/client-invoices' },
 ];

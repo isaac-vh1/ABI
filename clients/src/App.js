@@ -83,7 +83,7 @@ function ClientNav() {
 function PublicLayout({ children }) {
   return (
     <>
-      <header className="App-header" />
+      <nav className="App-header" />
       <main>{children}</main>
       <footer>
         <a href="https://www.acresbyisaac.com/privacy-policy">Privacy Policy</a> |{" "}

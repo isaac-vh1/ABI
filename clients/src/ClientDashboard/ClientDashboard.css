@@ -1,12 +1,13 @@
 .client-portal {
   max-width: 1240px;
   margin: 0 auto;
-  min-height: calc(100vh - 120px);
-  padding: 16px 20px 20px;
+  min-height: 100%;
+  height: 100%;
+  padding: 12px 20px;
   color: #162418;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: 14px;
+  gap: 12px;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -25,10 +26,11 @@
   border: 1px solid rgba(44, 88, 57, 0.12);
   border-radius: 24px;
   box-shadow: 0 20px 55px rgba(17, 41, 24, 0.08);
+  overflow: hidden;
 }
 
 .client-hero-copy {
-  padding: 26px;
+  padding: 22px;
 }
 
 .client-hero-copy h1 {
@@ -50,7 +52,7 @@
 }
 
 .client-hero-summary {
-  padding: 24px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -91,7 +93,7 @@
 }
 
 .client-metric {
-  padding: 20px;
+  padding: 18px;
 }
 
 .client-metric span {
@@ -120,6 +122,7 @@
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
   gap: 18px;
   min-height: 0;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -132,7 +135,7 @@
 }
 
 .client-panel {
-  padding: 20px;
+  padding: 18px;
   min-height: 0;
   overflow: auto;
 }
@@ -257,7 +260,7 @@
 }
 
 .client-calendar-shell {
-  max-width: 760px;
+  max-width: none;
   margin-bottom: 14px;
 }
 
@@ -544,9 +547,16 @@
   height: 100%;
 }
 
+.client-portal-requests .client-dashboard-grid,
+.client-portal-schedule .client-dashboard-grid,
+.client-portal-invoices .client-dashboard-grid {
+  grid-template-rows: 1fr;
+}
+
 @media (max-width: 1024px) {
   .client-portal {
     min-height: auto;
+    height: auto;
     overflow: visible;
   }
 
