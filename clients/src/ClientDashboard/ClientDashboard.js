@@ -229,17 +229,6 @@ export default function ClientDashboard({ section = 'overview' }) {
 
   return (
     <div className={`client-portal client-portal-${section}`}>
-      <section className="client-hero">
-        <div className="client-hero-copy">
-          <h1>Acres By Isaac</h1>
-          <p>Neat Nature LLC</p>
-        </div>
-        <div className="client-hero-summary">
-          <span>Outstanding Balance</span>
-          <strong>{formatCurrency(summary.outstandingBalance)}</strong>
-          <p>{summary.pendingInvoiceCount} invoice(s) still open</p>
-        </div>
-      </section>
       {error ? <div className="client-dashboard-state client-dashboard-error">{error}</div> : null}
       {section === 'requests' ? (
         <RequestsSection
