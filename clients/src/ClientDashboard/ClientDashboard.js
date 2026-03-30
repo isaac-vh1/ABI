@@ -1,65 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import './ClientDashboard.css';
 
 import { useAuth } from '../AuthContext';
-
-const currencyFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 2,
-});
-const statusLabels = {
-  draft: 'Draft invoice',
-  pending: 'Awaiting payment',
-  paid: 'Paid in full',
-};
-const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const monthLabels = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-const navItems = [
-  { key: 'overview', label: 'Overview', to: '/' },
-  { key: 'requests', label: 'Requests', to: '/client-requests' },
-  { key: 'schedule', label: 'Schedule', to: '/client-schedule' },
-  { key: 'invoices', label: 'Invoices', to: '/client-invoices' },
-];
-
-function formatCurrency(value) {
-  return currencyFormatter.format(Number(value || 0));
-}
-
-function formatDate(value) {
-  if (!value) return 'Not scheduled';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString();
-}
-
-function formatDateTime(value) {
-  if (!value) return 'Not scheduled';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString();
-}
-
-function dayKey(value) {
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getDate()}`.padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
-
-function MetricCard({ label, value, detail, tone = 'default' }) {
-  return (
-    <article className={`client-metric client-metric-${tone}`}>
-      <span>{label}</span>
-      <strong>{value}</strong>
-      {detail ? <p>{detail}</p> : null}
-    </article>
-  );
-}
+import InvoicesSection from './components/InvoicesSection';
+import OverviewSection from './components/OverviewSection';
+import RequestsSection from './components/RequestsSection';
+import ScheduleSection from './components/ScheduleSection';
+import { dayKey, formatCurrency } from './clientDashboardShared';
 
 export default function ClientDashboard({ section = 'overview' }) {
   const { user, loading: authLoading } = useAuth();
@@ -149,8 +98,8 @@ export default function ClientDashboard({ section = 'overview' }) {
     pendingInvoiceCount: 0,
     jobRequestCount: 0,
   };
-  const invoices = dashboard?.invoices || [];
-  const scheduledJobs = dashboard?.scheduledJobs || [];
+  const invoices = useMemo(() => dashboard?.invoices || [], [dashboard?.invoices]);
+  const scheduledJobs = useMemo(() => dashboard?.scheduledJobs || [], [dashboard?.scheduledJobs]);
   const scheduledJobsByDay = useMemo(
     () =>
       scheduledJobs.reduce((acc, job) => {
@@ -278,319 +227,12 @@ export default function ClientDashboard({ section = 'overview' }) {
     return <div className="client-dashboard-state">Loading your dashboard...</div>;
   }
 
-  const renderOverview = () => (
-    <>
-      <section className="client-metrics-grid client-metrics-grid-compact">
-        <MetricCard
-          label="Open Balance"
-          value={formatCurrency(summary.outstandingBalance)}
-          detail={`${summary.pendingInvoiceCount} invoice(s) awaiting payment`}
-          tone="warning"
-        />
-        <MetricCard
-          label="Job Requests"
-          value={summary.jobRequestCount}
-          detail="Separate from your scheduled service events"
-          tone="neutral"
-        />
-      </section>
-
-      <section className="client-dashboard-grid client-dashboard-grid-overview">
-        <article className="client-panel">
-          <div className="client-panel-header">
-            <div>
-              <h2>Upcoming Schedule</h2>
-              <p>Your next scheduled service dates at a glance.</p>
-            </div>
-            <NavLink className="client-inline-link" to="/client-schedule">Open schedule</NavLink>
-          </div>
-          {upcomingJobs.length ? (
-            <div className="client-scheduled-list">
-              {upcomingJobs.map((job) => (
-                <article className="client-scheduled-card" key={job.id}>
-                  <strong>{job.title}</strong>
-                  <p>{job.description || 'No additional details provided.'}</p>
-                  <div className="client-scheduled-meta">
-                    <span>{formatDateTime(job.start)}</span>
-                    {job.end ? <span>Ends {formatDateTime(job.end)}</span> : null}
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <div className="client-empty-state">No scheduled jobs yet.</div>
-          )}
-        </article>
-
-        <article className="client-panel">
-          <div className="client-panel-header">
-            <div>
-              <h2>Recent Invoices</h2>
-              <p>Latest balances and due dates.</p>
-            </div>
-            <NavLink className="client-inline-link" to="/client-invoices">View all invoices</NavLink>
-          </div>
-          {latestInvoices.length ? (
-            <div className="client-invoice-highlights client-invoice-highlights-stack">
-              {latestInvoices.slice(0, 3).map((invoice) => (
-                <button
-                  className="client-invoice-highlight"
-                  key={invoice.id}
-                  onClick={() => navigate(`/invoice#${invoice.id}`)}
-                >
-                  <span>{invoice.invoiceNumber || `#${invoice.id}`}</span>
-                  <strong>{formatCurrency(invoice.balanceDue)}</strong>
-                  <p>{statusLabels[invoice.status] || invoice.status}</p>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className="client-empty-state">No invoices are available yet.</div>
-          )}
-        </article>
-      </section>
-    </>
-  );
-
-  const renderRequests = () => (
-    <section className="client-dashboard-grid client-dashboard-grid-single">
-      <article className="client-panel client-panel-form">
-        <div className="client-panel-header">
-          <div>
-            <h2>Request New Work</h2>
-            <p>Send the team a scoped request without creating a calendar event.</p>
-          </div>
-        </div>
-        <form className="client-job-form" onSubmit={handleJobRequestSubmit}>
-          <label>
-            <span>Request Title</span>
-            <input
-              name="title"
-              value={jobForm.title}
-              onChange={handleFormChange}
-              placeholder="Spring cleanup, patio refresh, pruning..."
-            />
-          </label>
-          <label>
-            <span>Priority</span>
-            <select name="priority" value={jobForm.priority} onChange={handleFormChange}>
-              <option value="low">Low</option>
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
-            </select>
-          </label>
-          <label className="client-job-form-wide">
-            <span>Preferred Timing</span>
-            <input
-              name="preferredWindow"
-              value={jobForm.preferredWindow}
-              onChange={handleFormChange}
-              placeholder="Next week, before April 15, weekday mornings..."
-            />
-          </label>
-          <label className="client-job-form-wide">
-            <span>Service Address</span>
-            <input
-              name="serviceAddress"
-              value={jobForm.serviceAddress}
-              onChange={handleFormChange}
-            />
-          </label>
-          <label className="client-job-form-wide">
-            <span>Project Notes</span>
-            <textarea
-              name="details"
-              rows="5"
-              value={jobForm.details}
-              onChange={handleFormChange}
-              placeholder="Describe the work, goals, materials, access notes, or photos you plan to send separately."
-            />
-          </label>
-          <div className="client-job-actions client-job-form-wide">
-            <button className="client-primary-button" type="submit" disabled={submitting}>
-              {submitting ? 'Sending...' : 'Submit Job Request'}
-            </button>
-          </div>
-        </form>
-      </article>
-    </section>
-  );
-
-  const renderSchedule = () => (
-    <section className="client-dashboard-grid client-dashboard-grid-single">
-      <article className="client-panel client-panel-schedule">
-        <div className="client-panel-header">
-          <div>
-            <h2>Scheduled Calendar</h2>
-            <p>Click a highlighted day to view the jobs already booked for that date.</p>
-          </div>
-        </div>
-        <div className="client-calendar-shell">
-          <div className="client-calendar-header">
-            <button
-              type="button"
-              className="client-calendar-nav"
-              onClick={() => setCalendarMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))}
-            >
-              Prev
-            </button>
-            <strong>{monthLabels[calendarMonth.getMonth()]} {calendarMonth.getFullYear()}</strong>
-            <button
-              type="button"
-              className="client-calendar-nav"
-              onClick={() => setCalendarMonth((current) => new Date(current.getFullYear(), current.getMonth() + 1, 1))}
-            >
-              Next
-            </button>
-          </div>
-          <div className="client-calendar-grid">
-            {weekdayLabels.map((label) => (
-              <div key={label} className="client-calendar-weekday">{label}</div>
-            ))}
-            {calendarDays.map((date, index) => {
-              if (!date) {
-                return <div key={`empty-${index}`} className="client-calendar-cell client-calendar-empty" />;
-              }
-              const key = dayKey(date);
-              const jobs = scheduledJobsByDay[key] || [];
-              const isSelected = key === selectedCalendarDate;
-              return (
-                <button
-                  type="button"
-                  key={key}
-                  className={`client-calendar-cell ${jobs.length ? 'has-jobs' : ''} ${isSelected ? 'selected' : ''}`}
-                  onClick={() => setSelectedCalendarDate(key)}
-                >
-                  <span>{date.getDate()}</span>
-                  {jobs.length ? <strong>{jobs.length} job{jobs.length > 1 ? 's' : ''}</strong> : null}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        {selectedDayJobs.length ? (
-          <div className="client-scheduled-list">
-            {selectedDayJobs.map((job) => (
-              <article className="client-scheduled-card" key={job.id}>
-                <strong>{job.title}</strong>
-                <p>{job.description || 'No additional details provided.'}</p>
-                <div className="client-scheduled-meta">
-                  <span>{formatDateTime(job.start)}</span>
-                  {job.end ? <span>Ends {formatDateTime(job.end)}</span> : null}
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="client-empty-state">
-            {selectedCalendarDate ? 'No jobs are scheduled on that day.' : 'No scheduled jobs yet.'}
-          </div>
-        )}
-      </article>
-    </section>
-  );
-
-  const renderInvoices = () => (
-    <section className="client-dashboard-grid client-dashboard-grid-single">
-      <article className="client-panel client-panel-wide">
-        <div className="client-panel-header">
-          <div>
-            <h2>Invoices</h2>
-            <p>A cleaner view of balances, due dates, and invoice history.</p>
-          </div>
-          {invoiceYears.length ? (
-            <label className="client-invoice-year-filter">
-              <span>Year</span>
-              <select value={selectedInvoiceYear} onChange={(event) => setSelectedInvoiceYear(event.target.value)}>
-                {invoiceYears.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-        </div>
-
-        {latestInvoices.length ? (
-          <div className="client-invoice-highlights">
-            {latestInvoices.slice(0, 3).map((invoice) => (
-              <button
-                className="client-invoice-highlight"
-                key={invoice.id}
-                onClick={() => navigate(`/invoice#${invoice.id}`)}
-              >
-                <span>{invoice.invoiceNumber || `#${invoice.id}`}</span>
-                <strong>{formatCurrency(invoice.balanceDue)}</strong>
-                <p>{statusLabels[invoice.status] || invoice.status}</p>
-              </button>
-            ))}
-          </div>
-        ) : null}
-
-        {filteredInvoices.length ? (
-          <div className="client-invoice-table-wrap">
-            <table className="client-invoice-table">
-              <thead>
-                <tr>
-                  <th>Invoice</th>
-                  <th>Issued</th>
-                  <th>Due</th>
-                  <th>Status</th>
-                  <th>Total</th>
-                  <th>Balance</th>
-                  <th>Open</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredInvoices.map((invoice) => (
-                  <tr key={invoice.id} onClick={() => navigate(`/invoice#${invoice.id}`)}>
-                    <td>
-                      <strong>{invoice.invoiceNumber || `#${invoice.id}`}</strong>
-                    </td>
-                    <td>{formatDate(invoice.issueDate)}</td>
-                    <td>{formatDate(invoice.dueDate)}</td>
-                    <td>
-                      <span className={`client-status-pill client-status-${invoice.status}`}>
-                        {invoice.status}
-                      </span>
-                    </td>
-                    <td>{formatCurrency(invoice.subtotal + invoice.salesTax + invoice.tips)}</td>
-                    <td>{formatCurrency(invoice.balanceDue)}</td>
-                    <td>
-                      <button
-                        type="button"
-                        className="client-open-button"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          navigate(`/invoice#${invoice.id}`);
-                        }}
-                      >
-                        Open
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="client-empty-state">
-            No invoices are available for {selectedInvoiceYear || 'the selected year'}.
-          </div>
-        )}
-      </article>
-    </section>
-  );
-
   return (
     <div className={`client-portal client-portal-${section}`}>
       <section className="client-hero">
         <div className="client-hero-copy">
-          <h1>{dashboard?.client?.name || 'Dashboard'}</h1>
-          <p>
-            {[dashboard?.client?.address, dashboard?.client?.city, dashboard?.client?.zipCode]
-              .filter(Boolean)
-              .join(', ') || 'No service address on file.'}
-          </p>
+          <h1>Acres By Isaac</h1>
+          <p>Neat Nature LLC</p>
         </div>
         <div className="client-hero-summary">
           <span>Outstanding Balance</span>
@@ -598,25 +240,44 @@ export default function ClientDashboard({ section = 'overview' }) {
           <p>{summary.pendingInvoiceCount} invoice(s) still open</p>
         </div>
       </section>
-
-      <nav className="client-section-nav" aria-label="Client portal sections">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.key}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) => `client-section-link ${isActive ? 'active' : ''}`}
-          >
-            {item.label}
-          </NavLink>
-        ))}
-      </nav>
-
       {error ? <div className="client-dashboard-state client-dashboard-error">{error}</div> : null}
-      {section === 'requests' ? renderRequests() : null}
-      {section === 'schedule' ? renderSchedule() : null}
-      {section === 'invoices' ? renderInvoices() : null}
-      {section === 'overview' ? renderOverview() : null}
+      {section === 'requests' ? (
+        <RequestsSection
+          handleFormChange={handleFormChange}
+          handleJobRequestSubmit={handleJobRequestSubmit}
+          jobForm={jobForm}
+          submitting={submitting}
+        />
+      ) : null}
+      {section === 'schedule' ? (
+        <ScheduleSection
+          calendarDays={calendarDays}
+          calendarMonth={calendarMonth}
+          scheduledJobsByDay={scheduledJobsByDay}
+          selectedCalendarDate={selectedCalendarDate}
+          selectedDayJobs={selectedDayJobs}
+          setCalendarMonth={setCalendarMonth}
+          setSelectedCalendarDate={setSelectedCalendarDate}
+        />
+      ) : null}
+      {section === 'invoices' ? (
+        <InvoicesSection
+          filteredInvoices={filteredInvoices}
+          invoiceYears={invoiceYears}
+          latestInvoices={latestInvoices}
+          navigate={navigate}
+          selectedInvoiceYear={selectedInvoiceYear}
+          setSelectedInvoiceYear={setSelectedInvoiceYear}
+        />
+      ) : null}
+      {section === 'overview' ? (
+        <OverviewSection
+          latestInvoices={latestInvoices}
+          navigate={navigate}
+          summary={summary}
+          upcomingJobs={upcomingJobs}
+        />
+      ) : null}
     </div>
   );
 }

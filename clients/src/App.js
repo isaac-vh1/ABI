@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useState } from 'react';
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, NavLink } from "react-router-dom";
 import { AuthProvider } from "./AuthContext.js";
 import InvoicePage from "./InvoicePage/InvoicePage.js";
 import Login from './Login/Login.js';
@@ -10,6 +10,7 @@ import VerifyEmail from './CreateAccount/VerifyEmail.js';
 import ClientDashboard from './ClientDashboard/ClientDashboard.js';
 import ClientInfo from './ClientDashboard/ClientInfo.js';
 import EndOfYearSurvey from './Forms/endOfYearSurvey.js';
+import { navItems } from './ClientDashboard/clientDashboardShared';
 
 function PublicLayout({ children }) {
   return (
@@ -24,10 +25,26 @@ function PublicLayout({ children }) {
   );
 }
 
-function AuthLayout({ children }) {
+function AuthLayout({ children, showClientNav = false }) {
   return (
     <AuthProvider>
       <header className="App-header" />
+      {showClientNav ? (
+        <nav className="app-client-nav" aria-label="Client portal sections">
+          <div className="app-client-nav-inner">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.key}
+                to={item.to}
+                end={item.to === '/'}
+                className={({ isActive }) => `app-client-nav-link ${isActive ? 'active' : ''}`}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        </nav>
+      ) : null}
       <main>{children}</main>
       <footer>
         <a href="https://www.acresbyisaac.com/privacy-policy">Privacy Policy</a> |{" "}
@@ -93,7 +110,7 @@ export default function App() {
         <Route
           path="/"
           element={
-            <AuthLayout>
+            <AuthLayout showClientNav>
               <ProtectedRoute setSavedPage={setSavedPage}>
                 <ClientDashboard section="overview" />
               </ProtectedRoute>
@@ -103,7 +120,7 @@ export default function App() {
         <Route
           path="/client-requests"
           element={
-            <AuthLayout>
+            <AuthLayout showClientNav>
               <ProtectedRoute setSavedPage={setSavedPage}>
                 <ClientDashboard section="requests" />
               </ProtectedRoute>
@@ -113,7 +130,7 @@ export default function App() {
         <Route
           path="/client-schedule"
           element={
-            <AuthLayout>
+            <AuthLayout showClientNav>
               <ProtectedRoute setSavedPage={setSavedPage}>
                 <ClientDashboard section="schedule" />
               </ProtectedRoute>
@@ -123,7 +140,7 @@ export default function App() {
         <Route
           path="/client-invoices"
           element={
-            <AuthLayout>
+            <AuthLayout showClientNav>
               <ProtectedRoute setSavedPage={setSavedPage}>
                 <ClientDashboard section="invoices" />
               </ProtectedRoute>

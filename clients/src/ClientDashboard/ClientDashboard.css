@@ -5,7 +5,7 @@
   padding: 16px 20px 20px;
   color: #162418;
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto 1fr;
   gap: 14px;
   box-sizing: border-box;
   overflow: hidden;
@@ -78,32 +78,6 @@
 .client-dashboard-error {
   background: #ffe6e3;
   color: #912018;
-}
-
-.client-section-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.client-section-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(44, 88, 57, 0.14);
-  background: rgba(255, 255, 255, 0.82);
-  color: #2d4b35;
-  font-weight: 700;
-  text-decoration: none;
-  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
-}
-
-.client-section-link.active {
-  background: linear-gradient(135deg, #2c6a43, #3c8758);
-  color: #fff;
-  box-shadow: 0 14px 28px rgba(24, 65, 37, 0.16);
 }
 
 .client-metrics-grid {

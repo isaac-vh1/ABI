@@ -28,6 +28,57 @@ main {
   min-height: calc(100vh - 72px);
 }
 
+.app-client-nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 12px 20px 0;
+  background: linear-gradient(180deg, rgba(247, 250, 245, 0.96), rgba(247, 250, 245, 0.86));
+  backdrop-filter: blur(10px);
+}
+
+.app-client-nav-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.app-client-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(44, 88, 57, 0.14);
+  background: rgba(255, 255, 255, 0.82);
+  color: #2d4b35;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+.app-client-nav-link.active {
+  background: linear-gradient(135deg, #2c6a43, #3c8758);
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(24, 65, 37, 0.16);
+}
+
+@media (max-width: 720px) {
+  .app-client-nav {
+    padding: 10px 14px 0;
+  }
+
+  .app-client-nav-inner {
+    gap: 8px;
+  }
+
+  .app-client-nav-link {
+    flex: 1 1 calc(50% - 8px);
+  }
+}
+
 footer {
   background-color: #f8f9fa;
   color: #555;
