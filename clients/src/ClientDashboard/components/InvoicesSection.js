@@ -16,7 +16,6 @@ export default function InvoicesSection({
         <div className="client-panel-header">
           <div>
             <h2>Invoices</h2>
-            <p>A cleaner view of balances, due dates, and invoice history.</p>
           </div>
           {invoiceYears.length ? (
             <label className="client-invoice-year-filter">

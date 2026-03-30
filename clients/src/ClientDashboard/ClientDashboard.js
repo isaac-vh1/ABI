@@ -224,7 +224,11 @@ export default function ClientDashboard({ section = 'overview' }) {
   };
 
   if (loading) {
-    return <div className="client-dashboard-state">Loading your dashboard...</div>;
+    return (
+      <div className="client-dashboard-spinner-wrap">
+        <div className="client-dashboard-spinner" />
+      </div>
+    );
   }
 
   return (
