@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { auth } from '../firebase';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import HeaderBar from '../Components/HeaderBar';
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('en-US', {
@@ -13,7 +14,7 @@ function formatCurrency(value) {
   }).format(Number(value || 0));
 }
 
-const InvoicePage = () => {
+const InvoicePage = ({ toggleSidebar, collapsed }) => {
   const [invoiceData, setInvoiceData] = useState(null);
   const location = useLocation();
   const invoiceNum = location.hash.slice(1);
@@ -122,6 +123,7 @@ const InvoicePage = () => {
 
   return (
     <div className="invoice-shell">
+      <HeaderBar page="Invoice" toggleSidebar={toggleSidebar} collapsed={collapsed} />
       <div className="invoice-toolbar">
         <div className="invoice-toolbar-copy">
           <h1>Invoice #{invoiceData[0]}</h1>

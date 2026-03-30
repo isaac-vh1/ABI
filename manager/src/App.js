@@ -148,7 +148,7 @@ function App() {
               <Route key={table} path={`/table/${table}`} element={<ProtectedRoute setSavedPage={setSavedPage}><Table page={table} toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             ))}
             <Route path="/settings" element={<ProtectedRoute setSavedPage={setSavedPage}><Settings toggleSidebar={toggleSidebar}/></ProtectedRoute>} />
-            <Route path="/invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoicePage /></ProtectedRoute>} />
+            <Route path="/invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoicePage toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/invoice-dashboard" element={<ProtectedRoute setSavedPage={setSavedPage}><Invoices toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/financials" element={<ProtectedRoute setSavedPage={setSavedPage}><SalesTaxReport toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/sales-tax" element={<Navigate to="/financials" replace />} />

@@ -153,7 +153,7 @@ export default function App() {
         <Route
           path="/invoice"
           element={
-            <AuthLayout>
+            <AuthLayout showClientNav>
               <ProtectedRoute setSavedPage={setSavedPage}>
                 <InvoicePage />
               </ProtectedRoute>
