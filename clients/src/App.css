@@ -42,8 +42,8 @@ main > * {
   top: 0;
   z-index: 10;
   padding: 0 20px;
-  background: #fff;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(239, 245, 236, 0.92));
+  border-bottom: 1px solid rgba(44, 88, 57, 0.12);
 }
 
 .app-client-nav-inner {
@@ -146,13 +146,13 @@ main > * {
 }
 
 footer {
-  background-color: #f8f9fa;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(239, 245, 236, 0.92));
   color: #555;
   text-align: center;
   padding: 14px 0;
   font-family: Arial, sans-serif;
   font-size: 14px;
-  border-top: 1px solid #e7e7e7;
+  border-top: 1px solid rgba(44, 88, 57, 0.12);
   margin-top: 0;
   flex-shrink: 0;
 }

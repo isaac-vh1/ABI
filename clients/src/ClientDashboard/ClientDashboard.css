@@ -128,6 +128,7 @@
 
 .client-dashboard-grid-single {
   grid-template-columns: minmax(0, 1fr);
+  height: 100%;
 }
 
 .client-dashboard-grid-overview {
@@ -262,6 +263,21 @@
 .client-calendar-shell {
   max-width: none;
   margin-bottom: 14px;
+}
+
+.client-panel-schedule {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.client-panel-schedule .client-calendar-shell {
+  flex: 0 0 auto;
+}
+
+.client-panel-schedule .client-scheduled-list,
+.client-panel-schedule .client-empty-state {
+  margin-top: auto;
 }
 
 .client-calendar-header strong {
@@ -576,6 +592,10 @@
 
   .client-dashboard-grid,
   .client-panel {
+    overflow: visible;
+  }
+
+  .client-panel-schedule {
     overflow: visible;
   }
 }
