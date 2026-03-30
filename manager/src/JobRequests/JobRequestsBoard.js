@@ -6,10 +6,10 @@ import HeaderBar from '../Components/HeaderBar';
 import { useAuth } from '../AuthContext';
 
 const statusOptions = [
-  { value: 'requested', label: 'Requested' },
-  { value: 'review', label: 'In Review' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'approved', label: 'Approved' },
   { value: 'scheduled', label: 'Scheduled' },
-  { value: 'in_progress', label: 'In Progress' },
   { value: 'completed', label: 'Completed' },
 ];
 
