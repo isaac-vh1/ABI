@@ -569,6 +569,16 @@
   grid-template-rows: 1fr;
 }
 
+.client-portal-requests {
+  overflow: visible;
+}
+
+.client-portal-requests .client-dashboard-grid,
+.client-portal-requests .client-panel {
+  height: auto;
+  overflow: visible;
+}
+
 @media (max-width: 1024px) {
   .client-portal {
     min-height: auto;
