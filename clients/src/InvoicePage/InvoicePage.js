@@ -120,10 +120,6 @@ const InvoicePage = () => {
   return (
     <div className="invoice-shell">
       <div className="invoice-toolbar">
-        <div className="invoice-toolbar-copy">
-          <h1>Invoice #{invoiceData[0]}</h1>
-          <p>Review invoice details, payment options, and line items in one place.</p>
-        </div>
         <button className="invoice-download-button" onClick={handleDownloadPdf}>
           Download PDF
         </button>
