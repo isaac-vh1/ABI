@@ -268,7 +268,10 @@
 .client-panel-schedule {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 0;
+  overflow: auto;
+  padding-bottom: 20px;
+  box-sizing: border-box;
 }
 
 .client-panel-schedule .client-calendar-shell {
@@ -278,6 +281,7 @@
 .client-panel-schedule .client-scheduled-list,
 .client-panel-schedule .client-empty-state {
   margin-top: auto;
+  flex-shrink: 0;
 }
 
 .client-calendar-header strong {
@@ -573,8 +577,28 @@
   overflow: visible;
 }
 
+.client-portal-overview {
+  overflow: visible;
+}
+
+.client-portal-overview .client-dashboard-grid,
+.client-portal-overview .client-panel {
+  height: auto;
+  overflow: visible;
+}
+
 .client-portal-requests .client-dashboard-grid,
 .client-portal-requests .client-panel {
+  height: auto;
+  overflow: visible;
+}
+
+.client-portal-invoices {
+  overflow: visible;
+}
+
+.client-portal-invoices .client-dashboard-grid,
+.client-portal-invoices .client-panel {
   height: auto;
   overflow: visible;
 }
