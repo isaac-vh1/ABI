@@ -1,7 +1,7 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, NavLink } from "react-router-dom";
-import { AuthProvider } from "./AuthContext.js";
+import { AuthProvider, useAuth } from "./AuthContext.js";
 import InvoicePage from "./InvoicePage/InvoicePage.js";
 import Login from './Login/Login.js';
 import ProtectedRoute from "./ProtectedRoute.js";
@@ -11,6 +11,74 @@ import ClientDashboard from './ClientDashboard/ClientDashboard.js';
 import ClientInfo from './ClientDashboard/ClientInfo.js';
 import EndOfYearSurvey from './Forms/endOfYearSurvey.js';
 import { navItems } from './ClientDashboard/clientDashboardShared';
+import abiLogo from './ABI_NO_bg.png';
+
+function extractClientName(user) {
+  if (user?.displayName?.trim()) {
+    return user.displayName.trim();
+  }
+
+  const emailName = user?.email?.split('@')[0]?.trim();
+  if (!emailName) return 'Client';
+
+  return emailName
+    .split(/[._-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function buildGreeting(name) {
+  const hour = new Date().getHours();
+  const sharedGreetings = [
+    `Hello, ${name}`,
+    `Welcome, ${name}`,
+    `Hey, ${name}`,
+    `Howdy, ${name}`,
+  ];
+
+  if (hour >= 5 && hour < 12) {
+    sharedGreetings.push(`Good morning, ${name}`);
+  } else if (hour >= 12 && hour < 17) {
+    sharedGreetings.push(`Good afternoon, ${name}`);
+  } else {
+    sharedGreetings.push(`Good evening, ${name}`);
+  }
+
+  return sharedGreetings[Math.floor(Math.random() * sharedGreetings.length)];
+}
+
+function ClientNav() {
+  const { user } = useAuth();
+  const [greeting, setGreeting] = useState(() => buildGreeting(extractClientName(user)));
+
+  useEffect(() => {
+    setGreeting(buildGreeting(extractClientName(user)));
+  }, [user]);
+
+  return (
+    <nav className="app-client-nav" aria-label="Client portal sections">
+      <div className="app-client-nav-inner">
+        <div className="app-client-nav-brand">
+          <img src={abiLogo} alt="ABI logo" className="app-client-nav-logo" />
+          <p className="app-client-nav-greeting">{greeting}</p>
+        </div>
+        <div className="app-client-nav-links">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.key}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) => `app-client-nav-link ${isActive ? 'active' : ''}`}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
+      </div>
+    </nav>
+  );
+}
 
 function PublicLayout({ children }) {
   return (
@@ -29,22 +97,7 @@ function AuthLayout({ children, showClientNav = false }) {
   return (
     <AuthProvider>
       <header className="App-header" />
-      {showClientNav ? (
-        <nav className="app-client-nav" aria-label="Client portal sections">
-          <div className="app-client-nav-inner">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.key}
-                to={item.to}
-                end={item.to === '/'}
-                className={({ isActive }) => `app-client-nav-link ${isActive ? 'active' : ''}`}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </div>
-        </nav>
-      ) : null}
+      {showClientNav ? <ClientNav /> : null}
       <main>{children}</main>
       <footer>
         <a href="https://www.acresbyisaac.com/privacy-policy">Privacy Policy</a> |{" "}

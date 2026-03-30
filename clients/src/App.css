@@ -32,15 +32,46 @@ main {
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: 12px 20px 0;
-  background: linear-gradient(180deg, rgba(247, 250, 245, 0.96), rgba(247, 250, 245, 0.86));
-  backdrop-filter: blur(10px);
+  padding: 0 20px;
+  background: #000;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
 }
 
 .app-client-nav-inner {
   max-width: 1240px;
   margin: 0 auto;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  min-height: 84px;
+}
+
+.app-client-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.app-client-nav-logo {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.app-client-nav-greeting {
+  margin: 0;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.app-client-nav-links {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 10px;
 }
@@ -49,28 +80,54 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 16px;
+  padding: 10px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(44, 88, 57, 0.14);
-  background: rgba(255, 255, 255, 0.82);
-  color: #2d4b35;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: transparent;
+  color: #fff;
   font-weight: 700;
   text-decoration: none;
-  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.app-client-nav-link:hover,
+.app-client-nav-link:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .app-client-nav-link.active {
-  background: linear-gradient(135deg, #2c6a43, #3c8758);
-  color: #fff;
-  box-shadow: 0 14px 28px rgba(24, 65, 37, 0.16);
+  background: #fff;
+  color: #000;
+  border-color: #fff;
 }
 
 @media (max-width: 720px) {
   .app-client-nav {
-    padding: 10px 14px 0;
+    padding: 0 14px;
   }
 
   .app-client-nav-inner {
+    align-items: flex-start;
+    min-height: auto;
+    padding: 14px 0;
+  }
+
+  .app-client-nav-brand,
+  .app-client-nav-links {
+    width: 100%;
+  }
+
+  .app-client-nav-logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .app-client-nav-greeting {
+    font-size: 0.98rem;
+  }
+
+  .app-client-nav-links {
     gap: 8px;
   }
 
