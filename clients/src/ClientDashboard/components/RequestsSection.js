@@ -7,7 +7,7 @@ export default function RequestsSection({ handleFormChange, handleJobRequestSubm
         <div className="client-panel-header">
           <div>
             <h2>Request New Work</h2>
-            <p>Send the team a scoped request without creating a calendar event.</p>
+            <p>Send the team a scoped request</p>
           </div>
         </div>
         <form className="client-job-form" onSubmit={handleJobRequestSubmit}>
