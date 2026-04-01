@@ -1,11 +1,10 @@
 import React from 'react';
 
-import { formatCurrency, formatDate, statusLabels } from '../clientDashboardShared';
+import { formatCurrency, formatDate } from '../clientDashboardShared';
 
 export default function InvoicesSection({
   filteredInvoices,
   invoiceYears,
-  latestInvoices,
   navigate,
   selectedInvoiceYear,
   setSelectedInvoiceYear,
@@ -28,22 +27,6 @@ export default function InvoicesSection({
             </label>
           ) : null}
         </div>
-
-        {latestInvoices.length ? (
-          <div className="client-invoice-highlights">
-            {latestInvoices.slice(0, 3).map((invoice) => (
-              <button
-                className="client-invoice-highlight"
-                key={invoice.id}
-                onClick={() => navigate(`/invoice#${invoice.id}`)}
-              >
-                <span>{invoice.invoiceNumber || `#${invoice.id}`}</span>
-                <strong>{formatCurrency(invoice.balanceDue)}</strong>
-                <p>{statusLabels[invoice.status] || invoice.status}</p>
-              </button>
-            ))}
-          </div>
-        ) : null}
 
         {filteredInvoices.length ? (
           <div className="client-invoice-table-wrap">
