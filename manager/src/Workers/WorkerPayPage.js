@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import './WorkerPayPage.css';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 function findColumn(columns, candidates) {
@@ -356,10 +356,9 @@ function WorkerPayPage({ toggleSidebar, collapsed }) {
 
   return (
     <div className="worker-pay-page">
-      <HeaderBar page="Workers" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
       <section className="worker-pay-hero">
         <div>
+          <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
           <span className="worker-pay-kicker">Crew Tracking</span>
           <h2>Worker Hours and Pay</h2>
           <p>Track who worked each job, how many hours they logged, and what they were paid.</p>

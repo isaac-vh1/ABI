@@ -4,7 +4,7 @@ import heic2any from 'heic2any';
 import { useNavigate } from 'react-router-dom';
 import { createWorker } from 'tesseract.js';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 const CATEGORY_KEYWORDS = [
@@ -452,12 +452,13 @@ function ReceiptScanner({ toggleSidebar, collapsed }) {
 
   return (
     <div>
-      <HeaderBar page="Receipts" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
       <div className="d-flex justify-content-center p-4">
         <Card className="w-100" style={{ maxWidth: 980 }}>
           <Card.Body>
-            <Card.Title className="mb-3">Receipt Scanner</Card.Title>
+            <div className="d-flex align-items-center gap-3 mb-3">
+              <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
+              <Card.Title className="mb-0">Receipt Scanner</Card.Title>
+            </div>
             <Card.Text className="text-muted">
               OCR runs locally in the browser. Review the parsed fields before saving.
             </Card.Text>

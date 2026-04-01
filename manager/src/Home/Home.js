@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import './Home.css';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -171,7 +171,7 @@ function Home({ toggleSidebar, collapsed }) {
   if (loading) {
     return (
       <div className="dashboard-page">
-        <HeaderBar page="Home" toggleSidebar={toggleSidebar} collapsed={collapsed} />
+        <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
         <div className="dashboard-loading">Loading dashboard…</div>
       </div>
     );
@@ -179,10 +179,9 @@ function Home({ toggleSidebar, collapsed }) {
 
   return (
     <div className="dashboard-page">
-      <HeaderBar page="Home" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
       <section className="dashboard-hero">
         <div className="dashboard-hero-copy">
+          <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
           <span className="dashboard-kicker">Operations Snapshot</span>
           <h2>Manager Dashboard</h2>
           <p>

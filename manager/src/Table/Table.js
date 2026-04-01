@@ -166,13 +166,13 @@ function Table({ page, toggleSidebar, collapsed }) {
       <Helmet>
         <title>{capitalize(page)}</title>
       </Helmet>
-         <header className="Bar">
+         <div className="table-page-header">
            <div className="menu-toggle" onClick={toggleSidebar}>
              <HamburgerMenu collapsed={collapsed} />
            </div>
            <h1>{capitalize(page)}</h1>
            <button onClick={newItem}>New {page.slice(0, -1)}</button>
-         </header>
+         </div>
       <input
         type="text"
         placeholder="Search by name, email, phone, or address..."

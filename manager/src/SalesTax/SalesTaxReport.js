@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import './SalesTaxReport.css';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -162,9 +162,8 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
 
   return (
     <div className="sales-tax-page">
-      <HeaderBar page="Financials" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
       <section className="sales-tax-toolbar">
+        <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
         <div className="sales-tax-filters">
           <label>
             <span>Year</span>

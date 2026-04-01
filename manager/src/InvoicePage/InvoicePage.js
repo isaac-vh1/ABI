@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { auth } from '../firebase';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('en-US', {
@@ -123,8 +123,8 @@ const InvoicePage = ({ toggleSidebar, collapsed }) => {
 
   return (
     <div className="invoice-shell">
-      <HeaderBar page="Invoice" toggleSidebar={toggleSidebar} collapsed={collapsed} />
       <div className="invoice-toolbar">
+        <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
         <div className="invoice-toolbar-copy">
           <h1>Invoice #{invoiceData[0]}</h1>
           <p>Review invoice details, payment options, and line items in one place.</p>

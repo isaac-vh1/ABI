@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import './Clients.css';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -218,10 +218,9 @@ export default function Clients({ toggleSidebar, collapsed }) {
 
   return (
     <div className="clients-page">
-      <HeaderBar page="Clients" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
       <section className="clients-hero">
         <div>
+          <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
           <span className="clients-kicker">Client Management</span>
           <h2>Clients Directory</h2>
           <p>Browse clients with balances, upcoming work, and direct actions without digging through raw tables.</p>

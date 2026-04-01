@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import './JobRequestsBoard.css';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 const statusOptions = [
@@ -207,10 +207,9 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
 
   return (
     <div className="job-board-page">
-      <HeaderBar page="Job Board" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
       <section className="job-board-hero">
         <div>
+          <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
           <span className="job-board-kicker">Project Intake</span>
           <h2>Client Request Board</h2>
           <p>Track new work separately from scheduled calendar events and move requests through review, scheduling, and delivery.</p>

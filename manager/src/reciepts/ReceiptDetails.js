@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import './ReceiptDetails.css';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 const categoryOptions = [
@@ -194,10 +194,9 @@ export default function ReceiptDetails({ toggleSidebar, collapsed }) {
 
   return (
     <div className="receipt-details-page">
-      <HeaderBar page="Receipt Details" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
       <section className="receipt-details-hero">
         <div>
+          <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
           <span className="receipt-details-kicker">Manager View</span>
           <h2>Receipt #{receiptId}</h2>
           <p>{receipt?.description || 'Review the stored receipt image and update the saved expense fields.'}</p>

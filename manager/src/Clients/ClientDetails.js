@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import './ClientDetails.css';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -160,10 +160,9 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
 
   return (
     <div className="client-details-page">
-      <HeaderBar page="Client Overview" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
       <section className="client-details-hero">
         <div>
+          <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
           <span className="client-details-kicker">Manager View</span>
           <h2>{client?.name || `Client #${clientId}`}</h2>
           <p>

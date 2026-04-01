@@ -5,16 +5,13 @@ import { Helmet } from 'react-helmet';
 
 export default function HeaderBar({ page, toggleSidebar, collapsed }) {
   return (
-    <div>
+    <div className="header-bar">
       <Helmet>
         <title>{page}</title>
       </Helmet>
-      <header className="Bar">
-        <div className="menu-toggle" onClick={toggleSidebar}>
-          <HamburgerMenu collapsed={collapsed} />
-        </div>
-        <h1>{page}</h1>
-      </header>
+      <div className="menu-toggle" onClick={toggleSidebar}>
+        <HamburgerMenu collapsed={collapsed} />
+      </div>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Form, Spinner, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 function formatCurrency(value) {
@@ -136,11 +136,10 @@ function ReceiptsTablePage({ toggleSidebar, collapsed }) {
 
   return (
     <div>
-      <HeaderBar page="Receipts" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
       <div className="d-flex justify-content-center p-4">
         <div className="w-100" style={{ maxWidth: 1180 }}>
           <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+            <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
             <div>
               <h2 className="mb-1">Receipts Table</h2>
               <div className="text-muted">{loadingReceipts ? 'Loading receipts...' : receiptCountLabel}</div>
