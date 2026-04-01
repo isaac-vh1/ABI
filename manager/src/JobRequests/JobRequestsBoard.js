@@ -28,6 +28,7 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [creatingNew, setCreatingNew] = useState(false);
   const [newRequest, setNewRequest] = useState({
     clientId: '',
     clientSearch: '',
@@ -194,6 +195,7 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
         preferredWindow: '',
         serviceAddress: '',
       });
+      setCreatingNew(false);
       setSelectedRequest(created);
     } catch (err) {
       console.error('Job request create failed:', err);
@@ -212,6 +214,9 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
           <span className="job-board-kicker">Project Intake</span>
           <h2>Client Request Board</h2>
           <p>Track new work separately from scheduled calendar events and move requests through review, scheduling, and delivery.</p>
+        </div>
+        <div className="job-board-hero-actions">
+          <button className="job-board-primary" onClick={() => setCreatingNew(true)}>+ Create Job</button>
         </div>
         <div className="job-board-summary-grid">
           <article className="job-board-metric">
@@ -234,60 +239,6 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
 
       {!loading && !error ? (
         <>
-        <section className="job-board-create">
-          <div className="job-board-create-header">
-            <div>
-              <h3>Create Job</h3>
-              <p>Add manager-created work requests directly to the board.</p>
-            </div>
-          </div>
-          <form className="job-board-create-form" onSubmit={handleCreate}>
-            <label>
-              <span>Client</span>
-              <input
-                type="text"
-                list="job-board-client-options"
-                value={newRequest.clientSearch}
-                onChange={(event) => handleClientSelection(event.target.value)}
-                placeholder="Type to search clients..."
-              />
-            </label>
-            <datalist id="job-board-client-options">
-              {clients.map((client) => (
-                <option key={client.id} value={client.name} />
-              ))}
-            </datalist>
-            <label>
-              <span>Priority</span>
-              <select name="priority" value={newRequest.priority} onChange={handleNewRequestChange}>
-                <option value="low">Low</option>
-                <option value="normal">Normal</option>
-                <option value="high">High</option>
-              </select>
-            </label>
-            <label className="job-board-create-wide">
-              <span>Job Title</span>
-              <input name="title" value={newRequest.title} onChange={handleNewRequestChange} />
-            </label>
-            <label className="job-board-create-wide">
-              <span>Preferred Timing</span>
-              <input name="preferredWindow" value={newRequest.preferredWindow} onChange={handleNewRequestChange} />
-            </label>
-            <label className="job-board-create-wide">
-              <span>Service Address</span>
-              <input name="serviceAddress" value={newRequest.serviceAddress} onChange={handleNewRequestChange} />
-            </label>
-            <label className="job-board-create-wide">
-              <span>Client Notes</span>
-              <textarea name="details" rows="4" value={newRequest.details} onChange={handleNewRequestChange} />
-            </label>
-            <div className="job-board-create-actions job-board-create-wide">
-              <button className="job-board-primary" type="submit" disabled={creating}>
-                {creating ? 'Creating...' : 'Create Job'}
-              </button>
-            </div>
-          </form>
-        </section>
         <section className="job-board-columns">
           {columns.map((column) => (
             <article className="job-board-column" key={column.key}>
@@ -319,6 +270,66 @@ export default function JobRequestsBoard({ toggleSidebar, collapsed }) {
           ))}
         </section>
         </>
+      ) : null}
+
+      {creatingNew ? (
+        <div className="job-board-modal-backdrop" onClick={() => setCreatingNew(false)}>
+          <div className="job-board-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="job-board-modal-header">
+              <div>
+                <h3>Create Job</h3>
+                <p>Add a manager-created work request to the board.</p>
+              </div>
+            </div>
+            <form className="job-board-modal-grid" onSubmit={handleCreate}>
+              <label>
+                <span>Client</span>
+                <input
+                  type="text"
+                  list="job-board-client-options"
+                  value={newRequest.clientSearch}
+                  onChange={(event) => handleClientSelection(event.target.value)}
+                  placeholder="Type to search clients..."
+                />
+              </label>
+              <datalist id="job-board-client-options">
+                {clients.map((client) => (
+                  <option key={client.id} value={client.name} />
+                ))}
+              </datalist>
+              <label>
+                <span>Priority</span>
+                <select name="priority" value={newRequest.priority} onChange={handleNewRequestChange}>
+                  <option value="low">Low</option>
+                  <option value="normal">Normal</option>
+                  <option value="high">High</option>
+                </select>
+              </label>
+              <label className="job-board-modal-wide">
+                <span>Job Title</span>
+                <input name="title" value={newRequest.title} onChange={handleNewRequestChange} />
+              </label>
+              <label className="job-board-modal-wide">
+                <span>Preferred Timing</span>
+                <input name="preferredWindow" value={newRequest.preferredWindow} onChange={handleNewRequestChange} />
+              </label>
+              <label className="job-board-modal-wide">
+                <span>Service Address</span>
+                <input name="serviceAddress" value={newRequest.serviceAddress} onChange={handleNewRequestChange} />
+              </label>
+              <label className="job-board-modal-wide">
+                <span>Client Notes</span>
+                <textarea name="details" rows="4" value={newRequest.details} onChange={handleNewRequestChange} />
+              </label>
+              <div className="job-board-modal-actions job-board-modal-wide">
+                <button type="button" className="job-board-secondary" onClick={() => setCreatingNew(false)}>Cancel</button>
+                <button className="job-board-primary" type="submit" disabled={creating}>
+                  {creating ? 'Creating...' : 'Create Job'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       ) : null}
 
       {selectedRequest ? (

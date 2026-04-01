@@ -65,7 +65,6 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   const [currentView, setCurrentView] = useState(Views.MONTH);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [draggedEvent, setDraggedEvent] = useState(null);
-  const [copiedEvent, setCopiedEvent] = useState(null);
   const [jobSearch, setJobSearch] = useState("");
   const eventIdRef = useRef(1000);
 
@@ -188,30 +187,6 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
     }),
     []
   );
-  const copyEvent = useCallback((eventToCopy) => {
-    setCopiedEvent({
-      title: eventToCopy.title,
-      description: eventToCopy.description ?? "",
-      client_id: eventToCopy.client_id ?? "",
-      duration: eventToCopy.duration || 1,
-      calendar: eventToCopy.calendar || "unscheduledEvents",
-    });
-    setError("");
-  }, []);
-  const pasteCopiedEvent = useCallback(() => {
-    if (!copiedEvent) return;
-    const duplicated = buildEventDraft({
-      ...copiedEvent,
-      calendar: "unscheduledEvents",
-      start: null,
-      end: null,
-    });
-    setUnscheduledEvents((prev) => [duplicated, ...prev]);
-    setSelectedEvent(duplicated);
-    setCurrentView(Views.WEEK);
-    setError("");
-  }, [buildEventDraft, copiedEvent]);
-
   const persistEvent = useCallback(
     async (eventToSave) => {
       const payload = {
@@ -398,7 +373,6 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
     });
     setUnscheduledEvents((prev) => [duplicate, ...prev]);
     setSelectedEvent(duplicate);
-    copyEvent(selectedEvent);
   };
 
   if (loading) return <Spinner className="m-5" />;
@@ -424,9 +398,6 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
             <Button className="calendar-button" onClick={handleNewUnscheduledEvent}>
               New Job
             </Button>
-            <Button className="calendar-button" onClick={pasteCopiedEvent} disabled={!copiedEvent}>
-              Paste Copy
-            </Button>
           </div>
           {!filteredUnscheduledWithClients.length ? (
             <p className="noJob">No Jobs to Schedule</p>
@@ -450,9 +421,6 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
             </div>
             <Button className="calendar-button" onClick={handleNewUnscheduledEvent}>
               New Job
-            </Button>
-            <Button className="calendar-button" onClick={pasteCopiedEvent} disabled={!copiedEvent}>
-              Paste
             </Button>
           </div>
 
@@ -603,9 +571,6 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
             <div className="calendar-modal-buttons">
               <Button className="delete-button" onClick={() => removeEvent(selectedEvent)}>
                 Delete
-              </Button>
-              <Button className="calendar-button" onClick={() => copyEvent(selectedEvent)}>
-                Copy
               </Button>
               <Button className="calendar-button" onClick={handleDuplicateSelectedEvent}>
                 Duplicate

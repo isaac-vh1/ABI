@@ -1,3 +1,4 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 import React, { useState } from 'react';
