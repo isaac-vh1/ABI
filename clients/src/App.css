@@ -111,20 +111,26 @@ main > * {
   border-color: #000;
 }
 
+/* Hamburger — hidden on desktop */
+.app-client-nav-hamburger {
+  display: none;
+}
+
 @media (max-width: 720px) {
   .app-client-nav {
     padding: 0 14px;
   }
 
   .app-client-nav-inner {
-    align-items: flex-start;
+    flex-wrap: wrap;
+    align-items: center;
     min-height: auto;
     padding: 10px 0;
+    gap: 0;
   }
 
-  .app-client-nav-brand,
-  .app-client-nav-links {
-    width: 100%;
+  .app-client-nav-brand {
+    flex: 1 1 auto;
   }
 
   .app-client-nav-logo {
@@ -136,23 +142,61 @@ main > * {
     font-size: 0.92rem;
   }
 
+  /* Hamburger button */
+  .app-client-nav-hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 36px;
+    height: 36px;
+    padding: 8px 6px;
+    background: none;
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    border-radius: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .app-client-nav-hamburger span {
+    display: block;
+    height: 2px;
+    background: #000;
+    border-radius: 2px;
+    transition: transform 200ms ease, opacity 200ms ease;
+  }
+
+  /* Animate to X when open */
+  .menu-open .app-client-nav-hamburger span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .menu-open .app-client-nav-hamburger span:nth-child(2) {
+    opacity: 0;
+  }
+  .menu-open .app-client-nav-hamburger span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Links collapsed by default on mobile */
   .app-client-nav-links {
-    gap: 8px;
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 0 4px;
+  }
+
+  .menu-open .app-client-nav-links {
+    display: flex;
   }
 
   .app-client-nav-link {
-    flex: 1 1 calc(50% - 8px);
     text-align: center;
-    font-size: 0.88rem;
-    padding: 8px 10px;
+    font-size: 0.9rem;
+    padding: 10px 12px;
   }
 }
 
 @media (max-width: 400px) {
-  .app-client-nav-link {
-    flex: 1 1 100%;
-  }
-
   footer {
     font-size: 12px;
     padding: 10px 14px;

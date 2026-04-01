@@ -51,18 +51,27 @@ function buildGreeting(name) {
 function ClientNav() {
   const { user } = useAuth();
   const [greeting, setGreeting] = useState(() => buildGreeting(extractClientName(user)));
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     setGreeting(buildGreeting(extractClientName(user)));
   }, [user]);
 
   return (
-    <nav className="app-client-nav" aria-label="Client portal sections">
+    <nav className={`app-client-nav${menuOpen ? ' menu-open' : ''}`} aria-label="Client portal sections">
       <div className="app-client-nav-inner">
         <div className="app-client-nav-brand">
           <img src={abiLogo} alt="ABI logo" className="app-client-nav-logo" />
           <p className="app-client-nav-greeting">{greeting}</p>
         </div>
+        <button
+          className="app-client-nav-hamburger"
+          aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((o) => !o)}
+        >
+          <span /><span /><span />
+        </button>
         <div className="app-client-nav-links">
           {navItems.map((item) => (
             <NavLink
@@ -70,6 +79,7 @@ function ClientNav() {
               to={item.to}
               end={item.to === '/'}
               className={({ isActive }) => `app-client-nav-link ${isActive ? 'active' : ''}`}
+              onClick={() => setMenuOpen(false)}
             >
               {item.label}
             </NavLink>
