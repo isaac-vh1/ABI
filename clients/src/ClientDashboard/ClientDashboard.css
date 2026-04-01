@@ -636,9 +636,12 @@
     grid-template-columns: 1fr;
   }
 
-  .client-metrics-grid,
+  .client-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .client-invoice-highlights {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .client-calendar-shell {
@@ -661,15 +664,33 @@
     gap: 12px;
   }
 
+  .client-hero-copy h1 {
+    font-size: 1.25rem;
+  }
+
   .client-calendar-grid {
-    gap: 6px;
+    gap: 4px;
   }
 
   .client-calendar-cell,
   .client-calendar-empty {
-    min-height: 54px;
-    border-radius: 14px;
-    padding: 7px;
+    min-height: 44px;
+    border-radius: 12px;
+    padding: 5px 6px;
+    gap: 3px;
+  }
+
+  .client-calendar-cell span {
+    font-size: 0.8rem;
+  }
+
+  .client-calendar-cell strong {
+    font-size: 0.6rem;
+  }
+
+  .client-calendar-weekday {
+    font-size: 0.65rem;
+    letter-spacing: 0;
   }
 
   .client-calendar-header {
@@ -688,6 +709,89 @@
   .client-panel,
   .client-hero-copy,
   .client-hero-summary {
-    padding: 16px;
+    padding: 14px;
+  }
+
+  .client-invoice-highlights {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .client-invoice-highlight strong {
+    font-size: 1.1rem;
+  }
+
+  .client-invoice-table thead {
+    display: none;
+  }
+
+  .client-invoice-table tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    margin-bottom: 10px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #dfe8db;
+    background: #f7faf6;
+  }
+
+  .client-invoice-table tbody td {
+    border: none;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+
+  .client-invoice-table tbody td:first-child {
+    grid-column: 1 / -1;
+    border-radius: 0;
+    border-bottom: 1px solid #dfe8db;
+    font-weight: 700;
+  }
+
+  .client-invoice-table tbody td:last-child {
+    grid-column: 1 / -1;
+    border-radius: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 4px;
+  }
+
+  .client-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .client-metric strong {
+    font-size: 1.4rem;
+  }
+
+  .client-invoice-year-filter {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .client-panel-header {
+    flex-wrap: wrap;
+  }
+
+  .client-request-topline {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .client-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .client-invoice-highlights {
+    grid-template-columns: 1fr;
+  }
+
+  .client-calendar-cell,
+  .client-calendar-empty {
+    min-height: 36px;
+    padding: 4px;
+    border-radius: 10px;
   }
 }

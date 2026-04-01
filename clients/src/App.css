@@ -142,6 +142,25 @@ main > * {
 
   .app-client-nav-link {
     flex: 1 1 calc(50% - 8px);
+    text-align: center;
+    font-size: 0.88rem;
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .app-client-nav-link {
+    flex: 1 1 100%;
+  }
+
+  footer {
+    font-size: 12px;
+    padding: 10px 14px;
+  }
+
+  footer a {
+    display: inline-block;
+    margin: 4px 6px;
   }
 }
 

@@ -334,7 +334,7 @@
 
 @media (max-width: 767px) {
   .invoice-shell {
-    padding: 14px 14px 24px;
+    padding: 12px 12px 20px;
   }
 
   .invoice-card {
@@ -344,13 +344,43 @@
   .invoice-toolbar {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
+  }
+
+  .invoice-toolbar-copy h1 {
+    font-size: 1.4rem;
   }
 
   .invoice-download-button {
     width: 100%;
+    text-align: center;
   }
 
   .invoice-highlights {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .invoice-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .invoice-items-table thead th,
+  .invoice-items-table tbody td {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+  }
+
+  .invoice-section h3 {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .invoice-highlights {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-meta {
+    grid-template-columns: 1fr;
   }
 }
