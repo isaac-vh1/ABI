@@ -99,9 +99,6 @@ function App() {
   return (
     <div className="app-container">
       <nav className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-        <div className='sidebar-header'>
-          <h2>Dashboard</h2>
-        </div>
         {navItems.map((item) => (
           <Link
             key={item.to}
