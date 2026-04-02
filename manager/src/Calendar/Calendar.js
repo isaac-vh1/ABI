@@ -28,6 +28,7 @@ const EMPTY_EVENT = {
   end: null,
   duration: 1,
   calendar: "unscheduledEvents",
+  job_request_id: null,
 };
 
 function normalizeEvent(row) {
@@ -43,6 +44,7 @@ function normalizeEvent(row) {
     start,
     end,
     duration: Number.isFinite(durationHours) && durationHours > 0 ? durationHours : 1,
+    job_request_id: row.jobRequestId ?? row.job_request_id ?? null,
   };
 }
 

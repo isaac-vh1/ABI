@@ -18,6 +18,7 @@ import ReceiptDetails from './reciepts/ReceiptDetails.js';
 import ReceiptsTablePage from './reciepts/ReceiptsTablePage.js';
 import { Dropdown } from 'react-bootstrap'
 import ClientDetails from './Clients/ClientDetails.js';
+import ClientSettings from './Clients/ClientSettings.js';
 import SalesTaxReport from './SalesTax/SalesTaxReport.js';
 import Clients from './Clients/Clients.js';
 import JobRequestsBoard from './JobRequests/JobRequestsBoard.js';
@@ -153,6 +154,7 @@ function App() {
             <Route path="/workers" element={<ProtectedRoute setSavedPage={setSavedPage}><WorkerPayPage toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/new-invoice" element={<ProtectedRoute setSavedPage={setSavedPage}><InvoiceNew toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="/clients/:clientId" element={<ProtectedRoute setSavedPage={setSavedPage}><ClientDetails toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
+            <Route path="/clients/:clientId/settings" element={<ProtectedRoute setSavedPage={setSavedPage}><ClientSettings toggleSidebar={toggleSidebar} collapsed={collapsed} /></ProtectedRoute>} />
             <Route path="/receipts" element={<ProtectedRoute setSavedPage={setSavedPage}><ReceiptsTablePage toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="/receipts/new" element={<ProtectedRoute setSavedPage={setSavedPage}><ReceiptScanner toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />
             <Route path="/receipts/:receiptId" element={<ProtectedRoute setSavedPage={setSavedPage}><ReceiptDetails toggleSidebar={toggleSidebar} collapsed={collapsed}/></ProtectedRoute>} />

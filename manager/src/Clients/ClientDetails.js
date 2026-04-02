@@ -170,9 +170,14 @@ export default function ClientDetails({ toggleSidebar, collapsed }) {
             {client?.phoneNumber ? ` • ${client.phoneNumber}` : ''}
           </p>
         </div>
-        <button className="client-details-back" onClick={() => navigate('/clients')}>
-          Back to Clients
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button className="client-details-inline-button" onClick={() => navigate(`/clients/${clientId}/settings`)}>
+            Settings
+          </button>
+          <button className="client-details-back" onClick={() => navigate('/clients')}>
+            Back to Clients
+          </button>
+        </div>
       </section>
 
       {loading ? <div className="client-details-state">Loading client overview...</div> : null}

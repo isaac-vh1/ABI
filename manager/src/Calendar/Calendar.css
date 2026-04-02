@@ -258,8 +258,10 @@
     color: #1f2937;
     padding: 20px 30px;
     border-radius: 12px;
-    max-width: 400px;
-    width: 90%;
+    max-width: 480px;
+    width: 94%;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
 }
 
