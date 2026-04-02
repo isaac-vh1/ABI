@@ -61,6 +61,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   const [unscheduledEvents, setUnscheduledEvents] = useState([]);
   const [workerSchedule, setWorkerSchedule] = useState([]);
   const [clients, setClients] = useState([]);
+  const [jobRequests, setJobRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -112,6 +113,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
       setWorkerSchedule((data[2] || []).map(normalizeEvent));
       setClients(data[3] || []);
       eventIdRef.current = data[4] || 1000;
+      setJobRequests(data[5] || []);
     } catch (e) {
       console.error(e);
       setError("Failed to load calendar data.");
@@ -199,6 +201,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
         client_id: eventToSave.client_id ?? null,
         start: eventToSave.start ? new Date(eventToSave.start).toISOString() : null,
         end: eventToSave.end ? new Date(eventToSave.end).toISOString() : null,
+        job_request_id: eventToSave.job_request_id ?? null,
       };
 
       const response = await authorizedFetch("/api/manager/calendar/save", {
@@ -372,6 +375,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
       calendar: "unscheduledEvents",
       start: null,
       end: null,
+      job_request_id: selectedEvent.job_request_id ?? null,
     });
     setUnscheduledEvents((prev) => [duplicate, ...prev]);
     setSelectedEvent(duplicate);
@@ -497,6 +501,24 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
                 <option key={client.id} value={client.name} />
               ))}
             </datalist>
+            <label>
+              Linked Job Request:
+              <select
+                value={selectedEvent.job_request_id ?? ""}
+                onChange={(e) =>
+                  setSelectedEvent({ ...selectedEvent, job_request_id: e.target.value || null })
+                }
+              >
+                <option value="">— None —</option>
+                {jobRequests
+                  .filter((jr) => !selectedEvent.client_id || String(jr.clientId) === String(selectedEvent.client_id))
+                  .map((jr) => (
+                    <option key={jr.id} value={jr.id}>
+                      #{jr.id} — {jr.title}
+                    </option>
+                  ))}
+              </select>
+            </label>
             <label>
               Calendar:
               <select
