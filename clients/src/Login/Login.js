@@ -118,17 +118,18 @@ function Login() {
             autoComplete="current-password"
           />
         </div>
+        <div style={{ textAlign: 'right', marginBottom: '8px' }}>
+          <button
+            type="button"
+            style={{ background: 'none', border: 'none', color: '#1976d2', cursor: 'pointer', padding: 0, fontSize: '0.88rem' }}
+            onClick={() => { setResetMode(true); setResetEmail(email); }}
+          >
+            Forgot password?
+          </button>
+        </div>
         <button type="submit" className='submit'>Log In</button>
       </form>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', flexWrap: 'wrap', gap: '8px' }}>
-        <a href="/create-account">Create an account here!</a>
-        <button
-          style={{ background: 'none', border: 'none', color: '#1976d2', cursor: 'pointer', padding: 0, fontSize: '1rem' }}
-          onClick={() => { setResetMode(true); setResetEmail(email); }}
-        >
-          Forgot password?
-        </button>
-      </div>
+      <a href="/create-account" style={{ display: 'block', marginTop: '12px' }}>Create an account here!</a>
     </div>
   );
 }
