@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import './Home.css';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -15,10 +15,10 @@ const numberFormatter = new Intl.NumberFormat('en-US');
 
 const emptyDashboard = {
   summary: {
-    quarterIncome: 0,
-    quarterSalesTax: 0,
-    quarterExpenses: 0,
-    quarterTips: 0,
+    yearIncome: 0,
+    yearSalesTax: 0,
+    yearExpenses: 0,
+    yearTips: 0,
     netIncome: 0,
     paidInvoiceValue: 0,
     outstandingBalance: 0,
@@ -144,7 +144,7 @@ function Home({ toggleSidebar, collapsed }) {
         label: 'Net Income',
         value: formatCurrency(dashboard.summary.netIncome),
         tone: 'success',
-        detail: `Revenue ${formatCurrency(dashboard.summary.quarterIncome)} vs expenses ${formatCurrency(dashboard.summary.quarterExpenses)}`,
+        detail: `Revenue ${formatCurrency(dashboard.summary.yearIncome)} vs expenses ${formatCurrency(dashboard.summary.yearExpenses)}`,
       },
       {
         label: 'Outstanding Balance',
@@ -170,8 +170,8 @@ function Home({ toggleSidebar, collapsed }) {
 
   if (loading) {
     return (
-      <div>
-        <HeaderBar page="Home" toggleSidebar={toggleSidebar} collapsed={collapsed} />
+      <div className="dashboard-page">
+        <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
         <div className="dashboard-loading">Loading dashboard…</div>
       </div>
     );
@@ -179,25 +179,23 @@ function Home({ toggleSidebar, collapsed }) {
 
   return (
     <div className="dashboard-page">
-      <HeaderBar page="Home" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
       <section className="dashboard-hero">
         <div className="dashboard-hero-copy">
+          <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
           <span className="dashboard-kicker">Operations Snapshot</span>
           <h2>Manager Dashboard</h2>
           <p>
-            Track revenue, invoices, and upcoming work from one place instead of
-            relying on the raw tables.
+            {new Date().getFullYear()} revenue, invoices, and upcoming work — all from one place.
           </p>
         </div>
         <div className="dashboard-hero-panels">
           <div className="hero-stat">
-            <span>Sales Tax Collected</span>
-            <strong>{formatCurrency(dashboard.summary.quarterSalesTax)}</strong>
+            <span>Sales Tax Collected ({new Date().getFullYear()})</span>
+            <strong>{formatCurrency(dashboard.summary.yearSalesTax)}</strong>
           </div>
           <div className="hero-stat">
-            <span>Tips Collected</span>
-            <strong>{formatCurrency(dashboard.summary.quarterTips)}</strong>
+            <span>Tips Collected ({new Date().getFullYear()})</span>
+            <strong>{formatCurrency(dashboard.summary.yearTips)}</strong>
           </div>
         </div>
       </section>
@@ -214,7 +212,7 @@ function Home({ toggleSidebar, collapsed }) {
         <article className="dashboard-panel">
           <div className="panel-header">
             <h3>Invoice Status</h3>
-            <span>Current distribution</span>
+            <span>{new Date().getFullYear()} distribution</span>
           </div>
           <div className="status-grid">
             <div className="status-chip status-chip-paid">

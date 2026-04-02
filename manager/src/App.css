@@ -62,7 +62,6 @@ body {
 .nav-link {
   width: 85%;
   padding: 10px 20px;
-  text-align: center;
   color: #fff;
   text-decoration: none;
   display: block;
@@ -70,6 +69,25 @@ body {
   border-radius: 20px;
   box-sizing: border-box;
 }
+
+.nav-link-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+.nav-link-content-inline {
+  justify-content: center;
+}
+
+.nav-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+
 .nav-link:hover {
   background-color: #575757;
   transform: scale(1.05);

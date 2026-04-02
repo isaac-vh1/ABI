@@ -35,6 +35,30 @@
     border-radius: 999px;
 }
 
+.calendar-sidebar-search {
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+}
+
+.calendar-sidebar-search::placeholder {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.calendar-sidebar-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.calendar-sidebar-actions .btn {
+    flex: 1;
+}
+
 .noJob {
     display: flex;
     justify-content: center;
@@ -160,6 +184,27 @@
     transition: background-color 0.3s ease;
 }
 
+.calendar-event-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    cursor: pointer;
+    height: 100%;
+    overflow: hidden;
+}
+
+.calendar-event-card strong,
+.calendar-event-card span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar-event-card span {
+    opacity: 0.92;
+    font-size: 0.85em;
+}
+
 .my-custom-calendar .rbc-event-label {
     display: none;
 }
@@ -213,8 +258,10 @@
     color: #1f2937;
     padding: 20px 30px;
     border-radius: 12px;
-    max-width: 400px;
-    width: 90%;
+    max-width: 480px;
+    width: 94%;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
 }
 
@@ -234,6 +281,7 @@
 .calendar-modal-content input[type="text"],
 .calendar-modal-content input[type="datetime-local"],
 .calendar-modal-content input[type="number"],
+.calendar-modal-content select,
 .calendar-modal-content textarea {
     width: 100%;
     margin-top: 5px;
@@ -249,6 +297,12 @@
 .calendar-modal-content textarea {
     resize: vertical;
     min-height: 88px;
+}
+
+.calendar-modal-hint {
+    margin: -4px 0 16px;
+    color: #4b5563;
+    font-size: 0.92rem;
 }
 
 .calendar-modal-buttons {

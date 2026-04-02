@@ -5,6 +5,14 @@ import { auth } from '../firebase';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
+function formatCurrency(value) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: 2,
+  }).format(Number(value || 0));
+}
+
 const InvoicePage = () => {
   const [invoiceData, setInvoiceData] = useState(null);
   const location = useLocation();
@@ -42,34 +50,38 @@ const InvoicePage = () => {
     if (!invoiceRef.current) return;
 
     try {
-      // 1. Capture the invoice container with html2canvas
-      const canvas = await html2canvas(invoiceRef.current, { scale: 2 });
+      const canvas = await html2canvas(invoiceRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        windowWidth: 1280,
+        onclone: (documentClone) => {
+          const clonedInvoice = documentClone.querySelector('.invoice-card');
+          if (clonedInvoice) {
+            clonedInvoice.classList.add('invoice-pdf-mode');
+          }
+        },
+      });
       const imageData = canvas.toDataURL('image/png');
-
-      // 2. Initialize jsPDF (portrait, mm units, A4 page size)
       const pdf = new jsPDF('p', 'mm', 'letter');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      // 3. Get the original width/height of the canvas image
       const imgProps = pdf.getImageProperties(imageData);
       const originalWidth = imgProps.width;
       const originalHeight = imgProps.height;
+      const margin = 10;
+      const usableWidth = pdfWidth - margin * 2;
+      const usableHeight = pdfHeight - margin * 2;
+      let renderedWidth = usableWidth;
+      let renderedHeight = (originalHeight * usableWidth) / originalWidth;
 
-      // 4. Scale the image to fit the PDF width, preserving aspect ratio
-      let renderedWidth = pdfWidth; // fill full width
-      let renderedHeight = (originalHeight * pdfWidth) / originalWidth;
-
-      // 5. If the scaled height is too long for one page, scale to fit height instead
-      if (renderedHeight > pdfHeight) {
-        renderedHeight = pdfHeight;
-        renderedWidth = (originalWidth * pdfHeight) / originalHeight;
+      if (renderedHeight > usableHeight) {
+        renderedHeight = usableHeight;
+        renderedWidth = (originalWidth * usableHeight) / originalHeight;
       }
 
-      // 6. Add the image to the PDF at (x=0, y=0)
-      pdf.addImage(imageData, 'PNG', 0, 0, renderedWidth, renderedHeight);
-
-      // 7. Save (download) the PDF with the invoice number in filename
+      const x = (pdfWidth - renderedWidth) / 2;
+      const y = margin;
+      pdf.addImage(imageData, 'PNG', x, y, renderedWidth, renderedHeight);
       pdf.save(`invoice-${invoiceNum}.pdf`);
     } catch (err) {
       console.error('Failed to download PDF', err);
@@ -88,120 +100,162 @@ const InvoicePage = () => {
     const offset = date.getTimezoneOffset();
     return new Date(date.getTime() + offset * 60000);
   };
+  const subtotal = Number(invoiceData?.[3] || 0);
+  const salesTax = Number(invoiceData?.[4] || 0);
+  const totalDue = subtotal + salesTax;
+  const tips = Number(invoiceData?.[6] || 0);
+  const taxRate = subtotal > 0 ? (salesTax / subtotal) * 100 : 0;
+  const items = invoiceData ? invoiceData.slice(15) : [];
+  const invoiceStatus = String(invoiceData?.[7] || 'pending').toLowerCase();
+  const invoiceStatusLabel = invoiceStatus === 'paid' ? 'Paid' : invoiceStatus.charAt(0).toUpperCase() + invoiceStatus.slice(1);
 
   if (
     !invoiceData ||
     invoiceData === 'Invoice not found' ||
     invoiceData === 'All Data not found'
   ) {
-    return <h1>Error Retrieving Invoice, Please try again</h1>;
+    return <div className="invoice-error">Error retrieving invoice. Please try again.</div>;
   }
 
   return (
-    <div>
-      <div className='invoiceBorder'>
-        <div className="invoiceContainer" ref={invoiceRef}>
-          <h1 className="title">Invoice #{invoiceData[0]}</h1>
-          <img src="/ABI_NO_bg.png" className='invoiceLogo' alt={"Acres by Isaac logo"} />
-          <section className="section">
-            <h2 className="companyName">Acres By Isaac</h2>
-            <p>156 NE 193rd St.</p>
-            <p>Shoreline, WA 98155</p>
-            <p>(206) 595-5831</p>
-          </section>
+    <div className="invoice-shell">
+      <div className="invoice-toolbar">
+        <button className="invoice-download-button" onClick={handleDownloadPdf}>
+          Download PDF
+        </button>
+      </div>
 
-          <section className="section">
-            <h3 className="heading">Invoice Details</h3>
-            <p>
-            <p>
-              <strong>Date of Completion: </strong>{formatToMMDDYYYY(invoiceData[1])}
-            </p>
-            </p>
-            <p>
-            <p>
-              <strong>Due Date: </strong>{formatToMMDDYYYY(invoiceData[2])}
-            </p>
-            </p>
-          </section>
+      <div className="invoice-card" ref={invoiceRef}>
+        <section className="invoice-header">
+          <div className="invoice-brand">
+            <div className="invoice-logo-wrap">
+              <img src="/ABI_NO_bg.png" className="invoice-logo" alt="Acres by Isaac logo" />
+            </div>
+            <div className="invoice-company">
+              <h2>Acres By Isaac</h2>
+              <p>156 NE 193rd St.</p>
+              <p>Shoreline, WA 98155</p>
+              <p>(206) 595-5831</p>
+            </div>
+          </div>
 
-          <section className="section">
-            <h3 className="heading">Bill To</h3>
-            <p>
-              {invoiceData[10]} {invoiceData[11]}
-            </p>
-            <p>{invoiceData[12]}</p>
-            <p>
-              {invoiceData[13]}, WA {invoiceData[14]}
-            </p>
-          </section>
+          <div className="invoice-meta">
+            <article className="invoice-meta-card">
+              <span>Invoice Number</span>
+              <strong>#{invoiceData[0]}</strong>
+              <div className={`invoice-status-pill invoice-status-${invoiceStatus}`}>{invoiceStatusLabel}</div>
+            </article>
+            <article className="invoice-meta-card">
+              <span>Date of Completion</span>
+              <strong>{formatToMMDDYYYY(invoiceData[1])}</strong>
+              <p>Due {formatToMMDDYYYY(invoiceData[2])}</p>
+            </article>
+          </div>
+        </section>
 
-          <section className="section">
-            <h3 className="heading">Items</h3>
-            <table className="invoiceTable">
+        <section className="invoice-highlights">
+          <article className="invoice-highlight">
+            <span>Subtotal</span>
+            <strong>{formatCurrency(subtotal)}</strong>
+          </article>
+          <article className="invoice-highlight">
+            <span>Sales Tax</span>
+            <strong>{formatCurrency(salesTax)}</strong>
+          </article>
+          <article className="invoice-highlight">
+            <span>Tax Rate</span>
+            <strong>{taxRate.toFixed(2)}%</strong>
+          </article>
+          <article className="invoice-highlight">
+            <span>Status</span>
+            <strong className={`invoice-highlight-status invoice-status-${invoiceStatus}`}>{invoiceStatusLabel}</strong>
+          </article>
+          <article className="invoice-highlight">
+            <span>Total Due</span>
+            <strong>{formatCurrency(totalDue)}</strong>
+          </article>
+        </section>
+
+        <section className="invoice-grid">
+          <div className="invoice-section invoice-section-compact">
+            <h3>Bill To</h3>
+            <div className="invoice-billto">
+              <p>{invoiceData[10]} {invoiceData[11]}</p>
+              <p>{invoiceData[12]}</p>
+              <p>{invoiceData[13]}, WA {invoiceData[14]}</p>
+            </div>
+          </div>
+
+          <div className="invoice-side-stack">
+            <div className="invoice-section">
+              <h3>Totals</h3>
+              <div className="invoice-totals">
+                <div className="invoice-total-row">
+                  <span>Subtotal</span>
+                  <strong>{formatCurrency(subtotal)}</strong>
+                </div>
+                <div className="invoice-total-row">
+                  <span>Sales Tax</span>
+                  <strong>{formatCurrency(salesTax)}</strong>
+                </div>
+                {tips > 0 ? (
+                  <div className="invoice-total-row">
+                    <span>Tips</span>
+                    <strong>{formatCurrency(tips)}</strong>
+                  </div>
+                ) : null}
+                <div className="invoice-total-row invoice-total-final">
+                  <span>Total Due</span>
+                  <strong className="invoice-total-due">{formatCurrency(totalDue)}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="invoice-section">
+              <h3>Payment Methods</h3>
+              <ul className="invoice-payment-list">
+                <li>Zelle: acres.by.isaac@gmail.com (Neat Nature LLC)</li>
+                <li>Debit or credit card available by text at (206) 595-5831. ( 3% surcharge applies )</li>
+                <li>Cash or check accepted.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="invoice-section">
+            <h3>Line Items</h3>
+            <table className="invoice-items-table">
               <thead>
                 <tr>
-                  <th className="tableHeader">Description</th>
-                  <th className="tableHeader">Price</th>
+                  <th>Description</th>
+                  <th>Price</th>
                 </tr>
               </thead>
               <tbody>
-                {invoiceData.slice(15).map((item, index, slicedArray) => {
-                  if (index % 2 === 0) {
-                    const description = slicedArray[index];
-                    const price = slicedArray[index + 1];
-                    return (
-                      <tr key={index}>
-                        <td className="leftAlign">{description}</td>
-                        <td className="rightAlign">${price}</td>
-                      </tr>
-                    );
-                  }
-                  return null;
+                {items.map((item, index, slicedArray) => {
+                  if (index % 2 !== 0) return null;
+                  const description = slicedArray[index];
+                  const price = slicedArray[index + 1];
+                  return (
+                    <tr key={index}>
+                      <td>{description}</td>
+                      <td className="invoice-items-price">{formatCurrency(price)}</td>
+                    </tr>
+                  );
                 })}
               </tbody>
             </table>
-          </section>
+          </div>
 
-          <section className="section">
-            <div className="totals">
-              <p>
-                <strong>Subtotal:</strong> ${invoiceData[3]}
+          <div className="invoice-side-stack">
+            <div className="invoice-section">
+              <h3>Invoice Notes</h3>
+              <p className="invoice-note">
+                A late fee of 20% of the subtotal may apply if payment is not received by the due date.
               </p>
-              <p>
-                <strong>
-                  Sales Tax (
-                  {(parseFloat(invoiceData[4]) / parseFloat(invoiceData[3]) * 100).toFixed(2)}%
-                  ):
-                </strong>{' '}
-                ${invoiceData[4]}
-              </p>
-              <p className='total'>
-                ${parseFloat(invoiceData[3]) + parseFloat(invoiceData[4])}
-              </p>
-              {invoiceData[6] !== 0 ? (<p></p>):(<p><strong>Tips:</strong> ${invoiceData[6]}</p>)}
             </div>
-          </section>
-
-          <section className="section">
-            <h3 className="heading">Payment Methods</h3>
-            <ul>
-              <li>Zelle (acres.by.isaac@gmail.com, Neat Nature LLC)</li>
-              <li>Debit/Credit Card accepted, text (206) 595-5831 to get started, (3% surcharge will apply)</li>
-              <li>Cash or Check</li>
-            </ul>
-          </section>
-
-          <section className="section">
-            <p className="note">
-              Note: A late fee of 20% of the subtotal may apply if payment is not
-              received by the due date.
-            </p>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
-      <button className={"button"} onClick={handleDownloadPdf} style={{ marginTop: '20px' }}>
-        Download PDF of This Page
-      </button>
     </div>
   );
 };

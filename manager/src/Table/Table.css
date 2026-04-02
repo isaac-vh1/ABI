@@ -1,4 +1,16 @@
 /* ========== Client Section ========== */
+.table-page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.table-page-header h1 {
+  margin: 0;
+  flex: 1;
+}
+
 .table-container {
   overflow: scroll;
 }

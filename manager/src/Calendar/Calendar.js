@@ -18,6 +18,18 @@ const localizer = momentLocalizer(moment);
 const DnDCalendar = withDragAndDrop(Calendar);
 
 const CALENDAR_TABLE = "calendar";
+const EMPTY_EVENT = {
+  id: null,
+  client_id: "",
+  clientSearch: "",
+  title: "",
+  description: "",
+  start: null,
+  end: null,
+  duration: 1,
+  calendar: "unscheduledEvents",
+  job_request_id: null,
+};
 
 function normalizeEvent(row) {
   const start = row.start ? new Date(row.start) : null;
@@ -32,6 +44,7 @@ function normalizeEvent(row) {
     start,
     end,
     duration: Number.isFinite(durationHours) && durationHours > 0 ? durationHours : 1,
+    job_request_id: row.jobRequestId ?? row.job_request_id ?? null,
   };
 }
 
@@ -47,12 +60,15 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   const [scheduledEvents, setScheduledEvents] = useState([]);
   const [unscheduledEvents, setUnscheduledEvents] = useState([]);
   const [workerSchedule, setWorkerSchedule] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [jobRequests, setJobRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState(Views.MONTH);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [draggedEvent, setDraggedEvent] = useState(null);
+  const [jobSearch, setJobSearch] = useState("");
   const eventIdRef = useRef(1000);
 
   const { user, loading: authLoading } = useAuth();
@@ -95,7 +111,9 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
       setScheduledEvents((data[0] || []).map(normalizeEvent));
       setUnscheduledEvents((data[1] || []).map(normalizeEvent));
       setWorkerSchedule((data[2] || []).map(normalizeEvent));
+      setClients(data[3] || []);
       eventIdRef.current = data[4] || 1000;
+      setJobRequests(data[5] || []);
     } catch (e) {
       console.error(e);
       setError("Failed to load calendar data.");
@@ -113,13 +131,66 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
     () => [...scheduledEvents, ...workerSchedule],
     [scheduledEvents, workerSchedule]
   );
+  const clientOptions = useMemo(
+    () =>
+      (clients || []).map((client) => ({
+        id: String(client[0]),
+        name: `${client[1] || ""} ${client[2] || ""}`.trim() || `Client #${client[0]}`,
+      })),
+    [clients]
+  );
+  const clientNameById = useMemo(
+    () =>
+      clientOptions.reduce((acc, client) => {
+        acc[client.id] = client.name;
+        return acc;
+      }, {}),
+    [clientOptions]
+  );
+  const unscheduledMatches = jobSearch.trim().toLowerCase();
+  const filteredUnscheduledEvents = useMemo(() => {
+    if (!unscheduledMatches) return unscheduledEvents;
+    return unscheduledEvents.filter((event) => {
+      const clientName = clientNameById[String(event.client_id ?? "")] || "";
+      return [event.title, clientName, event.description]
+        .some((value) => String(value || "").toLowerCase().includes(unscheduledMatches));
+    });
+  }, [clientNameById, jobSearch, unscheduledEvents]);
+
+  const getClientName = useCallback(
+    (clientId) => clientNameById[String(clientId ?? "")] || "",
+    [clientNameById]
+  );
+  const decorateEvent = useCallback(
+    (event) => ({
+      ...event,
+      clientName: getClientName(event.client_id),
+      clientSearch: getClientName(event.client_id),
+    }),
+    [getClientName]
+  );
+  const allScheduledLikeEventsWithClients = useMemo(
+    () => allScheduledLikeEvents.map(decorateEvent),
+    [allScheduledLikeEvents, decorateEvent]
+  );
+  const filteredUnscheduledWithClients = useMemo(
+    () => filteredUnscheduledEvents.map(decorateEvent),
+    [decorateEvent, filteredUnscheduledEvents]
+  );
 
   const getCalendarSetter = (calendarName) => {
     if (calendarName === "scheduledEvents") return setScheduledEvents;
     if (calendarName === "unscheduledEvents") return setUnscheduledEvents;
     return setWorkerSchedule;
   };
-
+  const buildEventDraft = useCallback(
+    (overrides = {}) => ({
+      ...EMPTY_EVENT,
+      id: eventIdRef.current++,
+      ...overrides,
+    }),
+    []
+  );
   const persistEvent = useCallback(
     async (eventToSave) => {
       const payload = {
@@ -130,6 +201,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
         client_id: eventToSave.client_id ?? null,
         start: eventToSave.start ? new Date(eventToSave.start).toISOString() : null,
         end: eventToSave.end ? new Date(eventToSave.end).toISOString() : null,
+        job_request_id: eventToSave.job_request_id ?? null,
       };
 
       const response = await authorizedFetch("/api/manager/calendar/save", {
@@ -224,16 +296,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
   );
 
   const handleNewUnscheduledEvent = () => {
-    setSelectedEvent({
-      id: eventIdRef.current++,
-      title: "",
-      description: "",
-      client_id: null,
-      start: null,
-      end: null,
-      duration: 1,
-      calendar: "unscheduledEvents",
-    });
+    setSelectedEvent(buildEventDraft());
   };
 
   const handleSaveChanges = async () => {
@@ -243,7 +306,16 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
       return;
     }
     const setter = getCalendarSetter(selectedEvent.calendar);
-    const nextEvent = { ...selectedEvent };
+    const nextEvent = {
+      ...selectedEvent,
+      client_id: selectedEvent.client_id || null,
+      title: selectedEvent.title.trim(),
+      description: selectedEvent.description?.trim() || "",
+    };
+    if (nextEvent.calendar === "unscheduledEvents") {
+      nextEvent.start = null;
+      nextEvent.end = null;
+    }
     if (nextEvent.start && !nextEvent.end) {
       nextEvent.end = new Date(nextEvent.start.getTime() + (nextEvent.duration || 1) * 60 * 60 * 1000);
     }
@@ -265,6 +337,49 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
       loadCalendarData();
     }
   };
+  const handleEventCalendarChange = (calendarName) => {
+    setSelectedEvent((prev) => {
+      if (!prev) return prev;
+      if (calendarName === "unscheduledEvents") {
+        return { ...prev, calendar: calendarName, start: null, end: null };
+      }
+      const start = prev.start || new Date(currentDate);
+      const duration = prev.duration || 1;
+      return {
+        ...prev,
+        calendar: calendarName,
+        start,
+        end: prev.end || new Date(start.getTime() + duration * 60 * 60 * 1000),
+      };
+    });
+  };
+  const handleClientSelection = (inputValue) => {
+    setSelectedEvent((prev) => {
+      if (!prev) return prev;
+      const foundClient = clientOptions.find((client) => client.name === inputValue);
+      return {
+        ...prev,
+        clientSearch: inputValue,
+        client_id: foundClient ? foundClient.id : "",
+      };
+    });
+  };
+  const handleDuplicateSelectedEvent = () => {
+    if (!selectedEvent) return;
+    const duplicate = buildEventDraft({
+      clientSearch: getClientName(selectedEvent.client_id),
+      title: selectedEvent.title,
+      description: selectedEvent.description,
+      client_id: selectedEvent.client_id,
+      duration: selectedEvent.duration || 1,
+      calendar: "unscheduledEvents",
+      start: null,
+      end: null,
+      job_request_id: selectedEvent.job_request_id ?? null,
+    });
+    setUnscheduledEvents((prev) => [duplicate, ...prev]);
+    setSelectedEvent(duplicate);
+  };
 
   if (loading) return <Spinner className="m-5" />;
 
@@ -278,10 +393,22 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
           <h2>
             Unscheduled <Button onClick={handleNewUnscheduledEvent}>+</Button>
           </h2>
-          {!unscheduledEvents.length ? (
+          <input
+            className="calendar-sidebar-search"
+            type="text"
+            value={jobSearch}
+            onChange={(e) => setJobSearch(e.target.value)}
+            placeholder="Search jobs or clients"
+          />
+          <div className="calendar-sidebar-actions">
+            <Button className="calendar-button" onClick={handleNewUnscheduledEvent}>
+              New Job
+            </Button>
+          </div>
+          {!filteredUnscheduledWithClients.length ? (
             <p className="noJob">No Jobs to Schedule</p>
           ) : (
-            unscheduledEvents.map((item) => (
+            filteredUnscheduledWithClients.map((item) => (
               <DraggableEvent
                 key={item.id}
                 event={item}
@@ -306,7 +433,7 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
           <DnDCalendar
             className="my-custom-calendar"
             localizer={localizer}
-            events={allScheduledLikeEvents}
+            events={allScheduledLikeEventsWithClients}
             eventPropGetter={eventStyleGetter}
             date={currentDate}
             view={currentView}
@@ -321,13 +448,23 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
             dragFromOutsideItem={() => draggedEvent}
             onDragOver={(dragEvent) => dragEvent.preventDefault()}
             onDropFromOutside={handleDropFromOutside}
-            onSelectSlot={({ start }) => {
-              setCurrentDate(start);
-              if (currentView !== Views.DAY) setCurrentView(Views.WEEK);
+            onSelectSlot={({ start, end }) => {
+              const slotStart = new Date(start);
+              const slotEnd = end ? new Date(end) : new Date(slotStart.getTime() + 60 * 60 * 1000);
+              const duration = Math.max(0.25, (slotEnd - slotStart) / (60 * 60 * 1000));
+              setCurrentDate(slotStart);
+              setSelectedEvent(
+                buildEventDraft({
+                  calendar: "scheduledEvents",
+                  start: slotStart,
+                  end: slotEnd,
+                  duration,
+                })
+              );
             }}
             onEventDrop={onEventChange}
             onEventResize={onEventChange}
-            onSelectEvent={setSelectedEvent}
+            onSelectEvent={(event) => setSelectedEvent({ ...event })}
             startAccessor="start"
             endAccessor="end"
             components={{
@@ -350,6 +487,50 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
               />
             </label>
             <label>
+              Client:
+              <input
+                type="text"
+                list="calendar-client-options"
+                value={selectedEvent.clientSearch ?? getClientName(selectedEvent.client_id)}
+                onChange={(e) => handleClientSelection(e.target.value)}
+                placeholder="Type to search clients..."
+              />
+            </label>
+            <datalist id="calendar-client-options">
+              {clientOptions.map((client) => (
+                <option key={client.id} value={client.name} />
+              ))}
+            </datalist>
+            <label>
+              Linked Job Request:
+              <select
+                value={selectedEvent.job_request_id ?? ""}
+                onChange={(e) =>
+                  setSelectedEvent({ ...selectedEvent, job_request_id: e.target.value || null })
+                }
+              >
+                <option value="">— None —</option>
+                {jobRequests
+                  .filter((jr) => !selectedEvent.client_id || String(jr.clientId) === String(selectedEvent.client_id))
+                  .map((jr) => (
+                    <option key={jr.id} value={jr.id}>
+                      #{jr.id} — {jr.title}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <label>
+              Calendar:
+              <select
+                value={selectedEvent.calendar}
+                onChange={(e) => handleEventCalendarChange(e.target.value)}
+              >
+                <option value="unscheduledEvents">Unscheduled</option>
+                <option value="scheduledEvents">Scheduled</option>
+                <option value="workerSchedule">Worker Schedule</option>
+              </select>
+            </label>
+            <label>
               Description:
               <textarea
                 rows="3"
@@ -357,19 +538,21 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
                 onChange={(e) => setSelectedEvent({ ...selectedEvent, description: e.target.value })}
               />
             </label>
-            <label>
-              Start:
-              <input
-                type="datetime-local"
-                value={selectedEvent.start ? formatDateTimeLocal(selectedEvent.start) : ""}
-                onChange={(e) =>
-                  setSelectedEvent({
-                    ...selectedEvent,
-                    start: e.target.value ? new Date(e.target.value) : null,
-                  })
-                }
-              />
-            </label>
+            {selectedEvent.calendar !== "unscheduledEvents" ? (
+              <label>
+                Start:
+                <input
+                  type="datetime-local"
+                  value={selectedEvent.start ? formatDateTimeLocal(selectedEvent.start) : ""}
+                  onChange={(e) =>
+                    setSelectedEvent({
+                      ...selectedEvent,
+                      start: e.target.value ? new Date(e.target.value) : null,
+                    })
+                  }
+                />
+              </label>
+            ) : null}
             <label>
               Duration (hours):
               <input
@@ -387,24 +570,34 @@ export default function CalendarContainer({ toggleSidebar, collapsed }) {
                 }}
               />
             </label>
-            <label>
-              End:
-              <input
-                type="datetime-local"
-                value={selectedEvent.end ? formatDateTimeLocal(selectedEvent.end) : ""}
-                onChange={(e) => {
-                  const end = e.target.value ? new Date(e.target.value) : null;
-                  setSelectedEvent((prev) => ({
-                    ...prev,
-                    end,
-                    duration: prev.start && end ? (end - prev.start) / (60 * 60 * 1000) : prev.duration,
-                  }));
-                }}
-              />
-            </label>
+            {selectedEvent.calendar !== "unscheduledEvents" ? (
+              <label>
+                End:
+                <input
+                  type="datetime-local"
+                  value={selectedEvent.end ? formatDateTimeLocal(selectedEvent.end) : ""}
+                  onChange={(e) => {
+                    const end = e.target.value ? new Date(e.target.value) : null;
+                    setSelectedEvent((prev) => ({
+                      ...prev,
+                      end,
+                      duration: prev.start && end ? (end - prev.start) / (60 * 60 * 1000) : prev.duration,
+                    }));
+                  }}
+                />
+              </label>
+            ) : null}
+            {selectedEvent.client_id ? (
+              <div className="calendar-modal-hint">
+                Linked client: {getClientName(selectedEvent.client_id)}
+              </div>
+            ) : null}
             <div className="calendar-modal-buttons">
               <Button className="delete-button" onClick={() => removeEvent(selectedEvent)}>
                 Delete
+              </Button>
+              <Button className="calendar-button" onClick={handleDuplicateSelectedEvent}>
+                Duplicate
               </Button>
               <Button className="cancel-button" onClick={() => setSelectedEvent(null)}>
                 Cancel

@@ -27,14 +27,16 @@ const DraggableEvent = ({ event, onDragStart, onClick }) => {
       onDragEnd={handleDragEnd}
       onClick={onClick}
       role="button"
+      tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
-          handleDragStart();
+          e.preventDefault();
+          onClick();
         }
       }}
     >
       <strong>{event.title}</strong>
-      <div>ID: {event.id}</div>
+      {event.clientName ? <div>{event.clientName}</div> : null}
       <div>Duration: {event.duration} hr(s)</div>
     </div>
   );

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import './SalesTaxReport.css';
 
-import HeaderBar from '../Components/HeaderBar';
+import HamburgerMenu from '../Components/HamburgerMenu';
 import { useAuth } from '../AuthContext';
 
 const currencyFormatter = new Intl.NumberFormat('en-US', {
@@ -41,6 +41,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [quarter, setQuarter] = useState(String(currentQuarter()));
   const [locationCode, setLocationCode] = useState('');
+  const [activeSummaryTab, setActiveSummaryTab] = useState('expenses');
 
   const yearOptions = useMemo(() => {
     const now = new Date().getFullYear();
@@ -109,21 +110,60 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
     expenses: 0,
     netCash: 0,
   };
+  const yearlySummary = report?.yearlySummary || {
+    expenseCount: 0,
+    expenses: 0,
+    workerCompensation: 0,
+  };
+  const yearlyRevenueSummary = report?.yearlyRevenueSummary || {
+    invoiceCount: 0,
+    taxableSales: 0,
+    salesTaxCollected: 0,
+    totalPaid: 0,
+  };
   const locations = report?.locations || [];
   const paidInvoices = report?.paidInvoices || [];
   const expensesByCategory = report?.expensesByCategory || [];
+  const yearlyExpensesByCategory = report?.yearlyExpensesByCategory || [];
   const availableLocationCodes = report?.availableLocationCodes || [];
+  const summaryTabs = [
+    {
+      id: 'expenses',
+      label: 'Expenses',
+      metrics: [
+        { label: 'Quarter Receipt Expenses', value: formatCurrency(summary.expenses) },
+        { label: `${report?.year || year} Total Expenses`, value: formatCurrency(yearlySummary.expenses) },
+        { label: 'Worker Compensation', value: formatCurrency(yearlySummary.workerCompensation) },
+        { label: 'Year Expense Entries', value: yearlySummary.expenseCount },
+      ],
+    },
+    {
+      id: 'sales-tax',
+      label: 'Sales Tax',
+      metrics: [
+        { label: 'Quarter Taxable Sales', value: formatCurrency(summary.taxableSales) },
+        { label: 'Sales Tax Collected', value: formatCurrency(summary.salesTaxCollected) },
+        { label: 'Quarter Total Paid', value: formatCurrency(summary.totalPaid) },
+        { label: 'Paid Invoices', value: summary.invoiceCount },
+      ],
+    },
+    {
+      id: 'revenue',
+      label: `Revenue ${report?.year || year}`,
+      metrics: [
+        { label: 'Year Taxable Sales', value: formatCurrency(yearlyRevenueSummary.taxableSales) },
+        { label: 'Year Sales Tax', value: formatCurrency(yearlyRevenueSummary.salesTaxCollected) },
+        { label: 'Year Total Paid', value: formatCurrency(yearlyRevenueSummary.totalPaid) },
+        { label: 'Year Paid Invoices', value: yearlyRevenueSummary.invoiceCount },
+      ],
+    },
+  ];
+  const selectedSummaryTab = summaryTabs.find((tab) => tab.id === activeSummaryTab) || summaryTabs[0];
 
   return (
     <div className="sales-tax-page">
-      <HeaderBar page="Sales Tax" toggleSidebar={toggleSidebar} collapsed={collapsed} />
-
-      <section className="sales-tax-hero">
-        <div>
-          <span className="sales-tax-kicker">Cash Basis Accounting</span>
-          <h2>Sales Tax Ledger</h2>
-          <p>Track tax actually collected in the quarter from paid invoices, grouped by location code and backed by a payment ledger.</p>
-        </div>
+      <section className="sales-tax-toolbar">
+        <div className="menu-toggle" onClick={toggleSidebar}><HamburgerMenu collapsed={collapsed} /></div>
         <div className="sales-tax-filters">
           <label>
             <span>Year</span>
@@ -153,7 +193,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
         </div>
       </section>
 
-      {loading ? <div className="sales-tax-state">Loading sales tax report...</div> : null}
+      {loading ? <div className="sales-tax-state">Loading financial report...</div> : null}
       {error ? <div className="sales-tax-state sales-tax-error">{error}</div> : null}
 
       {!loading && !error ? (
@@ -163,31 +203,28 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
             <span>Only invoices marked paid with a `payment_date` inside the selected quarter are included and grouped by the stored DOR location code on each service location.</span>
           </section>
 
-          <section className="sales-tax-metrics">
-            <article className="sales-tax-card">
-              <span>Taxable Sales</span>
-              <strong>{formatCurrency(summary.taxableSales)}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Sales Tax Collected</span>
-              <strong>{formatCurrency(summary.salesTaxCollected)}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Total Paid</span>
-              <strong>{formatCurrency(summary.totalPaid)}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Paid Invoices</span>
-              <strong>{summary.invoiceCount}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Quarter Expenses</span>
-              <strong>{formatCurrency(summary.expenses)}</strong>
-            </article>
-            <article className="sales-tax-card">
-              <span>Net Cash</span>
-              <strong>{formatCurrency(summary.netCash)}</strong>
-            </article>
+          <section className="sales-tax-summary-panel">
+            <div className="sales-tax-tabs" role="tablist" aria-label="Financial summary groups">
+              {summaryTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`sales-tax-tab ${tab.id === selectedSummaryTab.id ? 'active' : ''}`}
+                  onClick={() => setActiveSummaryTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="sales-tax-metrics">
+              {selectedSummaryTab.metrics.map((metric) => (
+                <article key={metric.label} className="sales-tax-card">
+                  <span>{metric.label}</span>
+                  <strong>{metric.value}</strong>
+                </article>
+              ))}
+            </div>
           </section>
 
           <section className="sales-tax-panel">
@@ -234,8 +271,45 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
           <section className="sales-tax-panel">
             <div className="sales-tax-panel-header">
               <div>
-                <h3>Expenses by Category</h3>
-                <p>Quarter expenses included in the cash-basis worksheet.</p>
+                <h3>{report?.year || year} Expense Breakdown</h3>
+                <p>Year-to-date expenses by category, including worker compensation from contractor payments.</p>
+              </div>
+              <span>{yearlySummary.expenseCount} expense(s)</span>
+            </div>
+
+            {yearlyExpensesByCategory.length ? (
+              <div className="sales-tax-table-wrap">
+                <table className="sales-tax-table">
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Entries</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {yearlyExpensesByCategory.map((expense) => (
+                      <tr key={expense.category}>
+                        <td>{expense.category}</td>
+                        <td>{expense.expenseCount}</td>
+                        <td>{formatCurrency(expense.amount)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="sales-tax-empty">
+                No expenses were recorded in {report?.year || year}.
+              </div>
+            )}
+          </section>
+
+          <section className="sales-tax-panel">
+            <div className="sales-tax-panel-header">
+              <div>
+                <h3>Quarter Receipt Expenses</h3>
+                <p>Receipt-based expenses recorded inside the selected quarter.</p>
               </div>
               <span>{summary.expenseCount} expense(s)</span>
             </div>
@@ -263,7 +337,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
               </div>
             ) : (
               <div className="sales-tax-empty">
-                No expenses were recorded in this quarter.
+                No receipt expenses were recorded in this quarter.
               </div>
             )}
           </section>
@@ -272,7 +346,7 @@ export default function SalesTaxReport({ toggleSidebar, collapsed }) {
             <div className="sales-tax-panel-header">
               <div>
                 <h3>Paid Invoice Ledger</h3>
-                <p>Audit trail for the amounts included in this cash-basis quarter.</p>
+                <p>Audit trail for the sales-tax ledger in the selected quarter.</p>
               </div>
               <span>{paidInvoices.length} paid invoice(s)</span>
             </div>

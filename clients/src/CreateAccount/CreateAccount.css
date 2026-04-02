@@ -95,3 +95,16 @@ body {
   .required {
     color:red;
   }
+
+@media (max-width: 480px) {
+  .create-account-container {
+    margin: 16px;
+    padding: 1.25rem;
+    max-width: none;
+  }
+
+  .submit {
+    margin: 4px 0;
+    box-sizing: border-box;
+  }
+}

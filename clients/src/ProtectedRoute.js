@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import './App.css';
 
 const VERIFY_REQUEST_TIMEOUT_MS = 15000;
 
@@ -85,7 +86,11 @@ function ProtectedRoute({ setSavedPage, children }) {
   }, [user, location]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="app-spinner-wrap">
+        <div className="app-spinner" />
+      </div>
+    );
   }
   if (!user) {
     setSavedPage(location.pathname);
@@ -95,7 +100,11 @@ function ProtectedRoute({ setSavedPage, children }) {
     return <div>{verificationError}</div>;
   }
   if (verified === null || client === null) {
-    return <div>Loading</div>;
+    return (
+      <div className="app-spinner-wrap">
+        <div className="app-spinner" />
+      </div>
+    );
   }
   if (!verified && location.pathname !== "/verify") {
     return <Navigate to="/verify" />;
