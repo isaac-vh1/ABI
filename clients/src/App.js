@@ -1,6 +1,8 @@
 import './App.css';
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate, NavLink } from "react-router-dom";
+import { signOut } from 'firebase/auth';
+import { auth } from './firebase';
 import { AuthProvider, useAuth } from "./AuthContext.js";
 import InvoicePage from "./InvoicePage/InvoicePage.js";
 import Login from './Login/Login.js';
@@ -84,6 +86,13 @@ function ClientNav() {
               {item.label}
             </NavLink>
           ))}
+          <button
+            className="app-client-nav-link"
+            onClick={() => { setMenuOpen(false); signOut(auth); }}
+            style={{ cursor: 'pointer', fontWeight: 700 }}
+          >
+            Log Out
+          </button>
         </div>
       </div>
     </nav>
